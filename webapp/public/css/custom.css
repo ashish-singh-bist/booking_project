@@ -1,0 +1,12 @@
+.alert {
+    margin: 0 0 -10px 0;
+    padding: 10px;
+}
+table.dataTable{
+    width: 100% !important;
+}
+.dataTable tr th, .dataTable tr td {
+    /*min-width: 150px;*/
+    max-width: 300px;
+    overflow-wrap: break-word;
+}
