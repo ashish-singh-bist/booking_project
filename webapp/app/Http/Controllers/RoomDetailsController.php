@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Input;
-use JsValidator;
 use App\RoomDetails;
+use Carbon\Carbon;
 
 class RoomDetailsController extends Controller
 {
@@ -33,8 +31,18 @@ class RoomDetailsController extends Controller
         }         
         if($request->get('room_type') != Null && $request->get('room_type') != ''){
             $roomdetails = $roomdetails->where('room_type',$request->get('room_type'));
-        }          
-        $roomdetails_data = $roomdetails->get();
+        }
+        if($request->get('created_at') != Null && $request->get('created_at') != ''){
+            $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
+            $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
+            $roomdetails = $roomdetails->whereBetween(
+             'created_at', array(
+                 $start_date,
+                 $end_date
+             )
+         );
+        }
+        $roomdetails_data = $roomdetails->limit(1000)->get();
         return Datatables::of($roomdetails_data)->make(true);        
     }
 }

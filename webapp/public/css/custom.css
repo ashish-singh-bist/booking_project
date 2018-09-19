@@ -10,3 +10,12 @@ table.dataTable{
     max-width: 300px;
     overflow-wrap: break-word;
 }
+
+.slider-range-data{
+    padding: 6px 12px;
+    text-align: center;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    font-size: 15px;
+}

@@ -3,11 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Yajra\Datatables\Datatables;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Input;
-use JsValidator;
+use Carbon\Carbon;
 use App\RoomsAvailability;
 
 class RoomsAvailabilityController extends Controller
@@ -42,8 +39,18 @@ class RoomsAvailabilityController extends Controller
         }
         if($request->get('available_only') != Null && $request->get('available_only') != ''){
             $roomsavailability = $roomsavailability->where('available_only',(int)$request->get('available_only'));
-        }        
-        $roomsavailability_data = $roomsavailability->get();
+        }
+        if($request->get('created_at') != Null && $request->get('created_at') != ''){
+            $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
+            $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
+            $roomsavailability = $roomsavailability->whereBetween(
+             'created_at', array(
+                 $start_date,
+                 $end_date
+             )
+         );
+        }
+        $roomsavailability_data = $roomsavailability->limit(1000)->get();
         return Datatables::of($roomsavailability_data)->make(true);
         // return Datatables::of($roomsavailability)
         //     ->filter(function ($instance) use ($request) {

@@ -3,6 +3,10 @@
     Room Details
 @endsection
 
+@section('css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.css">
+@endsection
+
 @section('content')
     <!-- content wrapper. contains page content -->
     <div class="content-panel">
@@ -30,7 +34,17 @@
                                     <option value="Comfort Doppel-/Zweibettzimmer">Comfort Doppel-/Zweibettzimmer</option>
                                     <option value="Casa Special Room">Casa Special Room</option>
                                 </select>
-                            </div>                            
+                            </div>
+
+                            <div class="form-group col-sm-2">
+                                <label>Parse Date</label>
+                                <div class="input-group date" data-provide="datepicker">
+                                    <input type="text" class="form-control" id="created_at" readonly="readonly">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+                            </div> 
                         </div>
                     </div>
                 </div>
@@ -55,6 +69,12 @@
     <!-- end of content wrapper. contains page content -->
 @endsection
 @section('js')
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#datepicker').datepicker();
+        });
+    </script>
     <script type="text/javascript">
         $(function() {
             $.fn.dataTable.ext.errMode = 'none';
@@ -75,6 +95,7 @@
                     @endif                    
                     data: function (d) {
                         d.room_type = $('#room_type').val();
+                        d.created_at = $('#created_at').val();
                     }
                 },                
                 columns: [
@@ -85,7 +106,11 @@
             $('#room_type').change( function(e) {
                 oTable.draw();
                 e.preventDefault();
-            });            
+            });
+            $('#created_at').change( function(e) {
+                oTable.draw();
+                e.preventDefault();
+            });
         });
     </script>
 @endsection
