@@ -1,6 +1,8 @@
 from pymongo import MongoClient
 from Config import Config
 import datetime
+from bson.objectid import ObjectId
+
 class MongoDatabase:
 
   def __init__(self):
@@ -31,11 +33,8 @@ class MongoDatabase:
 
   def recInsertUpdate (self,table,data_dictionary,where_dictionary):
     collection = self.db[table]
-    rec_count = getCount(table,None,where_dictionary)
-    if(rec_count):
-      return recUpdate(table,data_dictionary,where_dictionary)
-    else:
-      return recInsert(table,[data_dictionary])
+    result = collection.update(where_dictionary,{ '$set': data_dictionary }, upsert=True, multi=False)
+    return result
   
   def recSelect (self,table,selected_column_dictionary = None,where_dictionary = None,limit=10000,order_by=None,order_type=None):
     collection = self.db[table]
@@ -50,7 +49,7 @@ class MongoDatabase:
 
   def recSelectById (self,table,id):
     collection = self.db[table]
-    result = collection.find_one({"_id" : id})
+    result = collection.find_one({"_id" : ObjectId(id)})
     return result
 
   def getCount (self,table,selected_column_dictionary = None,where_dictionary = None,limit=10000,order_by=None,order_type=None):

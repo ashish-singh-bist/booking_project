@@ -25,7 +25,7 @@ class Booking(Master):
     self.params['headers'] = { 'user-agent':CHROME_UA , 'host' : 'www.booking.com' , 'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8','Accept-Language':'en-US,en;q=0.9','Accept-Encoding':'gzip, deflate, br','Upgrade-Insecure-Requests':1 }
     
     html = ""
-    #html = self.obj_helper.readFile( "booking.html" ) 
+    #html = self.obj_helper.readFile( "booking_new.html" ) 
     if self.obj_helper.isFileExists( "./html_dir/" + file_name ):
       html = self.obj_helper.readFile( "./html_dir/" + file_name ) 
       print( "File Already exists" )      
@@ -64,12 +64,20 @@ class Booking(Master):
       if star_ratings:
         #<svg class="bk-icon -sprite-ratings_stars_4"
         arr_temp_class = self.obj_helper.getAttributeValue( star_ratings , 'svg' , 'class' )
-        for temp_class in arr_temp_class:
+        for temp_class in arr_temp_class:          
           m = re.search(r'ratings_stars_(\d+)', temp_class,re.S)
           if m:          
-            dict_hotel_info['hotel_stars'] = m.group(1)     
-
-
+            dict_hotel_info['hotel_stars'] = m.group(1)
+          else:            
+            #<svg class="bk-icon -sprite-ratings_circles_4"             
+            m = re.search(r'sprite-ratings_circles_(\d+)', temp_class,re.S)
+            if m:              
+              dict_hotel_info['hotel_stars'] = m.group(1)
+      
+      #atnm: 'Hotels',
+      m = re.search(r'atnm\s*:\s*\'(.+?)\'', html,re.S)
+      if m:
+        dict_hotel_info['hotel_category'] = m.group(1)        
       #booking.env.b_map_center_latitude = 15.55752173;      
       m = re.search(r'booking.env.b_map_center_latitude\s*=\s*(.+?)\;', html,re.S)
       if m:
@@ -80,9 +88,7 @@ class Booking(Master):
       if m:
         dict_hotel_info['longitude'] = m.group(1)
 
-
-      dict_hotel_info['hotel_id'] = self.getHotelId(html)      
-
+      dict_hotel_info['hotel_id'] = self.getHotelId(html)
       # #<input type="hidden" name="hotel_id" value="3433374" />      
       # input_tag = self.obj_helper.getContainerHtml(html,'input','name','hotel_id')
       # if input_tag:
@@ -283,11 +289,17 @@ class Booking(Master):
       ul_html = self.obj_helper.getContainerHtml(temp_html,'ul','class','hprt-conditions')
       if ul_html:
         arr_li_html = self.obj_helper.getHtmlByTag(ul_html,'li')
+        arr_other_desc = []
         for li_html in arr_li_html:
           if 'goal:hp_rt_hovering_mealplan' in str(li_html):
             dict_price_desc['mealplan_desc'] = self.obj_helper.removeHtml(str(li_html))
-          if 'goal:hp_rt_hovering_free_cancellation' in str(li_html):
+          elif 'goal:hp_rt_hovering_free_cancellation' in str(li_html):
             dict_price_desc['cancellation_desc'] = self.obj_helper.removeHtml(str(li_html))
+          else:
+            temp_desc = self.obj_helper.removeHtml(str(li_html))
+            arr_other_desc.append(temp_desc)
+        if len(arr_other_desc):
+          dict_price_desc['other_desc'] = arr_other_desc
     return { 'dict_room_equipment':dict_room_equipment , 'dict_price_desc':dict_price_desc }
 
 

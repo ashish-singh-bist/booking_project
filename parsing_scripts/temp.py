@@ -77,14 +77,15 @@ if __name__ == '__main__':
             #del result['hotel_info']['hotel_equipments']
             print(str(result['hotel_info']))
 
-            
+
             record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'hotel_id':1 }, { 'hotel_id':hotel_id } )
             print(record_count)            
             #record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'hotel_id':1 }, { 'hotel_id':hotel_id , 'checkin_date':checkin_date , 'length_stay':length_stay } )
             print("prop_id"+str(temp_prop_id))            
             if record_count:
               result['hotel_info']['prop_id'] = temp_prop_id
-              ret_id = obj_booking.obj_mongo_db.recUpdate( 'hotel_master' , {'hotel_info':result['hotel_info']} , { 'hotel_id':hotel_id } )
+              result['hotel_info'] = {}
+              ret_id = obj_booking.obj_mongo_db.recUpdate( 'hotel_master' , result['hotel_info'] , { 'hotel_id':hotel_id } )
               print( "\nUpdated in hotel_master The return id is"+str(ret_id) )
             else:
               result['hotel_info']['prop_id'] = temp_prop_id

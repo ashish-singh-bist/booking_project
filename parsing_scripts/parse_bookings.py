@@ -47,8 +47,9 @@ if __name__ == '__main__':
   
   for property_url_row in property_url_rows:    
     temp_prop_id = property_url_row['_id']
-    property_url = property_url_row['url']
-    start_date = datetime.datetime.now().date()
+    property_url = property_url_row['url']    
+    #for today We are starting it this date. later we will set it as current date()
+    start_date = datetime.datetime(2018, 9, 18).date()#datetime.datetime.now().date()
     end_date = datetime.datetime.now().date() + timedelta(days=365)
     while start_date < end_date:        
         checkin_date = str(start_date)
@@ -59,32 +60,38 @@ if __name__ == '__main__':
           print( "checkin:"+checkin_date," length_stay:"+str(length_stay) )
           url = property_url+"?checkin="+str(checkin_date)+"&checkout="+str(checkout_date)+"&selected_currency=USD"+"&group_adults="+str(number_of_guests)
           #url = 'https://www.booking.com/hotel/de/contel-koblenz.de.html?checkin=2018-10-01&checkout=2018-10-03&selected_currency=USD&group_adults=2'  
-          print(url)
-          #5b9fb00152c92b16c314fb1c-2018-09-17-1.html
-          temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"          
-          #if not '5b9fb00152c92b16c314fb1c-2018-09-20-1.ht' in temp_file:
-          #  continue
+          print(url)          
+          ###############################################
+          #old file format
+          #temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"
+          #new file format
+          url_md5 = obj_master.obj_helper.getMd5(url)
+          temp_file = url_md5+".html"
+          if not obj_master.obj_helper.isFileExists( "./html_dir/" + temp_file ):
+            obj_master.obj_helper.writeFile( "LogFileNotExists.txt" "\nFile not exists for url"+url );
+            continue
+          ###############################################
           print(temp_file)
           #if obj_booking.obj_helper.isFileExists( "./html_dir/" + temp_file ):
           #  print("file already exists")
           #  continue
           result = obj_booking.parseProductDetails(url,temp_file,checkin_date,checkout_date)          
-          #exit()
           if 'hotel_info' in result:
             hotel_id = result['hotel_info']['hotel_id']
             result['hotel_info']['length_stay'] = length_stay
             #showing error while insert in hotel details
-            del result['hotel_info']['hotel_equipments']
+            #del result['hotel_info']['hotel_equipments']
             record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'hotel_id':1 }, { 'hotel_id':hotel_id } )
             #record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'hotel_id':1 }, { 'hotel_id':hotel_id , 'checkin_date':checkin_date , 'length_stay':length_stay } )
             print("prop_id"+str(temp_prop_id))            
             if record_count:
               result['hotel_info']['prop_id'] = temp_prop_id
-              #ret_id = obj_booking.obj_mongo_db.recUpdate( 'hotel_master' , {'hotel_info':result['hotel_info']} , { 'hotel_id':hotel_id } )
+              #ret_id = obj_booking.obj_mongo_db.recUpdate( 'hotel_master' , result['hotel_info'] , { 'hotel_id':hotel_id } )
+              #print( "\nUpdated in hotel_master The return id is"+str(ret_id) )
             else:
               result['hotel_info']['prop_id'] = temp_prop_id
               ret_id = obj_booking.obj_mongo_db.recInsert( 'hotel_master' , [ result['hotel_info'] ] )
-            print( "\ninserted in hotel_master The return id is"+str(ret_id) )           
+              print( "\ninserted in hotel_master The return id is"+str(ret_id) )
             if 'room_price_details' in result:
               dict_room_price_details = result['room_price_details']
               for dict_price_details in dict_room_price_details['price_details']:              
@@ -97,9 +104,10 @@ if __name__ == '__main__':
                       ###################
                       dict_room_info['prop_id'] = temp_prop_id
                       ###################
-                      ret_id = obj_booking.obj_mongo_db.recInsert( 'room_details' , [ dict_room_info ] )
-                      print( "\ninserted in room_details The return id is"+str(ret_id) )
-                    
+                      record_count = obj_booking.obj_mongo_db.getCount( 'room_details' , { 'hotel_id':1 }, { 'hotel_id':hotel_id,'room_type':key_room_type } )
+                      if not record_count:
+                        ret_id = obj_booking.obj_mongo_db.recInsert( 'room_details' , [ dict_room_info ] )
+                        print( "\ninserted in room_details The return id is"+str(ret_id) )                    
                     available_only = ""
                     arr_price_info = dict_room_info['price_info']
                                       
@@ -113,7 +121,7 @@ if __name__ == '__main__':
                       dict_price_info['hotel_id'] = hotel_id
                       dict_price_info['checkin_date'] = checkin_date                      
                       ################
-                      choices_str = "bc"
+                      choices_str = ""
                       if 'mealplan_included_name' in dict_price_info and dict_price_info['mealplan_included_name']:
                         choices_str = dict_price_info['mealplan_included_name']
                       if 'mealplan_desc' in dict_price_info and dict_price_info['mealplan_desc']:
@@ -122,6 +130,9 @@ if __name__ == '__main__':
                         choices_str = choices_str + dict_price_info['cancellation_type']
                       if 'cancellation_desc' in dict_price_info and dict_price_info['cancellation_desc']:
                         choices_str = choices_str + dict_price_info['cancellation_desc']
+                      if 'other_desc' in dict_price_info and dict_price_info['other_desc']:
+                        for temp_other_desc in dict_price_info['other_desc']:
+                          choices_str = choices_str + temp_other_desc
                       #########################
                       #set the key in redis cache
                       str_to_md5 = str(hotel_id)+str(checkin_date)+str(key_room_type)+str(length_stay)+str(number_of_guests)+choices_str
