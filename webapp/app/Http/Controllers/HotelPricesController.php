@@ -84,7 +84,7 @@ class HotelPricesController extends Controller
         // $min_price = $hotelprices->min('price');
         // $sum_price = $hotelprice->sum('price');
   
-        $totalData = HotelPrices::count();
+        $totalData = $hotelprices->count();
         $totalFiltered = $totalData; 
 
         $limit = $request->input('length');
