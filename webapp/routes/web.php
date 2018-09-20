@@ -38,3 +38,6 @@ Route::get('/rooms_availability_getdata', 'RoomsAvailabilityController@getData')
 
 Route::resource('users', 'UserController');
 Route::get('/getdata', 'UserController@getData')->name('users.index.getdata');
+
+Route::get('/config', 'HomeController@config')->name('config');
+Route::post('/config', 'HomeController@configUpdate')->name('config_update');

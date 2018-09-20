@@ -15,6 +15,9 @@ class Booking(Master):
     self.params['return_error_page'] = 1
   def parseProductDetails(self,url,file_name,checkin_date,checkout_date):
     data_dic = {}
+
+    html_dir_path = self.obj_config.html_dir_path    
+
     ###################
     # if self.proxy_list:      
     #   proxy_hash = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]
@@ -26,8 +29,8 @@ class Booking(Master):
     
     html = ""
     #html = self.obj_helper.readFile( "booking_new.html" ) 
-    if self.obj_helper.isFileExists( "./html_dir/" + file_name ):
-      html = self.obj_helper.readFile( "./html_dir/" + file_name ) 
+    if self.obj_helper.isFileExists( html_dir_path + file_name ):
+      html = self.obj_helper.readFile( html_dir_path + file_name ) 
       print( "File Already exists" )      
     else:      
       html = self.obj_req.getPage( "GET", url , self.params )
@@ -40,10 +43,9 @@ class Booking(Master):
     if html:
       html = re.sub(r'&amp;', '&', html,flags=re.S|re.M)
       html = re.sub(r'&nbsp;', ' ', html,flags=re.S|re.M)
-      if not self.obj_helper.isFileExists( "./html_dir/"+file_name ):
+      if not self.obj_helper.isFileExists( html_dir_path+file_name ):
         print( "Saved successfully................." )
-        self.obj_helper.writeFileNewUTF( "./html_dir/"+file_name , html )   #save log in log file  
-      
+        self.obj_helper.writeFileNewUTF( html_dir_path+file_name , html )   #save log in log file      
       dict_hotel_info = {}
 
       #html = re.sub(r'\n+', '', html,flags=re.S|re.M)
@@ -72,7 +74,7 @@ class Booking(Master):
             #<svg class="bk-icon -sprite-ratings_circles_4"             
             m = re.search(r'sprite-ratings_circles_(\d+)', temp_class,re.S)
             if m:              
-              dict_hotel_info['hotel_stars'] = m.group(1)
+              dict_hotel_info['hotel_stars'] = int(m.group(1))
       
       #atnm: 'Hotels',
       m = re.search(r'atnm\s*:\s*\'(.+?)\'', html,re.S)
@@ -104,7 +106,10 @@ class Booking(Master):
         #<span aria-label="Scored 8.7 " class="review-score-badge" role="link">8.7</span>
         rating_html = self.obj_helper.getContainerText(span_html,'span','class','review-score-badge')
         if rating_html:
-          dict_hotel_info['booking_rating'] = self.obj_helper.removeHtml(rating_html)
+          booking_rating = self.obj_helper.removeHtml(rating_html)
+          if booking_rating:            
+            booking_rating = booking_rating.replace(',','.')
+            dict_hotel_info['booking_rating'] = float(booking_rating)
       
       ##################################################################
       result_dict['checkin_date'] = checkin_date
@@ -124,9 +129,6 @@ class Booking(Master):
       #   check_out_date = self.obj_helper.removeHtml(check_out_date)
       #   result_dict['checkout_date'] = self.getCorrectDateFormat(check_out_date)
       ##################################################################
-
-
-
       #<a href="#" class="bui-date__title bui-link bui-link--primary hp-dates-summary__date av-summary-value av-summary-guests">2 adults</a>
       number_of_guests = self.obj_helper.getContainerText(html,'a','class','av-summary-guests')      
       if number_of_guests:        
@@ -164,7 +166,7 @@ class Booking(Master):
           for b_block in arr_b_blocks:
             dict_price_info = {}            
             if 'b_raw_price' in b_block and b_block['b_raw_price']:
-              dict_price_info['raw_price'] = b_block['b_raw_price']
+              dict_price_info['raw_price'] = float(b_block['b_raw_price'])
               #print(dict_price_info['raw_price'])
             if 'b_mealplan_included_name' in b_block and b_block['b_mealplan_included_name']:
               dict_price_info['mealplan_included_name'] = b_block['b_mealplan_included_name']

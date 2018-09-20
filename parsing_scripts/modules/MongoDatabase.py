@@ -12,6 +12,12 @@ class MongoDatabase:
     self.client = MongoClient(connection_string)
     self.db = self.client[self.obj_config.mongo_database]
     
+  def connect (self):
+    # Open database connection
+    connection_string = "mongodb://" + self.obj_config.mongo_host + ":" + self.obj_config.mongo_port + "/"
+    self.client = MongoClient(connection_string)
+    self.db = self.client[self.obj_config.mongo_database] 
+
   def disconnect (self):
     self.client.close()
 

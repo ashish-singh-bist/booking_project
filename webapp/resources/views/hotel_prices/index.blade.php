@@ -86,6 +86,13 @@
                                 <input class="slider-range-data" type="hidden" id="min_price" readonly>
                                 <input class="slider-range-data" type="hidden" id="max_price" readonly>
                             </div>
+
+                            <div class="form-group col-sm-2">
+                                <div class="clear_btn">
+                                    <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -182,7 +189,28 @@
                     $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
                 }
             });
-            setTimeout(function(){ $( "#amount" ).val("$0" + " - $5000"); }, 1000);           
+            setTimeout(function(){ $( "#amount" ).val("$0" + " - $5000"); }, 1000);
+
+            $('#clear_filter').on('click',function(){
+                $("#checkin_date").val('');
+                $("#days")[0].selectedIndex = 0;
+                $("#room_type")[0].selectedIndex = 0;
+                $("#max_persons")[0].selectedIndex = 0;
+                $("#created_at").val('');
+                resetSlider();
+                oTable.draw();
+            });
+
+            function resetSlider() {
+                var $slider = $("#slider-range");
+                var min_value = 0;
+                var max_value = 5000;
+                $slider.slider("values", 0, min_value);
+                $slider.slider("values", 1, max_value);
+                $( "#min_price" ).val(0);
+                $( "#max_price" ).val(5000);
+                $( "#amount" ).val( "$" + min_value + " - $" + max_value );
+            }
         });
     </script> 
 @endsection

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'title' => 'AdminLTE 2',
+    'title' => 'B Parsing',
 
     'title_prefix' => '',
 
@@ -30,9 +30,9 @@ return [
     |
     */
 
-    'logo' => '<b>Admin</b>LTE',
+    'logo' => '<b>B</b>P',
 
-    'logo_mini' => '<b>A</b>LT',
+    'logo_mini' => '<b>B</b>P',
 
     /*
     |--------------------------------------------------------------------------
@@ -165,6 +165,12 @@ return [
              'icon'        => 'play',
              'icon_color'  => 'green',
         ],
+        [
+             'text'        => 'Config',
+             'url'         => '/config',
+             'icon'        => 'gear',
+             'icon_color'  => 'red',
+        ],        
         // 'ACCOUNT SETTINGS',
         // [
         //     'text' => 'Profile',

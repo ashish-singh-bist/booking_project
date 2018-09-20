@@ -2,6 +2,7 @@ from Helper import Helper
 from HttpRequests import HttpRequests
 from MongoDatabase import MongoDatabase
 from RedisCache import RedisCache
+from Config import Config
 #from Database import Database
 import re
 import json
@@ -12,6 +13,7 @@ class Master(object):
     self.obj_req = HttpRequests()
     self.obj_mongo_db = MongoDatabase()
     self.obj_redis_cache = RedisCache()
+    self.obj_config = Config()
     #self.obj_db= Database()
     #self.proxy_list = self.initProxies()
   # def insertDataInDb(self,data_hash,md5_str):

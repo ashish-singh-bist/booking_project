@@ -52,7 +52,13 @@
                                         <span class="glyphicon glyphicon-th"></span>
                                     </div>
                                 </div>
-                            </div> 
+                            </div>
+
+                            <div class="form-group col-sm-2">
+                                <div class="clear_btn">
+                                    <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -121,7 +127,14 @@
             });
             $('#checkin_date').change( function(e) {
                 oTable.draw();
-            });            
+            });
+
+            $('#clear_filter').on('click',function(){
+                $("#room_type")[0].selectedIndex = 0;
+                $("#checkin_date").val('');
+                $("#created_at").val('');
+                oTable.draw();
+            });
         });
     </script>
 @endsection
