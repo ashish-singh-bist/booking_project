@@ -26,6 +26,16 @@
                         </div>
                         <div class="box-body">
                             <div class="form-group col-sm-2">
+                                <label>CheckIn Date</label>
+                                <div class="input-group date" data-provide="datepicker">
+                                    <input type="text" class="form-control" id="checkin_date" readonly="readonly">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-2">
                                 <label>Days</label>
                                 <select class="form-control" id="days">
                                     <option value="">Any</option>
@@ -41,11 +51,9 @@
                                 <label>Room Type</label>
                                 <select class="form-control" id="room_type">
                                     <option value="">Any Type</option>
-                                    <option value="Doppel- oder Zweibettzimmer">Doppel- oder Zweibettzimmer</option>
-                                    <option value="Einzelzimmer">Einzelzimmer</option>
-                                    <option value="Einzelzimmer">Premium Doppel- oder Zweibettzimmer</option>
-                                    <option value="Comfort Doppel-/Zweibettzimmer">Comfort Doppel-/Zweibettzimmer</option>
-                                    <option value="Casa Special Room">Casa Special Room</option>
+                                    @foreach($room_type_list as $room_type)
+                                        <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -118,6 +126,7 @@
                 "sPaginationType" : "full_numbers",
                 processing: true,
                 serverSide: true,
+                searching: false,
                 select: {
                     style: 'multi'
                 },
@@ -134,10 +143,12 @@
                         d.min_price = $('#min_price').val();
                         d.max_price = $('#max_price').val();
                         d.max_persons = $('#max_persons').val();
+                        d.checkin_date = $('#checkin_date').val();
                     }
                 },                
                 columns: [
-                    @foreach (config('app.hotel_prices_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, @endforeach
+                    @foreach (config('app.hotel_prices_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, 
+                    @endforeach
                 ]
             });
 
@@ -152,7 +163,10 @@
             });
             $('#max_persons').change( function(e) {
                 oTable.draw();
-            });            
+            });
+            $('#checkin_date').change( function(e) {
+                oTable.draw();
+            });                    
             function onChangePrice() {
                 oTable.draw();
             }

@@ -24,17 +24,37 @@
                             <h3 class="box-title">Filters</h3>
                         </div>
                         <div class="box-body">
+                            <div class="form-group col-sm-2">
+                                <label>CheckIn Date</label>
+                                <div class="input-group date" data-provide="datepicker">
+                                    <input type="text" class="form-control" id="checkin_date" readonly="readonly">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group col-sm-4">
                                 <label>Room Type</label>
                                 <select class="form-control" id="room_type">
                                     <option value="">Any Type</option>
-                                    <option value="Doppel- oder Zweibettzimmer">Doppel- oder Zweibettzimmer</option>
-                                    <option value="Einzelzimmer">Einzelzimmer</option>
-                                    <option value="Einzelzimmer">Premium Doppel- oder Zweibettzimmer</option>
-                                    <option value="Comfort Doppel-/Zweibettzimmer">Comfort Doppel-/Zweibettzimmer</option>
-                                    <option value="Casa Special Room">Casa Special Room</option>
+                                    @foreach($room_type_list as $room_type)
+                                        <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                    @endforeach
                                 </select>
                             </div>
+
+                            <div class="form-group col-sm-2">
+                                <label>Days</label>
+                                <select class="form-control" id="days">
+                                    <option value="">Any</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="5">5</option>
+                                    <option value="7">7</option>
+                                </select>
+                            </div>                            
 
                             <div class="form-group col-sm-2">
                                 <label>Available Only</label>
@@ -101,6 +121,7 @@
                 "sPaginationType" : "full_numbers",
                 processing: true,
                 serverSide: true,
+                searching: false,
                 select: {
                     style: 'multi'
                 },
@@ -112,8 +133,10 @@
                     @endif                    
                     data: function (d) {
                         d.room_type = $('#room_type').val();
+                        d.days = $('#days').val();
                         d.available_only = $('#available_only').val();
                         d.created_at = $('#created_at').val();
+                        d.checkin_date = $('#checkin_date').val();
                     }
                 },
                 columns: [
@@ -124,16 +147,19 @@
             // $('#room_type').on('change', function(e) {
             $('#room_type').change( function(e) {
                 oTable.draw();
-                e.preventDefault();
             });
             $('#available_only').change( function(e) {
                 oTable.draw();
-                e.preventDefault();
             });
             $('#created_at').change( function(e) {
                 oTable.draw();
-                e.preventDefault();
-            });                     
+            });
+            $('#days').change( function(e) {
+                oTable.draw();
+            });
+            $('#checkin_date').change( function(e) {
+                oTable.draw();
+            });
         });
     </script>
 @endsection

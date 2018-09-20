@@ -243,6 +243,7 @@ return [
 
     'room_details_header_key' => [
         'hotel_id' => 'Hotel Id',
+        'checkin_date' => 'Check In',
         'room_type' => 'Room Type',
         // 'room_equipments' => 'Room Equipments',
         'created_at' => 'Create Time',

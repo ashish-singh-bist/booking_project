@@ -28,8 +28,9 @@
                                 <label>Category</label>
                                 <select class="form-control" id="category">
                                     <option value="">Any</option>
-                                    <option value="Hotels">Hotels</option>
-                                    <option value="Aparthotels">Aparthotels</option>
+                                    @foreach($category_list as $category)
+                                        <option value="{{$category[0]}}">{{$category[0]}}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -110,6 +111,7 @@
                 "sPaginationType" : "full_numbers",
                 processing: true,
                 serverSide: true,
+                searching: false,
                 select: {
                     style: 'multi'
                 },

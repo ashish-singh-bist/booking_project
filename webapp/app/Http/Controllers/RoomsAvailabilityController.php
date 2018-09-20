@@ -16,20 +16,22 @@ class RoomsAvailabilityController extends Controller
 
     public function index(Request $request)
     {
-        if($request->get('id') != Null && $request->get('id') != ''){
-            return view('rooms_availability.index',['id'=>$request->get('id')]);
-        }else{
-            return view('rooms_availability.index');
-        }         
-    }
+        $room_type_list = RoomsAvailability::select('room_type')->distinct()->get()->toArray();
 
-    public function getCustomFilter()
-    {
-        return view('datatables.collection.custom-filter');
+        if($request->get('id') != Null && $request->get('id') != ''){
+            return view('rooms_availability.index',['id'=>$request->get('id'), 'room_type_list' => $room_type_list]);
+        }else{
+            return view('rooms_availability.index', ['room_type_list' => $room_type_list]);
+        }         
     }
 
     public function getData(Request $request)
     {
+        $columns = [];
+        foreach (config('app.rooms_availability_header_key') as $key => $value){
+            array_push($columns,$key);
+        }
+
         $roomsavailability = new RoomsAvailability();
         if($request->get('id') != Null && $request->get('id') != ''){
             $roomsavailability = $roomsavailability->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
@@ -37,6 +39,9 @@ class RoomsAvailabilityController extends Controller
         if($request->get('room_type') != Null && $request->get('room_type') != ''){
             $roomsavailability = $roomsavailability->where('room_type',$request->get('room_type'));
         }
+        if($request->get('days') != Null && $request->get('days') != ''){
+            $roomsavailability = $roomsavailability->where('number_of_days',(int)$request->get('days'));
+        }        
         if($request->get('available_only') != Null && $request->get('available_only') != ''){
             $roomsavailability = $roomsavailability->where('available_only',(int)$request->get('available_only'));
         }
@@ -50,17 +55,43 @@ class RoomsAvailabilityController extends Controller
              )
          );
         }
-        $roomsavailability_data = $roomsavailability->limit(1000)->get();
-        return Datatables::of($roomsavailability_data)->make(true);
-        // return Datatables::of($roomsavailability)
-        //     ->filter(function ($instance) use ($request) {
-        //         if ($request->has('room_type') && $request->get('room_type')) {
-        //             $instance->collection = $instance->collection->filter(function ($row) use ($request) {
-        //                 return Str::contains($row['room_type'], $request->get('room_type')) ? true : false;
-        //             });
-        //         }
-        //     })
-        //     ->make(true);
-        //return Datatables::of($roomsavailability)->make(true);
+        if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
+            $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
+            $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();
+            $roomsavailability = $roomsavailability->whereBetween(
+             'checkin_date', array(
+                 $start_date,
+                 $end_date
+             )
+         );
+        } 
+        
+        $totalData = $roomsavailability->count();
+        $totalFiltered = $totalData; 
+
+        $limit = $request->input('length');
+        $start = $request->input('start');
+        $order = $columns[$request->input('order.0.column')];
+        $dir = $request->input('order.0.dir');
+            
+        $roomsavailability_data = $roomsavailability->offset((int)$start)
+                     ->limit((int)$limit)
+                     ->orderBy($order,$dir)
+                     ->get();
+
+        for($i=0; $i < count($roomsavailability_data); $i++)
+        {
+            //$roomsavailability_data[$i]['created_at'] = $roomsavailability_data[$i]['created_at'];
+            $roomsavailability_data[$i]['checkin_date'] =  $roomsavailability_data[$i]['checkin_date']->toDateTime()->format('Y M d');
+        }
+
+        $json_data = array(
+                    "draw"            => intval($request->input('draw')),  
+                    "recordsTotal"    => intval($totalData),  
+                    "recordsFiltered" => intval($totalFiltered), 
+                    "data"            => $roomsavailability_data   
+                    );
+            
+        echo json_encode($json_data);
     }
 }
