@@ -42,3 +42,5 @@ Route::get('/getdata', 'UserController@getData')->name('users.index.getdata');
 
 Route::get('/config', 'HomeController@config')->name('config');
 Route::post('/config', 'HomeController@configUpdate')->name('config_update');
+
+Route::get('/get_filter_list', 'HomeController@getFilterList')->name('get_filter_list');

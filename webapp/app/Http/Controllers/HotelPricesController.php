@@ -36,16 +36,37 @@ class HotelPricesController extends Controller
         $hotelprices = new HotelPrices();
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelprices = $hotelprices->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
+        } 
+
+        if(count($request->get('room_types'))>0){
+            $room_types = $request->get('room_types');
+            $hotelprices = $hotelprices->where(function ($query) use ($room_types) {
+                foreach($room_types as $key => $room_type){
+                    if($key == 0){
+                        $query = $query->where('room_type', $room_type);
+                    }else{
+
+                        $query = $query->orWhere('room_type', $room_type);
+                    }
+                }
+                return $query;
+            });
         }        
-        if($request->get('room_type') != Null && $request->get('room_type') != ''){
-            $hotelprices = $hotelprices->where('room_type',$request->get('room_type'));
-        }
-        if($request->get('days') != Null && $request->get('days') != ''){
-            $hotelprices = $hotelprices->where('number_of_days',(int)$request->get('days'));
-        }
-        if($request->get('max_persons') != Null && $request->get('max_persons') != ''){
-            $hotelprices = $hotelprices->where('max_persons',(int)$request->get('max_persons'));
-        }
+
+        if(count($request->get('max_persons'))>0){
+            $max_persons = $request->get('max_persons');
+            $hotelprices = $hotelprices->where(function ($query) use ($max_persons) {
+                foreach($max_persons as $key => $max_person){
+                    if($key == 0){
+                        $query = $query->where('max_persons', intval($max_person));
+                    }else{
+
+                        $query = $query->orWhere('max_persons', intval($max_person));
+                    }
+                }
+                return $query;
+            });
+        }           
 
         if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
             $hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
@@ -93,9 +114,20 @@ class HotelPricesController extends Controller
         //      )
         //  );
         // }
-        if($request->get('days') != Null && $request->get('days') != ''){
-            $hotelprices = $hotelprices->where('number_of_days',(int)$request->get('days'));
-        }
+        if(count($request->get('days'))>0){
+            $days = $request->get('days');
+            $hotelprices = $hotelprices->where(function ($query) use ($days) {
+                foreach($days as $key => $day){
+                    if($key == 0){
+                        $query = $query->where('number_of_days', intval($day));
+                    }else{
+
+                        $query = $query->orWhere('number_of_days', intval($day));
+                    }
+                }
+                return $query;
+            });
+        }        
 
         #$avg_price = $hotelprices->avg('number_of_days');
         #print_r($avg_price);

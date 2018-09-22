@@ -36,18 +36,39 @@ class HotelMasterController extends Controller
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelmaster = $hotelmaster->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
         }
-        if($request->get('star') != Null && $request->get('star') != ''){
-            $hotelmaster = $hotelmaster->where('hotel_stars',intval($request->get('star')));
+        if(count($request->get('stars'))>0){
+            $stars = $request->get('stars');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($stars) {
+                foreach($stars as $key => $star){
+                    if($key == 0){
+                        $query = $query->where('hotel_stars', $star);
+                    }else{
+
+                        $query = $query->orWhere('hotel_stars', $star);
+                    }
+                }
+                return $query;
+            });
         }
-        if($request->get('rating') != Null && $request->get('rating') != ''){
-            $start = \ceil($request->get('rating'));
-            $end = $start + 1; 
-            $hotelmaster = $hotelmaster->whereBetween(
-                'booking_rating', array(
-                    $start,
-                    $end
-                )
-            );            
+
+        if(count($request->get('ratings'))>0){
+            $ratings = $request->get('ratings');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
+                foreach($ratings as $key => $rating){
+                    $start = intval($rating);
+                    $end = $rating + 1;                     
+                    if($key == 0){
+                        $query = $query->where(function ($query_inner) use ($ratings) {
+                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+                        });
+                    }else{
+                        $query = $query->orWhere(function ($query_inner) use ($ratings) {
+                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+                        });
+                    }
+                }
+                return $query;
+            });
         }
 
         if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
@@ -68,8 +89,50 @@ class HotelMasterController extends Controller
         //         )
         //     );
         // }
-        if($request->get('category') != Null && $request->get('category') != ''){
-            $hotelmaster = $hotelmaster->where('hotel_category',$request->get('category'));
+
+        if(count($request->get('countries'))>0){
+            $countries = $request->get('countries');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($countries) {
+                foreach($countries as $key => $country){
+                    if($key == 0){
+                        $query = $query->where('country', $country);
+                    }else{
+
+                        $query = $query->orWhere('country', $country);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('cities'))>0){
+            $cities = $request->get('cities');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($cities) {
+                foreach($cities as $key => $city){
+                    if($key == 0){
+                        $query = $query->where('city', $city);
+                    }else{
+
+                        $query = $query->orWhere('city', $city);
+                    }
+                }
+                return $query;
+            });
+        }        
+
+        if(count($request->get('categories'))>0){
+            $categories = $request->get('categories');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($categories) {
+                foreach($categories as $key => $category){
+                    if($key == 0){
+                        $query = $query->where('hotel_category', $category);
+                    }else{
+
+                        $query = $query->orWhere('hotel_category', $category);
+                    }
+                }
+                return $query;
+            });
         }
 
         $totalData = $hotelmaster->count();

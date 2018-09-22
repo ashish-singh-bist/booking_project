@@ -36,9 +36,21 @@ class RoomsAvailabilityController extends Controller
         if($request->get('id') != Null && $request->get('id') != ''){
             $roomsavailability = $roomsavailability->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
         }        
-        if($request->get('room_type') != Null && $request->get('room_type') != ''){
-            $roomsavailability = $roomsavailability->where('room_type',$request->get('room_type'));
-        }
+
+        if(count($request->get('room_types'))>0){
+            $room_types = $request->get('room_types');
+            $roomsavailability = $roomsavailability->where(function ($query) use ($room_types) {
+                foreach($room_types as $key => $room_type){
+                    if($key == 0){
+                        $query = $query->where('room_type', $room_type);
+                    }else{
+
+                        $query = $query->orWhere('room_type', $room_type);
+                    }
+                }
+                return $query;
+            });
+        }   
         if($request->get('days') != Null && $request->get('days') != ''){
             $roomsavailability = $roomsavailability->where('number_of_days',(int)$request->get('days'));
         }        

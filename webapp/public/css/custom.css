@@ -22,3 +22,18 @@ table.dataTable{
 .clear_btn{
     margin-top: 24px;
 }
+
+.content{
+    padding-top: 2px;
+}
+
+.content-header{
+    padding-top: 2px;
+}
+
+.filter-outer-box{
+    height: 200px;
+    overflow: auto;
+    border: 1px solid #3c8dbc;
+    border-radius: 5px;    
+}

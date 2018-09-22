@@ -220,11 +220,12 @@ return [
         'location' => 'Location',
         // 'latitude' => 'Latitude',
         // 'longitude' => 'Longitude',
+        'city' => 'City',
+        'country' => 'Country',
+        'postal_code' => 'Postal Code',        
         'booking_rating' => 'Rating',
         // 'hotel_equipments' => 'Hotel Equipments',
         'created_at' => 'Create Time',
-        'city' => 'city',
-        'zipcode' => 'zipcode',
     ],    
 
     'hotel_prices_header_key' => [

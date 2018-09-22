@@ -22,46 +22,62 @@
                     <div class="box box-solid box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">Filters</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                {{-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> --}}
+                                <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                            </div>
                         </div>
                         <div class="box-body">
-                            <div class="form-group col-sm-2">
+                            <div class="form-group col-sm-2 filter-outer-box">
                                 <label>Category</label>
-                                <select class="form-control filter_class" id="category">
+                                @foreach($category_list as $category)
+                                    <li><input type="checkbox" name="category[]" value="{{$category[0]}}"/> {{$category[0]}}</li>
+                                @endforeach
+{{--                                 <select class="form-control filter_class" id="category">
                                     <option value="">Any</option>
                                     @foreach($category_list as $category)
                                         <option value="{{$category[0]}}">{{$category[0]}}</option>
                                     @endforeach
-                                </select>
+                                </select> --}}
                             </div>
 
-                            <div class="form-group col-sm-2">
+                            <div class="form-group col-sm-2 filter-outer-box">
                                 <label>Star</label>
-                                <select class="form-control filter_class" id="star">
-                                    <option value="">Any</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
+                                <li><input type="checkbox" name="stars[]" value="1"/> 1 stars</li>
+                                <li><input type="checkbox" name="stars[]" value="2"/> 2 stars</li>
+                                <li><input type="checkbox" name="stars[]" value="3"/> 3 stars</li>
+                                <li><input type="checkbox" name="stars[]" value="4"/> 4 stars</li>
+                                <li><input type="checkbox" name="stars[]" value="5"/> 5 stars</li>
+                                <li><input type="checkbox" name="stars[]" value="6"/> 6 stars</li>
+                                <li><input type="checkbox" name="stars[]" value="7"/> 7 stars</li>
+                            </div>
+
+                            <div class="form-group col-sm-2 filter-outer-box">
+                                <label>Rating</label>
+                                <li><input type="checkbox" name="ratings[]" value="0"/> 0 - 1</li>
+                                <li><input type="checkbox" name="ratings[]" value="1"/> 1 - 2</li>
+                                <li><input type="checkbox" name="ratings[]" value="2"/> 2 - 3</li>
+                                <li><input type="checkbox" name="ratings[]" value="3"/> 3 - 4</li>
+                                <li><input type="checkbox" name="ratings[]" value="4"/> 4 - 5</li>
+                                <li><input type="checkbox" name="ratings[]" value="5"/> 5 - 6</li>
+                                <li><input type="checkbox" name="ratings[]" value="6"/> 6 - 7</li>
+                                <li><input type="checkbox" name="ratings[]" value="7"/> 7 - 8</li>
+                                <li><input type="checkbox" name="ratings[]" value="8"/> 8 - 9</li>
+                                <li><input type="checkbox" name="ratings[]" value="9"/> 9 - 10</li>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label>Country</label>
+                                <select class="form-control filter_class select2-country" id="countries" multiple="multiple">
                                 </select>
                             </div>
 
-                            <div class="form-group col-sm-2">
-                                <label>Rating</label>
-                                <select class="form-control filter_class" id="rating">
-                                    <option value="">Any</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="10">10</option>
+                            <div class="form-group col-sm-6">
+                                <label>City</label>
+                                <select class="form-control filter_class select2-city" id="cities" multiple="multiple">
                                 </select>
-                            </div>
+                            </div>                                                 
 
                             <div class="form-group col-sm-6">
                                 <label>Parse Date</label>
@@ -82,12 +98,6 @@
                                             </span>
                                         </p>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group col-sm-2">
-                                <div class="clear_btn">
-                                    <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
                                 </div>
                             </div>
                         </div>
@@ -140,11 +150,25 @@
                         url: "{!! route('hotel_master.getData') !!}",
                     @endif
                     data: function (d) {
-                        d.star = $('#star').val();
-                        d.rating = $('#rating').val();
                         d.created_at_to = $('#created_at_to').val();
                         d.created_at_from = $('#created_at_from').val();
-                        d.category = $('#category').val();
+                        var stars = $('input[name="stars[]"]:checked')
+                        .map(function() {
+                            return $(this).val();
+                        }).get();
+                        var ratings = $('input[name="ratings[]"]:checked')
+                        .map(function() {
+                            return $(this).val();
+                        }).get();
+                        var categories = $('input[name="category[]"]:checked')
+                        .map(function() {
+                            return $(this).val();
+                        }).get();
+                        d.stars = stars;
+                        d.ratings = ratings;
+                        d.categories = categories;
+                        d.cities = $("#cities").val();
+                        d.countries = $("#countries").val();
                     }
                 },                
                 columns: [
@@ -152,7 +176,7 @@
                 ]
             });
 
-            $('.filter_class').on('change', function(e) {
+            $('.filter_class, .filter-outer-box input').on('change', function(e) {
                 oTable.draw();
             });
 
@@ -170,13 +194,81 @@
             // });
 
             $('#clear_filter').on('click',function(){
-                $("#category")[0].selectedIndex = 0;
-                $("#star")[0].selectedIndex = 0;
-                $("#rating")[0].selectedIndex = 0;
+                $('input[name="category[]"]:checked')
+                .map(function() {
+                    $(this).prop( "checked", false );
+                });
+                $('input[name="stars[]"]:checked')
+                .map(function() {
+                    $(this).prop( "checked", false );
+                });
+                $('input[name="ratings[]"]:checked')
+                .map(function() {
+                    $(this).prop( "checked", false );
+                });
+                $(".select2-country").val('').trigger('change');
+                $(".select2-city").val('').trigger('change');
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
                 oTable.draw();
             });
+
+            $('#countries').select2({
+                //data: ['s','y','z'],
+                placeholder: 'Select a country',
+                allowClear: true,
+                //minimumResultsForSearch: 5,
+                minimumInputLength: 3,
+                ajax: {
+                    url: '{{route("get_filter_list")}}',
+                    dataType: 'json',
+                    data: function (params) {
+                      var query = {
+                        search: params.term,
+                        type: 'Country'
+                      }
+
+                      // Query parameters will be ?search=[term]&type=public
+                      return query;
+                    },
+                    processResults: function (data) {
+                        console.log(data)
+                        return {
+                          results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $('#cities').select2({
+                //data: ['s','y','z'],
+                placeholder: 'Select a city',
+                allowClear: true,
+                //minimumResultsForSearch: 5,
+                minimumInputLength: 3,
+                ajax: {
+                    url: '{{route("get_filter_list")}}',
+                    dataType: 'json',
+                    data: function (params) {
+                      var query = {
+                        search: params.term,
+                        type: 'City'
+                      }
+
+                      // Query parameters will be ?search=[term]&type=public
+                      return query;
+                    },
+                    processResults: function (data) {
+                        console.log(data)
+                        return {
+                          results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
         });
     </script>
 @endsection

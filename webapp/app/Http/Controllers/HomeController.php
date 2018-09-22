@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\CustomConfig;
+use App\HotelMaster;
 
 class HomeController extends Controller
 {
@@ -42,6 +43,23 @@ class HomeController extends Controller
         $custom_config->thread_count = $request->thread_count;
         $custom_config->save();
         return view('config', [ 'custom_config'=> $custom_config->toArray()]);
-    }  
+    }
+    public function getFilterList(Request $request)
+    {
 
+        if($request->get('type') == 'Country'){
+            $filter_list = HotelMaster::select('country')->where('country', 'like',$request->get('search') . '%')->distinct()->get()->toArray();
+        }elseif($request->get('type') == 'City'){
+            $filter_list = HotelMaster::select('city')->where('city', 'like',$request->get('search') . '%')->distinct()->get()->toArray();
+        }
+
+        $final_array = [];
+        foreach($filter_list as $item) {
+            $temp['id'] = $item[0];
+            $temp['text'] = $item[0];
+            array_push($final_array,$temp);
+        }
+
+        return response()->json($final_array);
+    }    
 }

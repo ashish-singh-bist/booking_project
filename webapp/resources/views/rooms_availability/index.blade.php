@@ -22,71 +22,67 @@
                     <div class="box box-solid box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">Filters</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                {{-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> --}}
+                                <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                            </div>                             
                         </div>
                         <div class="box-body">
-                            <div class="row">
-                                <div class="form-group col-sm-6">
-                                    <label>CheckIn Date</label>
-                                    <div class="form-inline">
-                                        <div class="form-group">
-                                            <label for="checkin_date_from">From</label>
-                                            <p class="input-group date" data-provide="datepicker">
-                                                <input type="text" class="form-control filter_class" id="checkin_date_from" readonly="readonly">
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-th"></span>
-                                                </span>
-                                            </p>
-                                            <label for="checkin_date_to">To</label>
-                                            <p class="input-group date" data-provide="datepicker">
-                                                <input type="text" class="form-control filter_class" id="checkin_date_to" readonly="readonly">
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-th"></span>
-                                                </span>
-                                            </p>
-                                        </div>
+                            <div class="form-group col-sm-6">
+                                <label>CheckIn Date</label>
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <label for="checkin_date_from">From</label>
+                                        <p class="input-group date" data-provide="datepicker">
+                                            <input type="text" class="form-control filter_class" id="checkin_date_from" readonly="readonly">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </span>
+                                        </p>
+                                        <label for="checkin_date_to">To</label>
+                                        <p class="input-group date" data-provide="datepicker">
+                                            <input type="text" class="form-control filter_class" id="checkin_date_to" readonly="readonly">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group col-sm-4">
-                                    <label>Room Type</label>
-                                    <select class="form-control filter_class" id="room_type">
-                                        <option value="">Any Type</option>
+                            <div class="form-group col-sm-6">
+                                <label>Parse Date</label>
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <label for="created_at_from">From</label>
+                                        <p class="input-group date" data-provide="datepicker">
+                                            <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </span>
+                                        </p>
+                                        <label for="created_at_to">To</label>
+                                        <p class="input-group date" data-provide="datepicker">
+                                            <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <div class="input-group">
+                                    <label>Room Type &nbsp;&nbsp;</label>
+                                    <select class="form-control filter_class" id="room_types" multiple="multiple">
                                         @foreach($room_type_list as $room_type)
                                             <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="form-group col-sm-6">
-                                    <label>Parse Date</label>
-                                    <div class="form-inline">
-                                        <div class="form-group">
-                                            <label for="created_at_from">From</label>
-                                            <p class="input-group date" data-provide="datepicker">
-                                                <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-th"></span>
-                                                </span>
-                                            </p>
-                                            <label for="created_at_to">To</label>
-                                            <p class="input-group date" data-provide="datepicker">
-                                                <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-th"></span>
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group col-sm-2">
-                                    <div class="clear_btn">
-                                        <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
-                                    </div>
-                                </div>
-                            </div>
+                            </div> 
                         </div>
                     </div>
                 </div>
@@ -137,7 +133,7 @@
                         url: "{!! route('room_details.index.getData') !!}",
                     @endif                    
                     data: function (d) {
-                        d.room_type = $('#room_type').val();
+                        d.room_types = $("#room_types").val();
                         d.created_at_to = $('#created_at_to').val();
                         d.created_at_from = $('#created_at_from').val();
                         d.checkin_date_to = $('#checkin_date_to').val();
@@ -153,24 +149,20 @@
                 oTable.draw();
             });
 
-            // $('#room_type').change( function(e) {
-            //     oTable.draw();
-            // });
-            // $('#created_at').change( function(e) {
-            //     oTable.draw();
-            // });
-            // $('#checkin_date').change( function(e) {
-            //     oTable.draw();
-            // });
-
             $('#clear_filter').on('click',function(){
-                $("#room_type")[0].selectedIndex = 0;
+                $("#room_types").val('').trigger('change');
                 $("#checkin_date_to").val('');
                 $("#checkin_date_from").val('');
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
                 oTable.draw();
             });
+
+            $('#room_types').select2({
+                placeholder: 'Select room type',
+                allowClear: true,
+                //minimumResultsForSearch: 5,
+            });             
         });
     </script>
 @endsection
