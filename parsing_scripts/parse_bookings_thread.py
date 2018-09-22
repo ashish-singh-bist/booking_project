@@ -16,13 +16,13 @@ import threading
 import multiprocessing
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool
-
+from bson.objectid import ObjectId
 
 #####################
 processoutput = os.popen("ps -A -L -F").read()
 cur_script = os.path.basename(__file__)
 res = re.findall(cur_script,processoutput)
-print(str(res))
+#print(str(res))
 if len(res)>2:
     print ("EXITING BECAUSE ALREADY RUNNING.\n\n")
     exit(0)
@@ -53,13 +53,7 @@ def parseAndSaveData(temp_dict):
   checkout_date = temp_dict['checkout_date']
   temp_prop_id = temp_dict['temp_prop_id']
   length_stay = temp_dict['length_stay']
-  number_of_guests = 2 
-  #url = arr_args[0]
-  # temp_file = arr_args[1]
-  # checkin_date = arr_args[2]
-  # checkout_date = arr_args[3]
-  # temp_prop_id = arr_args[4]
-  #temp_file = "5b9fb00152c92b16c314fb35-2018-09-21-1.html"
+  number_of_guests = temp_dict['number_of_guests']  
   print( "\nParsing start:"+str(datetime.datetime.now()) )
   #print( "\nParsing file:"+temp_file )
   result = obj_booking.parseProductDetails(url,temp_file,checkin_date,checkout_date)  
@@ -72,10 +66,8 @@ def parseAndSaveData(temp_dict):
     hotel_id = result['hotel_info']['hotel_id']
     result['hotel_info']['length_stay'] = length_stay
     #showing error while insert in hotel details
-    del result['hotel_info']['hotel_equipments']
-    #print( "s===============DB connecteddddddd......" )
-    obj_booking.obj_mongo_db.connect()
-    print( "DB connecteddddddd......" )
+    del result['hotel_info']['hotel_equipments']    
+    obj_booking.obj_mongo_db.connect()    
     record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'hotel_id':1 }, { 'hotel_id':hotel_id } )
     #record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'hotel_id':1 }, { 'hotel_id':hotel_id , 'checkin_date':checkin_date , 'length_stay':length_stay } )
     print("prop_id:"+str(temp_prop_id))
@@ -93,15 +85,13 @@ def parseAndSaveData(temp_dict):
       result['hotel_info']['prop_id'] = temp_prop_id
       ret_id = obj_booking.obj_mongo_db.recInsert( 'hotel_master' , [ result['hotel_info'] ] )
       print( "\ninserted in hotel_master The return id is"+str(ret_id) )
-
     if 'room_price_details' in result:
       dict_room_price_details = result['room_price_details']
       for dict_price_details in dict_room_price_details['price_details']:        
         for key_room_type in dict_price_details:                  
           dict_room_info = dict_price_details[key_room_type]                  
           if 'price_info' in dict_room_info:
-            arr_price_info = dict_room_info['price_info']
-            print("HOTEL PRICES:"+str(arr_price_info))
+            arr_price_info = dict_room_info['price_info']            
             if 'room_equipment' in dict_room_info:                      
               dict_room_info['hotel_id'] = hotel_id
               dict_room_info['room_type'] = key_room_type
@@ -115,9 +105,7 @@ def parseAndSaveData(temp_dict):
                 ret_id = obj_booking.obj_mongo_db.recInsert( 'room_details' , [ dict_room_info ] )
                 print( "\ninserted in room_details The return id is"+str(ret_id) )                    
             available_only = ""            
-            print("HOTEL PRICES222:"+str(arr_price_info))
-            for dict_price_info in arr_price_info:
-              print("HOTEL PRICES3333:"+str(arr_price_info))
+            for dict_price_info in arr_price_info:              
               #available_only = dict_price_info['max_persons']
               if 'nr_stays' in dict_price_info and dict_price_info['nr_stays']:
                 available_only = dict_price_info['nr_stays']
@@ -141,20 +129,17 @@ def parseAndSaveData(temp_dict):
               if 'other_desc' in dict_price_info and dict_price_info['other_desc']:
                 for temp_other_desc in dict_price_info['other_desc']:
                   choices_str = choices_str + temp_other_desc
-              #########################
-              #print("HOTEL PRICES444444:"+str(choices_str))
+              #########################              
               #set the key in redis cache
               str_to_md5 = str(hotel_id)+str(checkin_date)+str(key_room_type)+str(length_stay)+str(number_of_guests)+choices_str
               #for now not including price we will add it later...
               if 'raw_price' in dict_price_info and dict_price_info['raw_price']:
                 str_to_md5 = str_to_md5+str(dict_price_info['raw_price'])
               temp_key_md5 = obj_booking.obj_helper.getMd5(str_to_md5)                      
-              redis_value = obj_booking.obj_redis_cache.getKeyValue(temp_key_md5)
-              print("REDIS VALUE:"+str(redis_value))
+              redis_value = obj_booking.obj_redis_cache.getKeyValue(temp_key_md5)              
               if not redis_value:
                 ###################
-                dict_price_info['prop_id'] = temp_prop_id
-                print("REDIS VALUE:"+str(dict_price_info))
+                dict_price_info['prop_id'] = temp_prop_id                
                 ###################                
                 if 'raw_price' in dict_price_info:
                   ret_id = obj_booking.obj_mongo_db.recInsert( 'hotel_prices' , [ dict_price_info ] )
@@ -183,25 +168,24 @@ def parseAndSaveData(temp_dict):
 
 
 if __name__ == '__main__':
-  max_process = 100
+  max_process = 200
+  config_rows = obj_booking.obj_mongo_db.recSelect('config')
+  for config_row in config_rows:
+    if 'thread_count' in config_row and config_row['thread_count']:
+      max_process = int(config_row['thread_count']) 
+
   pool = multiprocessing.Pool(processes=max_process)
   temp_date_today = datetime.datetime(2018, 9, 18)#datetime.datetime.now()
   #property_url_rows = obj_booking.obj_mongo_db.recSelect('property_urls',{'url':1},{'updated_at':{ '$lt': temp_date_today }})
-  property_url_rows = obj_booking.obj_mongo_db.recSelect('property_urls',{'url':1,'_id':1},{'updated_at':{ '$lt': temp_date_today }})  
+  property_url_rows = obj_booking.obj_mongo_db.recSelect('property_urls',{'url':1,'_id':1},{'is_active':1,'updated_at':{ '$lt': temp_date_today }})
   obj_booking.obj_mongo_db.disconnect()
   for property_url_row in property_url_rows:    
     temp_prop_id = property_url_row['_id']
     property_url = property_url_row['url']
-    record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'prop_url':1 }, { 'prop_url':property_url } )
-    if record_count:
-      print( "property already parsed....skipping this" )
-      continue
-    # if 'https://www.booking.com/hotel/de/restaurant-weinhaus-grebel.de.html' in property_url:
-    #   print( "parsing script"+property_url )      
-    # else:
-    #   #print( "only we have to parse one script" )
-    #   continue   
-    #for today We are starting it this date. later we will set it as current date()
+    # record_count = obj_booking.obj_mongo_db.getCount( 'hotel_master' , { 'prop_url':1 }, { 'prop_url':property_url } )
+    # if record_count:
+    #   print( "property already parsed....skipping this" )
+    #   continue
     start_date = datetime.datetime(2018, 9, 18).date()#datetime.datetime.now().date()
     end_date = datetime.datetime.now().date() + timedelta(days=365)
     
@@ -212,36 +196,27 @@ if __name__ == '__main__':
       arr_length_stay = obj_booking.obj_config.arr_length_stay#[1,2,3,5,7]
       number_of_guests = 2
       for length_stay in arr_length_stay:
-        checkout_date = str( start_date + timedelta(days=length_stay) )  # increase day one by one
-        #print( "checkin:"+checkin_date," length_stay:"+str(length_stay) )
-        url = property_url+"?checkin="+str(checkin_date)+"&checkout="+str(checkout_date)+"&selected_currency=USD"+"&group_adults="+str(number_of_guests)
-        #url = 'https://www.booking.com/hotel/de/contel-koblenz.de.html?checkin=2018-10-01&checkout=2018-10-03&selected_currency=USD&group_adults=2'  
+        checkout_date = str( start_date + timedelta(days=length_stay) )  # increase day one by one        
+        url = property_url+"?checkin="+str(checkin_date)+"&checkout="+str(checkout_date)+"&selected_currency=USD"+"&group_adults="+str(number_of_guests)        
         #print(url)          
-        ###############################################
-        #old file format
-        #temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"
-        #new file format
+        ###############################################        
         url_md5 = obj_booking.obj_helper.getMd5(url)
-        temp_file = url_md5+".html"
-        ##################
-        #this is for local system
-        #temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"
-        ##################
+        temp_file = url_md5+".html"        
         if not obj_booking.obj_helper.isFileExists( html_dir_path + temp_file ):
           obj_booking.obj_helper.writeFile( "LogFileNotExists.txt" , "\nFile not exists for url"+url );
           continue
         #################
-        arr_args_dict.append({'url':url,'temp_file':temp_file,'checkin_date':checkin_date,'checkout_date':checkout_date,'temp_prop_id':temp_prop_id,'length_stay':length_stay})        
-      start_date = start_date + timedelta(days=1)  # increase day one by one
-    #for args_dict in arr_args_dict:
-    #results = pool.map_async(parseAndSaveData, [url,temp_file,checkin_date,checkout_date,temp_prop_id])
+        arr_args_dict.append({'url':url,'temp_file':temp_file,'checkin_date':checkin_date,'checkout_date':checkout_date,'temp_prop_id':temp_prop_id,'length_stay':length_stay,'number_of_guests':number_of_guests})        
+      start_date = start_date + timedelta(days=1)  # increase day one by one        
     result = pool.map_async(parseAndSaveData, [args_dict for args_dict in arr_args_dict])
-    while not result.ready():
-      #print("Running...")
-      time.sleep(0.5) 
-    #return sum(result.get())
-    #obj_booking.obj_redis_cache.setKeyValue(temp_prop_id,1)
-  
+    while not result.ready():      
+      time.sleep(0.5)
+    obj_booking.obj_mongo_db.connect()    
+    ret_id = obj_booking.obj_mongo_db.recUpdate( 'property_urls' , { 'updated_at':datetime.datetime.now() } , { '_id':ObjectId(temp_prop_id) } )
+    print( "\nUpdated in property_urls The return id is"+str(temp_prop_id) )
+    print( "\nprop_id"+str(ret_id) )
+    obj_booking.obj_mongo_db.disconnect()
+    #exit()  
   #wait till all the threads are almost done
   #while threading.activeCount() > 1:
   #  time.sleep(2)

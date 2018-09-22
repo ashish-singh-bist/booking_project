@@ -40,8 +40,8 @@ def getDateTimeObject(date_str):
   return datetime_object
 
 
-def parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id):  
-  temp_file = "5b9fb00152c92b16c314fb35-2018-09-21-1.html"
+def parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id,number_of_guests):  
+  #temp_file = "5b9fb00152c92b16c314fb35-2018-09-21-1.html"
   print( "\nParsing start:"+str(datetime.datetime.now()) )
   print( "\nParsing file:"+temp_file )
   result = obj_booking.parseProductDetails(url,temp_file,checkin_date,checkout_date)
@@ -126,6 +126,7 @@ def parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id):
                 str_to_md5 = str_to_md5+str(dict_price_info['raw_price'])
               temp_key_md5 = obj_booking.obj_helper.getMd5(str_to_md5)                      
               redis_value = obj_booking.obj_redis_cache.getKeyValue(temp_key_md5)
+              print("Redis:"+str(redis_value))
               if not redis_value:
                 ###################
                 dict_price_info['prop_id'] = temp_prop_id
@@ -187,24 +188,16 @@ if __name__ == '__main__':
           print( "checkin:"+checkin_date," length_stay:"+str(length_stay) )
           url = property_url+"?checkin="+str(checkin_date)+"&checkout="+str(checkout_date)+"&selected_currency=USD"+"&group_adults="+str(number_of_guests)
           #url = 'https://www.booking.com/hotel/de/contel-koblenz.de.html?checkin=2018-10-01&checkout=2018-10-03&selected_currency=USD&group_adults=2'  
-          #print(url)          
-          ###############################################
-          #old file format
-          #temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"
-          #new file format
+          print(url)          
           url_md5 = obj_master.obj_helper.getMd5(url)
-          temp_file = url_md5+".html"
-          ##################
-          #this is for local system
-          temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"
-          ##################
+          temp_file = url_md5+".html"          
           if not obj_master.obj_helper.isFileExists( html_dir_path + temp_file ):
             print("file not exists")
             obj_master.obj_helper.writeFile( "LogFileNotExists.txt" , "\nFile not exists for url"+url );
             continue
           ###############################################
           print(temp_file)          
-          parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id)
+          parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id,number_of_guests)
           exit()
           ###############
         start_date = start_date + timedelta(days=1)  # increase day one by one

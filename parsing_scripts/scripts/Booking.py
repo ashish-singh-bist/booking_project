@@ -11,18 +11,26 @@ class Booking(Master):
     Master.__init__(self)
     #self.proxy = {}
     self.params = {}
-    #self.params['proxy_ip'] = { 'http': 'socks5://127.0.0.1:9050',}
+    #self.params['proxy_ip'] = { 'https': 'socks5://127.0.0.1:9050',}
+    self.proxy_list = self.initProxies()
     self.params['return_error_page'] = 1
+  def initProxies(self):
+    arr_proxies = []
+    if self.obj_helper.isFileExists( "proxies.txt" ):
+      content = self.obj_helper.readFile( "proxies.txt" )
+      lines = content.split("\n")
+      for line in lines:
+        if line:
+          arr_proxies.append(line)
+    return arr_proxies
   def parseProductDetails(self,url,file_name,checkin_date,checkout_date):
     data_dic = {}
-
-    html_dir_path = self.obj_config.html_dir_path    
-
+    html_dir_path = self.obj_config.html_dir_path
     ###################
-    # if self.proxy_list:      
-    #   proxy_hash = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]
-    #   proxy_ip = proxy_hash['proxy_ip']
-    #   self.params['proxy_ip'] = { 'http': proxy_ip,}
+    if self.proxy_list:      
+      proxy_ip = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]      
+      self.params['proxy_ip'] = { 'https': proxy_ip,}
+      print(self.params['proxy_ip'])    
     ###################
     CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
     self.params['headers'] = { 'user-agent':CHROME_UA , 'host' : 'www.booking.com' , 'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8','Accept-Language':'en-US,en;q=0.9','Accept-Encoding':'gzip, deflate, br','Upgrade-Insecure-Requests':1 }
@@ -84,7 +92,7 @@ class Booking(Master):
       #atnm: 'Hotels',
       m = re.search(r'atnm\s*:\s*\'(.+?)\'', html,re.S)
       if m:
-        dict_hotel_info['hotel_category'] = m.group(1)        
+        dict_hotel_info['hotel_category'] = self.obj_helper.removeHtml(m.group(1))
       
       latitude_temp = ""
       longitude_temp = ""
@@ -92,8 +100,7 @@ class Booking(Master):
       m = re.search(r'booking.env.b_map_center_latitude\s*=\s*(.+?)\;', html,re.S)
       if m:
         #dict_hotel_info['latitude'] = m.group(1)
-        latitude_temp = float(m.group(1))
-        
+        latitude_temp = float(m.group(1))        
 
       #booking.env.b_map_center_longitude = 73.75393242; 
       m = re.search(r'booking.env.b_map_center_longitude\s*=\s*(.+?)\;', html,re.S)
@@ -104,36 +111,48 @@ class Booking(Master):
       if latitude_temp and longitude_temp:
         dict_hotel_info['lat_lng'] = { 'type':'Point' , 'coordinates':[latitude_temp,longitude_temp] }
 
-
+      #<script type="application/ld+json">      
+      m = re.search('<script[^>]+type\W+application\/ld\+json\W[^>]*>(.*?)<\/script>', html,re.S)      
+      if m:
+        script_data = m.group(1)
+        if script_data:
+          hotel_data_json = json.loads(str(script_data))
+          if hotel_data_json:
+            if 'address' in hotel_data_json:            
+              if 'postalCode' in hotel_data_json['address']:
+                dict_hotel_info['postal_code'] = hotel_data_json['address']['postalCode']
+              if 'addressCountry' in hotel_data_json['address']:
+                dict_hotel_info['country'] = hotel_data_json['address']['addressCountry']
+            if 'aggregateRating' in hotel_data_json and hotel_data_json['aggregateRating']:
+              if 'ratingValue' in hotel_data_json['aggregateRating'] and hotel_data_json['aggregateRating']['ratingValue']:
+                dict_hotel_info['booking_rating'] = float(hotel_data_json['aggregateRating']['ratingValue'])
+      #city_name: 'Baga',
+      m = re.search('city_name\s*:\s*\'([^\']+)\W+', html,re.S)
+      if m:        
+        dict_hotel_info['city'] = m.group(1)      
+      #if booking rating is not parsed from json
+      if not 'booking_rating' in dict_hotel_info:
+        #<span  class=" review-score-widget   review-score-widget__20     hp_main_score_badge  "  >
+        span_html = self.obj_helper.getContainerHtml(html,'span','class','hp_main_score_badge')
+        if span_html:
+          #<span aria-label="Scored 8.7 " class="review-score-badge" role="link">8.7</span>
+          rating_html = self.obj_helper.getContainerText(span_html,'span','class','review-score-badge')
+          if rating_html:
+            booking_rating = self.obj_helper.removeHtml(rating_html)
+            if booking_rating:            
+              booking_rating = booking_rating.replace(',','.')
+              dict_hotel_info['booking_rating'] = float(booking_rating)
 
       #dict_hotel_info['hotel_id'] = self.getHotelId(html)
-      dict_hotel_info['hotel_id'] = self.getHotelId(header_html)      
-      # #<input type="hidden" name="hotel_id" value="3433374" />      
-      # input_tag = self.obj_helper.getContainerHtml(html,'input','name','hotel_id')
-      # if input_tag:
-      #   dict_hotel_info['hotel_id'] = self.obj_helper.getAttributeValue( input_tag , 'input' , 'value' )
-      # else:
-      #   m = re.search('window\.utag_data\s*=\s*(\{.+?\})', html,re.S)
-      #   if m and m.group(1):          
-      #     dict_hotel_info['hotel_id'] = m.group(1)      
-
-      #<span  class=" review-score-widget   review-score-widget__20     hp_main_score_badge  "  >
-      span_html = self.obj_helper.getContainerHtml(html,'span','class','hp_main_score_badge')
-      if span_html:
-        #<span aria-label="Scored 8.7 " class="review-score-badge" role="link">8.7</span>
-        rating_html = self.obj_helper.getContainerText(span_html,'span','class','review-score-badge')
-        if rating_html:
-          booking_rating = self.obj_helper.removeHtml(rating_html)
-          if booking_rating:            
-            booking_rating = booking_rating.replace(',','.')
-            dict_hotel_info['booking_rating'] = float(booking_rating)
-      
+      dict_hotel_info['hotel_id'] = self.getHotelId(header_html)
       ##################################################################
       result_dict['checkin_date'] = checkin_date
       result_dict['checkout_date'] = checkout_date
+      #<div class="av-summary-content">
+      summary_html = self.obj_helper.getContainerHtml(html,'div','class','av-summary-content')
       #checkin and checkout date is input string so no need to parse it from html
       # #<a href="#" class="av-summary-value av-summary-checkin bui-date__title bui-link bui-link--primary hp-dates-summary__date">
-      # check_in_date = self.obj_helper.getContainerText(html,'a','class','av-summary-checkin')
+      # check_in_date = self.obj_helper.getContainerText(summary_html,'a','class','av-summary-checkin')
       # if check_in_date:        
       #   #result_dict['checkin_date'] = self.obj_helper.removeHtml(check_in_date)
       #   checkin_date = self.obj_helper.removeHtml(check_in_date)
@@ -141,17 +160,15 @@ class Booking(Master):
       #   result_dict['checkin_date'] = self.getCorrectDateFormat(checkin_date)
       
       # #<a href="#" class="av-summary-checkout bui-date__title bui-link bui-link--primary hp-dates-summary__date">
-      # check_out_date = self.obj_helper.getContainerText(html,'a','class','av-summary-checkout')
+      # check_out_date = self.obj_helper.getContainerText(summary_html,'a','class','av-summary-checkout')
       # if check_out_date:        
       #   check_out_date = self.obj_helper.removeHtml(check_out_date)
       #   result_dict['checkout_date'] = self.getCorrectDateFormat(check_out_date)
       ##################################################################
       #<a href="#" class="bui-date__title bui-link bui-link--primary hp-dates-summary__date av-summary-value av-summary-guests">2 adults</a>
-      number_of_guests = self.obj_helper.getContainerText(html,'a','class','av-summary-guests')      
-      if number_of_guests:        
-        number_of_guests = self.obj_helper.removeHtml(number_of_guests)
-        #Fr., 14. Sept. 2018
-        result_dict['number_of_guests'] = number_of_guests
+      guest_data = self.obj_helper.getContainerText(summary_html,'a','class','av-summary-guests')      
+      if guest_data:
+        result_dict['number_of_guests'] = self.obj_helper.removeHtml(guest_data)        
       
       # #<a href="#" class="av-summary-checkout bui-date__title bui-link bui-link--primary hp-dates-summary__date">
       # m = re.search('<a[^>]+class\W+[^\"\']*av-summary-checkout\W[^>]*>(.+?<\/span>)', html,re.S)
@@ -231,7 +248,6 @@ class Booking(Master):
 
   def parseHotelEqupDetails(self,html):    
     dict_hotel_equipments = {}
-
     #<div class="facilitiesChecklist">
     temp_html = self.obj_helper.getContainerHtml(html,'div','class','facilitiesChecklist')
     if temp_html:
