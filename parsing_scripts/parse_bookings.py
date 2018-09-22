@@ -41,15 +41,15 @@ def getDateTimeObject(date_str):
 
 
 def parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id):  
-  #temp_file = "5b9fb00152c92b16c314fb35-2018-09-21-1.html"
+  temp_file = "5b9fb00152c92b16c314fb35-2018-09-21-1.html"
   print( "\nParsing start:"+str(datetime.datetime.now()) )
   print( "\nParsing file:"+temp_file )
   result = obj_booking.parseProductDetails(url,temp_file,checkin_date,checkout_date)
   print( "\nParsing End:"+str(datetime.datetime.now()) )  
-  #print(str(result))
-  #exit()
   #print(result)
   #return 1
+  print("\n===Length="+str(length_stay)+"====\n")
+  print( "\nDb Processing start:"+str(datetime.datetime.now()) )  
   if 'hotel_info' in result:
     hotel_id = result['hotel_info']['hotel_id']
     result['hotel_info']['length_stay'] = length_stay
@@ -87,13 +87,13 @@ def parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id):
               dict_room_info['prop_id'] = temp_prop_id
               dict_room_info['checkin_date'] = getDateTimeObject(checkin_date)
               dict_room_info['number_of_days'] = length_stay
-              ###################
-              record_count = obj_booking.obj_mongo_db.getCount( 'room_details' , { 'hotel_id':1 }, { 'hotel_id':hotel_id,'room_type':key_room_type , 'checkin_date':checkin_date,'number_of_days':length_stay } )
+              ###################              
+              record_count = obj_booking.obj_mongo_db.getCount( 'room_details' , { 'hotel_id':1 }, { 'hotel_id':hotel_id,'room_type':key_room_type , 'checkin_date':{ '$eq': getDateTimeObject(checkin_date) },'number_of_days':length_stay } )
               if not record_count:
                 ret_id = obj_booking.obj_mongo_db.recInsert( 'room_details' , [ dict_room_info ] )
                 print( "\ninserted in room_details The return id is"+str(ret_id) )                    
             available_only = ""            
-                              
+            print("hotel price:"+str(arr_price_info))
             for dict_price_info in arr_price_info:              
               #available_only = dict_price_info['max_persons']
               if 'nr_stays' in dict_price_info and dict_price_info['nr_stays']:
@@ -147,10 +147,11 @@ def parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id):
               ###################
               dict_availability['prop_id'] = temp_prop_id
               ###################
-              record_count = obj_booking.obj_mongo_db.getCount( 'rooms_availability' , { 'hotel_id':1 }, { 'hotel_id':hotel_id,'room_type':key_room_type,'checkin_date':checkin_date,'number_of_days':length_stay } )
+              record_count = obj_booking.obj_mongo_db.getCount( 'rooms_availability' , { 'hotel_id':1 }, { 'hotel_id':hotel_id,'room_type':key_room_type,'checkin_date':{ '$eq': getDateTimeObject(checkin_date) },'number_of_days':length_stay } )
               if not record_count:
                 ret_id = obj_booking.obj_mongo_db.recInsert( 'rooms_availability' , [ dict_availability ] )
                 print( "\ninserted in rooms_availability The return id is"+str(ret_id) )
+  print( "\nDb Processing End:"+str(datetime.datetime.now()) )
 
 
 if __name__ == '__main__':  
@@ -186,7 +187,7 @@ if __name__ == '__main__':
           print( "checkin:"+checkin_date," length_stay:"+str(length_stay) )
           url = property_url+"?checkin="+str(checkin_date)+"&checkout="+str(checkout_date)+"&selected_currency=USD"+"&group_adults="+str(number_of_guests)
           #url = 'https://www.booking.com/hotel/de/contel-koblenz.de.html?checkin=2018-10-01&checkout=2018-10-03&selected_currency=USD&group_adults=2'  
-          print(url)          
+          #print(url)          
           ###############################################
           #old file format
           #temp_file = str(temp_prop_id)+"-"+str(checkin_date)+"-"+str(length_stay)+".html"
@@ -204,6 +205,7 @@ if __name__ == '__main__':
           ###############################################
           print(temp_file)          
           parseAndSaveData(url,temp_file,checkin_date,checkout_date,temp_prop_id)
+          exit()
           ###############
         start_date = start_date + timedelta(days=1)  # increase day one by one
 

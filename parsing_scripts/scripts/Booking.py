@@ -37,8 +37,7 @@ class Booking(Master):
     if not html:
       print("\nCould not get html for url:"+url)
       self.obj_helper.writeFile( "Log.txt" , "\nCould not get html for:"+url )   #save log in log file
-      return {}   
-    
+      return {}    
     result_dict = {}
     if html:
       html = re.sub(r'&amp;', '&', html,flags=re.S|re.M)
@@ -48,21 +47,27 @@ class Booking(Master):
         self.obj_helper.writeFileNewUTF( html_dir_path+file_name , html )   #save log in log file      
       dict_hotel_info = {}
 
+      #<div id="wrap-hotelpage-top" class="wrap-hotelpage-top" >
+      header_html = self.obj_helper.getContainerHtml(html,'div','id','wrap-hotelpage-top')
+
       #html = re.sub(r'\n+', '', html,flags=re.S|re.M)
       #self.obj_helper.writeFileNewUTF( "booking_new.html" , html )   #save log in log file
       #exit()
       #<h2 class="hp__hotel-name" id="hp_hotel_name">Le Méridien Goa, Calangute</h2>
-      title = self.obj_helper.getContainerText(html,'h2','id','hp_hotel_name')
+      #title = self.obj_helper.getContainerText(html,'h2','id','hp_hotel_name')
+      title = self.obj_helper.getContainerText(header_html,'h2','id','hp_hotel_name')
       if title:        
         dict_hotel_info['hotel_name'] = self.obj_helper.removeHtml(title)
 
       #<span class="hp_address_subtitle js-hp_address_subtitle jq_tooltip " data-source="top_link" data-coords="," data-node_tt_id="location_score_tooltip" title="">
-      location = self.obj_helper.getContainerText(html,'span','class','hp_address_subtitle')
+      #location = self.obj_helper.getContainerText(html,'span','class','hp_address_subtitle')
+      location = self.obj_helper.getContainerText(header_html,'span','class','hp_address_subtitle')
       if location:
         dict_hotel_info['location'] = self.obj_helper.removeHtml(location)
       #<span class="hp__hotel_ratings">
       #star_ratings = self.obj_helper.getContainerText(html,'span','class','hp__hotel_ratings')
-      star_ratings = self.obj_helper.getContainerHtml(html,'span','class','hp__hotel_ratings')      
+      #star_ratings = self.obj_helper.getContainerHtml(html,'span','class','hp__hotel_ratings')      
+      star_ratings = self.obj_helper.getContainerHtml(header_html,'span','class','hp__hotel_ratings')      
       if star_ratings:
         #<svg class="bk-icon -sprite-ratings_stars_4"
         arr_temp_class = self.obj_helper.getAttributeValue( star_ratings , 'svg' , 'class' )
@@ -80,17 +85,29 @@ class Booking(Master):
       m = re.search(r'atnm\s*:\s*\'(.+?)\'', html,re.S)
       if m:
         dict_hotel_info['hotel_category'] = m.group(1)        
+      
+      latitude_temp = ""
+      longitude_temp = ""
       #booking.env.b_map_center_latitude = 15.55752173;      
       m = re.search(r'booking.env.b_map_center_latitude\s*=\s*(.+?)\;', html,re.S)
       if m:
-        dict_hotel_info['latitude'] = m.group(1)
+        #dict_hotel_info['latitude'] = m.group(1)
+        latitude_temp = float(m.group(1))
+        
 
       #booking.env.b_map_center_longitude = 73.75393242; 
       m = re.search(r'booking.env.b_map_center_longitude\s*=\s*(.+?)\;', html,re.S)
       if m:
-        dict_hotel_info['longitude'] = m.group(1)
+        #dict_hotel_info['longitude'] = m.group(1)
+        longitude_temp = float(m.group(1))
 
-      dict_hotel_info['hotel_id'] = self.getHotelId(html)
+      if latitude_temp and longitude_temp:
+        dict_hotel_info['lat_lng'] = { 'type':'Point' , 'coordinates':[latitude_temp,longitude_temp] }
+
+
+
+      #dict_hotel_info['hotel_id'] = self.getHotelId(html)
+      dict_hotel_info['hotel_id'] = self.getHotelId(header_html)      
       # #<input type="hidden" name="hotel_id" value="3433374" />      
       # input_tag = self.obj_helper.getContainerHtml(html,'input','name','hotel_id')
       # if input_tag:
