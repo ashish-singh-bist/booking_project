@@ -59,14 +59,34 @@ class PropertyUrlController extends Controller
     {
         $propertyurl = PropertyUrl::all();
         return Datatables::of($propertyurl)
-        ->addColumn('action', function ($propertyurl) {
+        ->addColumn('link', function ($propertyurl) {
             $html =  '<a href="' . route('hotel_master.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Info"><i class="fa fa-eye"></i> Info</a>';
             $html .=  '&nbsp;<a href="' . route('hotel_prices.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Price"><i class="fa fa-eye"></i> Price</a>';
             $html .=  '&nbsp;<a href="' . route('room_details.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Room Details"><i class="fa fa-eye"></i> Room Details</a>';
-            $html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Availability"><i class="fa fa-eye"></i> Availability</a>';              
+            $html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Availability"><i class="fa fa-eye"></i> Availability</a>';
             return $html;
         })
-        ->rawColumns([ 'action' ])
+        ->addColumn('action', function ($propertyurl) {
+            if($propertyurl->is_active == '1'){
+                $html = '&nbsp;<button  prop_id="'. $propertyurl->_id.'" status="1" class="btn btn-xs btn-success update_status" title="Active"><i class="fa fa-check"></i> Active</button>';
+            }
+            else{
+                $html = '&nbsp;<button  prop_id="'. $propertyurl->_id.'" status="0" class="btn btn-xs btn-danger update_status" title="Inactive"><i class="fa fa-close"></i> Inactive</button>';
+            }
+            return $html;
+        })
+        ->rawColumns([ 'link','action' ])
         ->make(true);
+    }
+
+    public function updatePropertyUrlStatus(Request $request)
+    {
+        $property_url = PropertyUrl::find($request->_id);
+        $property_url->is_active = $request->is_active;
+        $property_url->save();
+        return  response()->json([
+            'status' =>true,
+            'message' => 'Property Url Status Updated'
+        ]);
     }
 }

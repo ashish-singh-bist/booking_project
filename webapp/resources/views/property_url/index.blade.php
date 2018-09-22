@@ -46,6 +46,7 @@
                                         <th>City</th>
                                         <th>Created At</th>
                                         <th>Updated At</th>
+                                        <th>Links</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -78,9 +79,47 @@
                     { data: 'city', name: 'city' },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'updated_at', name: 'updated_at' },
+                    { data: 'link', name: 'link' },
                     { data: 'action', name: 'action' },
                 ]
             });
+
+            $('#property-table').on('click', '.update_status', function (e) { 
+                e.preventDefault();
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                var data = {};
+                data._id = $(this).attr('prop_id');
+                var is_active = $(this).attr('status');
+                if(is_active == '1'){
+                    data.is_active = 0;
+                }else{
+                    data.is_active = 1;
+                }
+                if(data.is_active != '' || data.is_active !=null){
+                    $.ajax({
+                        type: "POST",
+                        url: "{!! URL::to('property_url/updatestatus') !!}",
+                        dataType: "json",
+                        data: data,
+                        success:function(data){
+                            $('#property-table').DataTable().draw(true);
+                            console.log("this is success msg");
+                        },
+                        error: function(error) {
+                            console.log("this is error msg");
+                            console.log(error);
+                        }
+                    });
+                } else{
+                    alert("Please Add Message.");
+                }
+            });
         });
+
+
     </script>
 @endsection

@@ -218,11 +218,13 @@ return [
         'hotel_category' => 'Category',
         'hotel_stars' => 'Star',
         'location' => 'Location',
-        'latitude' => 'Latitude',
-        'longitude' => 'Longitude',
+        // 'latitude' => 'Latitude',
+        // 'longitude' => 'Longitude',
         'booking_rating' => 'Rating',
         // 'hotel_equipments' => 'Hotel Equipments',
         'created_at' => 'Create Time',
+        'city' => 'city',
+        'zipcode' => 'zipcode',
     ],    
 
     'hotel_prices_header_key' => [

@@ -24,39 +24,67 @@
                             <h3 class="box-title">Filters</h3>
                         </div>
                         <div class="box-body">
-                            <div class="form-group col-sm-2">
-                                <label>CheckIn Date</label>
-                                <div class="input-group date" data-provide="datepicker">
-                                    <input type="text" class="form-control" id="checkin_date" readonly="readonly">
-                                    <div class="input-group-addon">
-                                        <span class="glyphicon glyphicon-th"></span>
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label>CheckIn Date</label>
+                                    <div class="form-inline">
+                                        <div class="form-group">
+                                            <label for="checkin_date_from">From</label>
+                                            <p class="input-group date" data-provide="datepicker">
+                                                <input type="text" class="form-control filter_class" id="checkin_date_from" readonly="readonly">
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </span>
+                                            </p>
+                                            <label for="checkin_date_to">To</label>
+                                            <p class="input-group date" data-provide="datepicker">
+                                                <input type="text" class="form-control filter_class" id="checkin_date_to" readonly="readonly">
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
+                                </div>
+
+                                <div class="form-group col-sm-4">
+                                    <label>Room Type</label>
+                                    <select class="form-control filter_class" id="room_type">
+                                        <option value="">Any Type</option>
+                                        @foreach($room_type_list as $room_type)
+                                            <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="form-group col-sm-4">
-                                <label>Room Type</label>
-                                <select class="form-control" id="room_type">
-                                    <option value="">Any Type</option>
-                                    @foreach($room_type_list as $room_type)
-                                        <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="form-group col-sm-2">
-                                <label>Parse Date</label>
-                                <div class="input-group date" data-provide="datepicker">
-                                    <input type="text" class="form-control" id="created_at" readonly="readonly">
-                                    <div class="input-group-addon">
-                                        <span class="glyphicon glyphicon-th"></span>
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label>Parse Date</label>
+                                    <div class="form-inline">
+                                        <div class="form-group">
+                                            <label for="created_at_to">From</label>
+                                            <p class="input-group date" data-provide="datepicker">
+                                                <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </span>
+                                            </p>
+                                            <label for="created_at_from">To</label>
+                                            <p class="input-group date" data-provide="datepicker">
+                                                <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group col-sm-2">
-                                <div class="clear_btn">
-                                    <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                                <div class="form-group col-sm-2">
+                                    <div class="clear_btn">
+                                        <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -110,8 +138,10 @@
                     @endif                    
                     data: function (d) {
                         d.room_type = $('#room_type').val();
-                        d.created_at = $('#created_at').val();
-                        d.checkin_date = $('#checkin_date').val();
+                        d.created_at_to = $('#created_at_to').val();
+                        d.created_at_from = $('#created_at_from').val();
+                        d.checkin_date_to = $('#checkin_date_to').val();
+                        d.checkin_date_from = $('#checkin_date_from').val();
                     }
                 },                
                 columns: [
@@ -119,20 +149,26 @@
                 ]
             });
 
-            $('#room_type').change( function(e) {
-                oTable.draw();
-            });
-            $('#created_at').change( function(e) {
-                oTable.draw();
-            });
-            $('#checkin_date').change( function(e) {
+            $('.filter_class').on('change', function(e) {
                 oTable.draw();
             });
 
+            // $('#room_type').change( function(e) {
+            //     oTable.draw();
+            // });
+            // $('#created_at').change( function(e) {
+            //     oTable.draw();
+            // });
+            // $('#checkin_date').change( function(e) {
+            //     oTable.draw();
+            // });
+
             $('#clear_filter').on('click',function(){
                 $("#room_type")[0].selectedIndex = 0;
-                $("#checkin_date").val('');
-                $("#created_at").val('');
+                $("#checkin_date_to").val('');
+                $("#checkin_date_from").val('');
+                $("#created_at_to").val('');
+                $("#created_at_from").val('');
                 oTable.draw();
             });
         });

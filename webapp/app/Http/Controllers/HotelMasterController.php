@@ -43,25 +43,34 @@ class HotelMasterController extends Controller
             $start = \ceil($request->get('rating'));
             $end = $start + 1; 
             $hotelmaster = $hotelmaster->whereBetween(
-             'booking_rating', array(
-                 $start,
-                 $end
-             )
-         );            
+                'booking_rating', array(
+                    $start,
+                    $end
+                )
+            );            
         }
-        if($request->get('created_at') != Null && $request->get('created_at') != ''){
-            $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
-            $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
-            $hotelmaster = $hotelmaster->whereBetween(
-             'created_at', array(
-                 $start_date,
-                 $end_date
-             )
-         );
+
+        if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
+            $hotelmaster = $hotelmaster->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
         }
+
+        if($request->get('created_at_to') != Null && $request->get('created_at_to') != ''){
+            $hotelmaster = $hotelmaster->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
+        }
+
+        // if($request->get('created_at') != Null && $request->get('created_at') != ''){
+        //     $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
+        //     $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
+        //     $hotelmaster = $hotelmaster->whereBetween(
+        //         'created_at', array(
+        //             $start_date,
+        //             $end_date
+        //         )
+        //     );
+        // }
         if($request->get('category') != Null && $request->get('category') != ''){
             $hotelmaster = $hotelmaster->where('hotel_category',$request->get('category'));
-        }        
+        }
 
         $totalData = $hotelmaster->count();
         $totalFiltered = $totalData; 

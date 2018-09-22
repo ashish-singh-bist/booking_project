@@ -24,9 +24,9 @@
                             <h3 class="box-title">Filters</h3>
                         </div>
                         <div class="box-body">
-                            <div class="form-group col-sm-3">
+                            <div class="form-group col-sm-2">
                                 <label>Category</label>
-                                <select class="form-control" id="category">
+                                <select class="form-control filter_class" id="category">
                                     <option value="">Any</option>
                                     @foreach($category_list as $category)
                                         <option value="{{$category[0]}}">{{$category[0]}}</option>
@@ -36,7 +36,7 @@
 
                             <div class="form-group col-sm-2">
                                 <label>Star</label>
-                                <select class="form-control" id="star">
+                                <select class="form-control filter_class" id="star">
                                     <option value="">Any</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -48,7 +48,7 @@
 
                             <div class="form-group col-sm-2">
                                 <label>Rating</label>
-                                <select class="form-control" id="rating">
+                                <select class="form-control filter_class" id="rating">
                                     <option value="">Any</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -63,12 +63,24 @@
                                 </select>
                             </div>
 
-                            <div class="form-group col-sm-2">
+                            <div class="form-group col-sm-6">
                                 <label>Parse Date</label>
-                                <div class="input-group date" data-provide="datepicker">
-                                    <input type="text" class="form-control" id="created_at" readonly="readonly">
-                                    <div class="input-group-addon">
-                                        <span class="glyphicon glyphicon-th"></span>
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <label for="created_at_from">From</label>
+                                        <p class="input-group date" data-provide="datepicker">
+                                            <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </span>
+                                        </p>
+                                        <label for="created_at_to">To</label>
+                                        <p class="input-group date" data-provide="datepicker">
+                                            <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +142,8 @@
                     data: function (d) {
                         d.star = $('#star').val();
                         d.rating = $('#rating').val();
-                        d.created_at = $('#created_at').val();
+                        d.created_at_to = $('#created_at_to').val();
+                        d.created_at_from = $('#created_at_from').val();
                         d.category = $('#category').val();
                     }
                 },                
@@ -139,24 +152,29 @@
                 ]
             });
 
-            $('#star').change( function(e) {
+            $('.filter_class').on('change', function(e) {
                 oTable.draw();
             });
-            $('#rating').change( function(e) {
-                oTable.draw();
-            });
-            $('#created_at').change( function(e) {
-                oTable.draw();
-            });
-            $('#category').change( function(e) {
-                oTable.draw();
-            });
+
+            // $('#star').change( function(e) {
+            //     oTable.draw();
+            // });
+            // $('#rating').change( function(e) {
+            //     oTable.draw();
+            // });
+            // $('#created_at').change( function(e) {
+            //     oTable.draw();
+            // });
+            // $('#category').change( function(e) {
+            //     oTable.draw();
+            // });
 
             $('#clear_filter').on('click',function(){
                 $("#category")[0].selectedIndex = 0;
                 $("#star")[0].selectedIndex = 0;
                 $("#rating")[0].selectedIndex = 0;
-                $("#created_at").val('');
+                $("#created_at_to").val('');
+                $("#created_at_from").val('');
                 oTable.draw();
             });
         });

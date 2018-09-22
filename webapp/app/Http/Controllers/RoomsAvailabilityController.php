@@ -45,26 +45,39 @@ class RoomsAvailabilityController extends Controller
         if($request->get('available_only') != Null && $request->get('available_only') != ''){
             $roomsavailability = $roomsavailability->where('available_only',(int)$request->get('available_only'));
         }
-        if($request->get('created_at') != Null && $request->get('created_at') != ''){
-            $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
-            $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
-            $roomsavailability = $roomsavailability->whereBetween(
-             'created_at', array(
-                 $start_date,
-                 $end_date
-             )
-         );
+        if($request->get('checkin_date_from')!=Null && $request->get('checkin_date_from')!=''){
+            $roomsavailability = $roomsavailability->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
         }
-        if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
-            $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
-            $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();
-            $roomsavailability = $roomsavailability->whereBetween(
-             'checkin_date', array(
-                 $start_date,
-                 $end_date
-             )
-         );
-        } 
+        if($request->get('checkin_date_to')!=Null && $request->get('checkin_date_to')!=''){
+            $roomsavailability = $roomsavailability->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
+        }
+        if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
+            $roomsavailability = $roomsavailability->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
+        }
+        if($request->get('created_at_to') != Null && $request->get('created_at_to') != ''){
+            $roomsavailability = $roomsavailability->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
+        }
+
+        // if($request->get('created_at') != Null && $request->get('created_at') != ''){
+        //     $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
+        //     $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
+        //     $roomsavailability = $roomsavailability->whereBetween(
+        //      'created_at', array(
+        //          $start_date,
+        //          $end_date
+        //      )
+        //  );
+        // }
+        // if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
+        //     $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
+        //     $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();
+        //     $roomsavailability = $roomsavailability->whereBetween(
+        //      'checkin_date', array(
+        //          $start_date,
+        //          $end_date
+        //      )
+        //  );
+        // } 
         
         $totalData = $roomsavailability->count();
         $totalFiltered = $totalData; 
