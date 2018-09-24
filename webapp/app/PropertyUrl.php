@@ -3,13 +3,9 @@
 namespace App;
 
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class PropertyUrl extends Eloquent
 {
-    use Notifiable;
     protected $connection = 'mongodb';
     protected $collection = 'property_urls';
     protected $primaryKey = '_id';

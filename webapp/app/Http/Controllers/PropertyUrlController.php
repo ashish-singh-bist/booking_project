@@ -49,7 +49,7 @@ class PropertyUrlController extends Controller
         
         foreach ($data as $key => $value) {
             if ($key == 0) continue;
-            PropertyUrl::create([ 'city' => $value[0], 'url' => $value[1] ]);
+            PropertyUrl::create([ 'city' => $value[0], 'url' => $value[1], 'is_active' => 1 ]);
         }
         flash('CSV uploaded successfully!')->success()->important();
         return redirect()->route('property_url.index');
@@ -82,7 +82,7 @@ class PropertyUrlController extends Controller
     public function updatePropertyUrlStatus(Request $request)
     {
         $property_url = PropertyUrl::find($request->_id);
-        $property_url->is_active = $request->is_active;
+        $property_url->is_active = intval($request->is_active);
         $property_url->save();
         return  response()->json([
             'status' =>true,

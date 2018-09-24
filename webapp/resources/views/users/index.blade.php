@@ -10,10 +10,12 @@
         <section class="content-header">
             <h1>Users
                 <small>All Users</small>
+                @if(auth()->user()->user_type =='admin')
                 <a class="btn btn-primary" href="{{ route('users.create') }}">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     Create User
                 </a>
+                @endif
             </h1>
         </section>
         <!-- end of content header (page header) -->
@@ -100,7 +102,7 @@
                             }
                         },
                         cancel: {
-                            text: 'Cancle',
+                            text: 'Cancel',
                             btnClass: 'btn-gray',
                             keys: ['enter'],
                             action: function(){

@@ -58,11 +58,11 @@ class HotelMasterController extends Controller
                     $start = intval($rating);
                     $end = $rating + 1;                     
                     if($key == 0){
-                        $query = $query->where(function ($query_inner) use ($ratings) {
+                        $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
                             return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
                         });
                     }else{
-                        $query = $query->orWhere(function ($query_inner) use ($ratings) {
+                        $query = $query->orWhere(function ($query_inner) use ($ratings,$start,$end) {
                             return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
                         });
                     }
@@ -134,6 +134,11 @@ class HotelMasterController extends Controller
                 return $query;
             });
         }
+
+        // $hotelmaster = $hotelmaster->where('lng_lat', 'near', [
+        //     '$geometry' => ['type' => 'Point', 'coordinates' => [51.33631274, 12.39401847]],
+        //     '$maxDistance' => 200000,
+        // ]);
 
         $totalData = $hotelmaster->count();
         $totalFiltered = $totalData; 

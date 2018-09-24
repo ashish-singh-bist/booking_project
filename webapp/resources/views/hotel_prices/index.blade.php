@@ -41,11 +41,11 @@
 
                             <div class="form-group col-sm-2 filter-outer-box">
                                 <label>Max Person</label>
-                                <li><input type="checkbox" name="max_persons[]" value="1"/> 1 day</li>
-                                <li><input type="checkbox" name="max_persons[]" value="2"/> 2 day</li>
-                                <li><input type="checkbox" name="max_persons[]" value="3"/> 3 day</li>
-                                <li><input type="checkbox" name="max_persons[]" value="4"/> 4 day</li>
-                                <li><input type="checkbox" name="max_persons[]" value="5"/> 5 day</li>
+                                <li><input type="checkbox" name="max_persons[]" value="1"/> 1 person</li>
+                                <li><input type="checkbox" name="max_persons[]" value="2"/> 2 person</li>
+                                <li><input type="checkbox" name="max_persons[]" value="3"/> 3 person</li>
+                                <li><input type="checkbox" name="max_persons[]" value="4"/> 4 person</li>
+                                <li><input type="checkbox" name="max_persons[]" value="5"/> 5 person</li>
                             </div>   
 
                             <div class="form-group col-sm-6">

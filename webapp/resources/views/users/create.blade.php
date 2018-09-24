@@ -60,6 +60,21 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group @if ($errors->has('user_type')) has-error @endif">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-md-8">
+                                            @if($user_type)
+                                            <label for="user_type">Role</label>
+                                            <select name="user_type" class="form-control" id="id_user_type">
+                                                @foreach($user_type as $role)
+                                                    <option id="{{ $role->user_type }}">{{ $role->user_type }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     {!! Form::submit('Register', array('class' => 'btn btn-primary')) !!}
                                 </div>
