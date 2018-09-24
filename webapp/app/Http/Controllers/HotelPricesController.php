@@ -18,11 +18,13 @@ class HotelPricesController extends Controller
     public function index(Request $request)
     {
         $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
-
+        $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
+        $other_desc_list = HotelPrices::select('other_desc')->distinct()->get()->toArray();
+        
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices.index',['id'=>$request->get('id'), 'room_type_list' => $room_type_lis]);
+            return view('hotel_prices.index',['id'=>$request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
         }else{
-            return view('hotel_prices.index', ['room_type_list' => $room_type_list]);
+            return view('hotel_prices.index', ['room_type_list' => $room_type_list, 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
         }        
     }
 
@@ -103,7 +105,45 @@ class HotelPricesController extends Controller
         if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
             $hotelprices = $hotelprices->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
         }
+       
+        if($request->get('meal_plan')!=Null && $request->get('meal_plan')!=''){
+            $search_meal_plan = $request->get('meal_plan');
+            if($search_meal_plan == 'empty'){
+                $hotelprices = $hotelprices->whereNull('mealplan_included_name');
+                // dd("condition obtained ".$search_meal_plan);
+            } else if($search_meal_plan == 'not-empty'){
+                $hotelprices = $hotelprices->whereNotNull('mealplan_included_name');
+            }
+        }
+        if(count($request->get('cancellation_type'))>0){
+            $cancel_type = $request->get('cancellation_type');
+            $hotelprices = $hotelprices->where(function ($query) use ($cancel_type) {
+                foreach($cancel_type as $key => $cancel_type){
+                    if($key == 0){
+                        $query = $query->where('cancellation_type', $cancel_type);
+                    }else{
 
+                        $query = $query->orWhere('cancellation_type', $cancel_type);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('others_desc'))>0){
+            $otherdesc = $request->get('others_desc');
+            $hotelprices = $hotelprices->where(function ($query) use ($otherdesc) {
+                foreach($otherdesc as $key => $otherdesc){
+                    if($key == 0){
+                        $query = $query->where('other_desc', $otherdesc);
+                    }else{
+
+                        $query = $query->orWhere('other_desc', $otherdesc);
+                    }
+                }
+                return $query;
+            });
+        }
         // if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
         //     $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
         //     $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();

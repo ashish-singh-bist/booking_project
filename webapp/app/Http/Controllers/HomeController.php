@@ -86,7 +86,15 @@ class HomeController extends Controller
 
     public function restartParser(Request $request)
     {
-        exec('python3 motn.py');
+        $res = exec('python3 ' . base_path() . '/script.py');
+        flash("Scraper restart successfully! " . $res)->success()->important();
+        return redirect()->back();
     }
 
+    public function stopParser(Request $request)
+    {
+        $res = exec('python3 ' . base_path() . '/script.py');
+        flash("Scraper stop successfully! " . $res)->success()->important();
+        return redirect()->back();
+    }
 }
