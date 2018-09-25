@@ -34,7 +34,7 @@ class HotelMasterController extends Controller
 
         $hotelmaster = new HotelMaster();
         if($request->get('id') != Null && $request->get('id') != ''){
-            $hotelmaster = $hotelmaster->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
+            $hotelmaster = $hotelmaster->where('hotel_id',$request->get('id'));
         }
         if(count($request->get('stars'))>0){
             $stars = $request->get('stars');
@@ -135,6 +135,11 @@ class HotelMasterController extends Controller
             });
         }
 
+        $statistics = [];
+        $statistics['avg_rating'] = $hotelmaster->avg('booking_rating');
+        $statistics['max_rating'] = $hotelmaster->max('booking_rating');
+        $statistics['min_rating'] = $hotelmaster->min('booking_rating');
+
         // $hotelmaster = $hotelmaster->where('lng_lat', 'near', [
         //     '$geometry' => ['type' => 'Point', 'coordinates' => [51.33631274, 12.39401847]],
         //     '$maxDistance' => 200000,
@@ -163,7 +168,8 @@ class HotelMasterController extends Controller
                     "draw"            => intval($request->input('draw')),  
                     "recordsTotal"    => intval($totalData),  
                     "recordsFiltered" => intval($totalFiltered), 
-                    "data"            => $hotelmaster_data   
+                    "data"            => $hotelmaster_data,
+                    "statistics" => $statistics
                     );
             
         echo json_encode($json_data);

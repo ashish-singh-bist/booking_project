@@ -37,7 +37,7 @@ class HotelPricesController extends Controller
 
         $hotelprices = new HotelPrices();
         if($request->get('id') != Null && $request->get('id') != ''){
-            $hotelprices = $hotelprices->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
+            $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
         } 
 
         if(count($request->get('room_types'))>0){
@@ -78,7 +78,6 @@ class HotelPricesController extends Controller
             $hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
         }
 
-        
         // if($request->get('created_at') != Null && $request->get('created_at') != ''){
         //     $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
         //     $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
@@ -89,6 +88,7 @@ class HotelPricesController extends Controller
         //      )
         //  );
         // }
+
         if($request->get('min_price') != Null && $request->get('min_price') != ''){
             $hotelprices = $hotelprices->whereBetween(
              'raw_price', array(
@@ -144,6 +144,7 @@ class HotelPricesController extends Controller
                 return $query;
             });
         }
+
         // if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
         //     $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
         //     $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();
@@ -154,6 +155,7 @@ class HotelPricesController extends Controller
         //      )
         //  );
         // }
+
         if(count($request->get('days'))>0){
             $days = $request->get('days');
             $hotelprices = $hotelprices->where(function ($query) use ($days) {
@@ -169,12 +171,11 @@ class HotelPricesController extends Controller
             });
         }        
 
-        #$avg_price = $hotelprices->avg('number_of_days');
-        #print_r($avg_price);
-        // $max_price = $hotelprices->max('price');
-        // $min_price = $hotelprices->min('price');
-        // $sum_price = $hotelprice->sum('price');
-  
+        $statistics = [];
+        $statistics['avg_price'] = $hotelprices->avg('raw_price');
+        $statistics['max_price'] = $hotelprices->max('raw_price');
+        $statistics['min_price'] = $hotelprices->min('raw_price');
+
         $totalData = $hotelprices->count();
         $totalFiltered = $totalData; 
 
@@ -192,15 +193,16 @@ class HotelPricesController extends Controller
         {
             //dd($hotelprices_data[$i]['created_at']);
             //$hotelprices_data[$i]['created_at'] = date('Y-m-d H:i:s',strtotime($hotelprices_data[$i]['created_at']));
-            $hotelprices_data[$i]['raw_price'] = "$" . $hotelprices_data[$i]['raw_price'];
+            $hotelprices_data[$i]['raw_price'] = "&euro;" . $hotelprices_data[$i]['raw_price'];
             $hotelprices_data[$i]['checkin_date'] =  $hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y M d');
         }
-
+        
         $json_data = array(
                     "draw"            => intval($request->input('draw')),  
                     "recordsTotal"    => intval($totalData),  
                     "recordsFiltered" => intval($totalFiltered), 
-                    "data"            => $hotelprices_data   
+                    "data"            => $hotelprices_data,
+                    "statistics" => $statistics
                     );
             
         echo json_encode($json_data);

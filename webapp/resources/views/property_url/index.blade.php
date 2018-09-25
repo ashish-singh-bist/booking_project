@@ -43,6 +43,7 @@
                                 <thead>
                                     <tr>
                                         <th>Url</th>
+                                        <th>Hotel Id</th>
                                         <th>City</th>
                                         <th>Created At</th>
                                         <th>Updated At</th>
@@ -76,6 +77,7 @@
                 ajax: "{!! route('property_url.index.getData') !!}",
                 columns: [
                     { data: 'url', name: 'url', 'render' : function ( data, type, row) { return '<a target="_blank" href="' + data + '">' + data + '</a>'; } },
+                    { data: 'hotel_id', name: 'hotel_id' },
                     { data: 'city', name: 'city' },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'updated_at', name: 'updated_at' },

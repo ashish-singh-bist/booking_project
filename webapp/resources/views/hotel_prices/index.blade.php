@@ -20,18 +20,18 @@
         <section class="content">
             <div class="row">
                 <div class="col-xs-12">
-                    <div class="box box-solid box-primary">
-                        <div class="row">
-                            <div class="col-xs-12">                        
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Filters</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                                        {{-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> --}}
-                                        <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
-                                    </div>                            
-                                </div>
-                                <div class="box-body">
+                    <div class="box box-solid box-primary">                   
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Filters</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                {{-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> --}}
+                                <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
+                            </div>                            
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-xs-12">  
                                     <div class="form-group col-sm-2 filter-outer-box">
                                         <label>Days</label>
                                         <li><input type="checkbox" name="days[]" value="1"/> 1 day</li>
@@ -197,6 +197,13 @@
                 select: {
                     style: 'multi'
                 },
+                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>",
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5'
+                ],
                 ajax: {
                     @if(isset($id))
                         url: "{!! route('hotel_prices.index.getData') !!}?id={{$id}}",
@@ -224,8 +231,17 @@
                         }).get();
                         d.days = days;
                         d.max_persons = max_persons;                        
-                    }
-                },                
+                    },
+                    // "dataSrc": function(json_data){
+                    //     console.log(json_data + "dfs");
+                    // },
+                   dataFilter: function(response) {
+                        var statistics = JSON.parse(response)['statistics'];
+                        console.log(statistics);
+                        $("#statistics").html('<div><span class="p_badge"><b>Max Price : </b>&euro;'+statistics['max_price'].toFixed(2)+'</span>|<span class="p_badge"><b>Min Price : </b>&euro;'+statistics['min_price'].toFixed(2)+'</span>|<span class="p_badge"><b>Avg. Price : </b>&euro;'+statistics['avg_price'].toFixed(2)+'</span></div>');
+                        return response;
+                    },
+                },
                 columns: [
                     @foreach (config('app.hotel_prices_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, 
                     @endforeach

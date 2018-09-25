@@ -60,10 +60,11 @@ class PropertyUrlController extends Controller
         $propertyurl = PropertyUrl::all();
         return Datatables::of($propertyurl)
         ->addColumn('link', function ($propertyurl) {
-            $html =  '<a href="' . route('hotel_master.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Info"><i class="fa fa-eye"></i> Info</a>';
-            $html .=  '&nbsp;<a href="' . route('hotel_prices.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Price"><i class="fa fa-eye"></i> Price</a>';
-            $html .=  '&nbsp;<a href="' . route('room_details.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Room Details"><i class="fa fa-eye"></i> Room Details</a>';
-            $html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl->_id . '" class="btn btn-xs btn-success" title="Availability"><i class="fa fa-eye"></i> Availability</a>';
+            $disable_param = $propertyurl->hotel_id ? '' : ' disabled';
+            $html =  '<a href="' . route('hotel_master.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Hotel Details"><i class="fa fa-info fa-size"></i></a>';
+            $html .=  '&nbsp;<a href="' . route('hotel_prices.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Hotel Prices"><i class="fa fa-euro fa-size"></i></a>';
+            $html .=  '&nbsp;<a href="' . route('room_details.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Room Details"><i class="fa fa-home fa-size"></i></a>';
+            $html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Room Availability"><i class="fa fa-font fa-size"></i></a>';
             return $html;
         })
         ->addColumn('action', function ($propertyurl) {

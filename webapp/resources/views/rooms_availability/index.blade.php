@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 @section('title')
-    Room Details
+    Room Avaibility
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="content-panel">
         <!-- content header (page header) -->
         <section class="content-header">
-            <h1>Room<small>Details</small></h1>
+            <h1>Room<small>Avaibility</small></h1>
         </section>
         <!-- end of content header (page header) -->
         <!-- main content-->
@@ -126,6 +126,13 @@
                 select: {
                     style: 'multi'
                 },
+                dom: "<'row'<'col-sm-2'l><'col-sm-6'B>>",
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5'
+                ],                
                 ajax: {
                     @if(isset($id))
                         url: "{!! route('room_details.index.getData') !!}?id={{$id}}",

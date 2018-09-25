@@ -34,7 +34,7 @@ class RoomsAvailabilityController extends Controller
 
         $roomsavailability = new RoomsAvailability();
         if($request->get('id') != Null && $request->get('id') != ''){
-            $roomsavailability = $roomsavailability->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
+            $roomsavailability = $roomsavailability->where('hotel_id',$request->get('id'));
         }        
 
         if(count($request->get('room_types'))>0){

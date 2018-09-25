@@ -33,7 +33,7 @@ class RoomDetailsController extends Controller
 
         $roomdetails = new RoomDetails();
         if($request->get('id') != Null && $request->get('id') != ''){
-            $roomdetails = $roomdetails->where('prop_id',new \MongoDB\BSON\ObjectID($request->get('id')));
+            $roomdetails = $roomdetails->where('hotel_id',$request->get('id'));
         }         
 
         if(count($request->get('room_types'))>0){
@@ -101,7 +101,7 @@ class RoomDetailsController extends Controller
 
         for($i=0; $i < count($roomdetails_data); $i++)
         {
-            //$roomdetails_data[$i]['created_at'] = $roomdetails_data[$i]['created_at'];
+            $roomdetails_data[$i]['created_at'] = $roomdetails_data[$i]['created_at'];
             $roomdetails_data[$i]['checkin_date'] =  $roomdetails_data[$i]['checkin_date']->toDateTime()->format('Y M d');
         }
 

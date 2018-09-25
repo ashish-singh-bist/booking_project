@@ -127,6 +127,13 @@
                 select: {
                     style: 'multi'
                 },
+                dom: "<'row'<'col-sm-2'l><'col-sm-4'B>>",
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5'
+                ],
                 ajax: {
                     @if(isset($id))
                         url: "{!! route('room_details.index.getData') !!}?id={{$id}}",

@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 @section('title')
-    Hotel Master
+    Hotel Details
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="content-panel">
         <!-- content header (page header) -->
         <section class="content-header">
-            <h1>Hotel<small>Master</small></h1>
+            <h1>Hotel<small>Details</small></h1>
         </section>
         <!-- end of content header (page header) -->
         <!-- main content-->
@@ -143,6 +143,13 @@
                 select: {
                     style: 'multi'
                 },
+                dom: "<'row'<'col-sm-2'l><'col-sm-4'B>>",
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5'
+                ],
                 ajax: {
                     @if(isset($id))
                         url: "{!! route('hotel_master.getData') !!}?id={{$id}}",
@@ -169,7 +176,13 @@
                         d.categories = categories;
                         d.cities = $("#cities").val();
                         d.countries = $("#countries").val();
-                    }
+                    },
+                    dataFilter: function(response) {
+                        var statistics = JSON.parse(response)['statistics'];
+                        console.log(statistics);
+                        $("#statistics").html('<div><span class="p_badge"><b>Max Rating : </b>'+statistics['max_rating'].toFixed(1)+'</span>|<span class="p_badge"><b>Min Rating : </b>'+statistics['min_rating'].toFixed(1)+'</span>|<span class="p_badge"><b>Avg. Rating : </b>'+statistics['avg_rating'].toFixed(1)+'</span></div>');
+                        return response;
+                    },
                 },                
                 columns: [
                     @foreach (config('app.hotel_master_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, @endforeach
