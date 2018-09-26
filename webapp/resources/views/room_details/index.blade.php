@@ -151,7 +151,7 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B>>",
+                dom: "<'row'<'col-sm-2'l><'col-sm-4'B>>rt<'bottom'ip><'clear'>",
                 buttons: [
                     // 'copyHtml5',
                     // 'excelHtml5',

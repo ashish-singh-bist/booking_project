@@ -136,9 +136,9 @@ class HotelMasterController extends Controller
         }
 
         $statistics = [];
-        $statistics['avg_rating'] = $hotelmaster->avg('booking_rating');
-        $statistics['max_rating'] = $hotelmaster->max('booking_rating');
-        $statistics['min_rating'] = $hotelmaster->min('booking_rating');
+        $statistics['avg_rating'] = $hotelmaster->avg('booking_rating') ?: 0;
+        $statistics['max_rating'] = $hotelmaster->max('booking_rating') ?: 0;
+        $statistics['min_rating'] = $hotelmaster->min('booking_rating') ?: 0;
 
         // $hotelmaster = $hotelmaster->where('lng_lat', 'near', [
         //     '$geometry' => ['type' => 'Point', 'coordinates' => [51.33631274, 12.39401847]],

@@ -195,7 +195,7 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>",
+                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>rt<'bottom'ip><'clear'>",
                 buttons: [
                     // 'copyHtml5',
                     // 'excelHtml5',
