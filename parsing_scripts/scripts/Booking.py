@@ -5,6 +5,7 @@ import os
 import json
 import random
 import time
+import datetime
 
 class Booking(Master):
   def __init__(self):
@@ -14,6 +15,8 @@ class Booking(Master):
     #self.params['proxy_ip'] = { 'https': 'socks5://127.0.0.1:9050',}
     self.proxy_list = self.initProxies()
     self.params['return_error_page'] = 1
+  def __del__(self):
+        print('Destructor called, Booking deleted..............')
   def initProxies(self):
     arr_proxies = []
     if self.obj_helper.isFileExists( "proxies.txt" ):
@@ -28,9 +31,9 @@ class Booking(Master):
     html_dir_path = self.obj_config.html_dir_path
     ###################
     if self.proxy_list:      
-      proxy_ip = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]      
+      proxy_ip = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]
       self.params['proxy_ip'] = { 'https': proxy_ip,}
-      print(self.params['proxy_ip'])    
+      #print(self.params['proxy_ip'])    
     ###################
     CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
     self.params['headers'] = { 'user-agent':CHROME_UA , 'host' : 'www.booking.com' , 'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8','Accept-Language':'en-US,en;q=0.9','Accept-Encoding':'gzip, deflate, br','Upgrade-Insecure-Requests':1 }
@@ -55,8 +58,10 @@ class Booking(Master):
         self.obj_helper.writeFileNewUTF( html_dir_path+file_name , html )   #save log in log file      
       dict_hotel_info = {}
 
+      #print( "\nBeautiful soup start:" + str(datetime.datetime.now()) )
       #<div id="wrap-hotelpage-top" class="wrap-hotelpage-top" >
       header_html = self.obj_helper.getContainerHtml(html,'div','id','wrap-hotelpage-top')
+      #print( "\nBeautiful soup end:" + str(datetime.datetime.now()) )
 
       #html = re.sub(r'\n+', '', html,flags=re.S|re.M)
       #self.obj_helper.writeFileNewUTF( "booking_new.html" , html )   #save log in log file
@@ -102,6 +107,7 @@ class Booking(Master):
         #dict_hotel_info['latitude'] = m.group(1)
         latitude_temp = float(m.group(1))        
 
+      
       #booking.env.b_map_center_longitude = 73.75393242; 
       m = re.search(r'booking.env.b_map_center_longitude\s*=\s*(.+?)\;', html,re.S)
       if m:
@@ -109,7 +115,7 @@ class Booking(Master):
         longitude_temp = float(m.group(1))
 
       if latitude_temp and longitude_temp:
-        dict_hotel_info['lat_lng'] = { 'type':'Point' , 'coordinates':[latitude_temp,longitude_temp] }
+        dict_hotel_info['lng_lat'] = { 'type':'Point' , 'coordinates':[longitude_temp,latitude_temp] }
 
       #<script type="application/ld+json">      
       m = re.search('<script[^>]+type\W+application\/ld\+json\W[^>]*>(.*?)<\/script>', html,re.S)      
@@ -180,7 +186,7 @@ class Booking(Master):
       #   if length_stay:
       #     result_dict['length_stay'] = self.obj_helper.removeHtml(length_stay)
 
-
+      
       #b_rooms_available_and_soldout: [{....],
       m = re.search('b_rooms_available_and_soldout\s*:\s*(\[.*?\])\s*,\n', html,re.S)
       if m and m.group(1):
@@ -188,7 +194,9 @@ class Booking(Master):
         #print( "Room Details Json"+room_details_json )
         arr_room_details_dict = json.loads(room_details_json)
         arr_room_data_final = []
-
+        #<table class="hprt-table  " data-et-view="goal:rt_onview" >
+        temp_table_html = self.obj_helper.getContainerHtml(html,'table','class','hprt-table')
+        #print( "\nprice scrape start:"+str(datetime.datetime.now()) )        
         for dict_room_details in arr_room_details_dict:
           dict_room_info = {}
           #dict_room_info['room_type'] = dict_room_details['b_name']
@@ -212,8 +220,10 @@ class Booking(Master):
               dict_price_info['max_persons'] = b_block['b_max_persons']
 
             if 'b_block_id' in b_block and b_block['b_block_id']:
-              b_block_id = b_block['b_block_id']              
-              room_equp_desc_price_dict = self.parseRoomEqupDetails(html,b_block_id)
+              b_block_id = b_block['b_block_id']
+              #print( "\nprice 111:"+str(datetime.datetime.now()) )
+              room_equp_desc_price_dict = self.parseRoomEqupDetails(temp_table_html,b_block_id)
+              #print( "\nprice 222:"+str(datetime.datetime.now()) )
               #print(room_equp_desc_price_dict)
               #'dict_room_equipment':dict_room_equipment , 'dict_price_desc':dict_price_desc
               if 'dict_room_equipment' in room_equp_desc_price_dict and room_equp_desc_price_dict['dict_room_equipment']:
@@ -225,6 +235,7 @@ class Booking(Master):
           dict_room_info[room_type]['price_info'] = arr_price_info          
           arr_room_data_final.append(dict_room_info)
           result_dict['price_details'] = arr_room_data_final
+        #print( "\nprice scrape end:"+str(datetime.datetime.now()) )
     ##################
     hotel_equipments = self.parseHotelEqupDetails(html)    
     ##################        
@@ -332,7 +343,8 @@ class Booking(Master):
             dict_price_desc['cancellation_desc'] = self.obj_helper.removeHtml(str(li_html))
           else:
             temp_desc = self.obj_helper.removeHtml(str(li_html))
-            arr_other_desc.append(temp_desc)
+            if temp_desc:
+              arr_other_desc.append(temp_desc)
         if len(arr_other_desc):
           dict_price_desc['other_desc'] = arr_other_desc
     return { 'dict_room_equipment':dict_room_equipment , 'dict_price_desc':dict_price_desc }

@@ -7,6 +7,25 @@ class Helper:
     soup = BeautifulSoup(html,"lxml")
     container_arr = soup.findAll( tag , { attr_name : attr_value } )
     return container_arr;
+  
+  def getContainerDataOld(self,html,container,count):
+    html = " "+html+" " 
+    str = ''
+    while True:   
+      m = re.search(r'(.*?\W'+container+')', html,re.S|re.M|re.I)
+      if m:
+        tempst = m.group(1)
+        str = str+tempst
+        m = re.search(r'<'+container, tempst,re.S|re.M|re.I)
+        if m:
+          count = count + 1
+        else:
+          m = re.search(r'<\/'+container, tempst,re.S|re.M|re.I)
+          if m:
+            count = count - 1
+        if count == 0:
+          return str
+    return ''  
 
   def getContainerHtml(self,html,tag,attr_name,attr_value):
     soup = BeautifulSoup(html,"lxml")
@@ -15,6 +34,7 @@ class Helper:
     for temp_item in container_arr:
         temp_html += str(temp_item)
     return temp_html
+
 
   def getContainerText(self,html,tag,attr_name,attr_value):
     soup = BeautifulSoup(html,"lxml")

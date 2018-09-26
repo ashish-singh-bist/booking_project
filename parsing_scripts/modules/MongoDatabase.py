@@ -1,3 +1,4 @@
+import pymongo
 from pymongo import MongoClient
 from Config import Config
 import datetime
@@ -18,7 +19,7 @@ class MongoDatabase:
     self.client = MongoClient(connection_string)
     self.db = self.client[self.obj_config.mongo_database] 
 
-  def disconnect (self):
+  def disconnect (self):    
     self.client.close()
 
   def recInsert (self,table,data_array):
