@@ -144,7 +144,7 @@ class HotelMasterController extends Controller
         //     '$geometry' => ['type' => 'Point', 'coordinates' => [51.33631274, 12.39401847]],
         //     '$maxDistance' => 200000,
         // ]);
-
+        // print_r($hotelmaster);
         $totalData = $hotelmaster->count();
         $totalFiltered = $totalData; 
 

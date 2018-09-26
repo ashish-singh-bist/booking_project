@@ -9,6 +9,8 @@ use App\CustomConfig;
 use App\HotelMaster;
 use App\StatsBooking;
 use App\PropertyUrl;
+use App\HotelPrices;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -33,11 +35,12 @@ class HomeController extends Controller
 
         $p_total_count = PropertyUrl::count();
         $p_active_count = PropertyUrl::where('is_active',1)->count();
+        $custom_config = CustomConfig::first();
 
         //get parser stats
         $stats = StatsBooking::limit(10)->latest()->get();
-
-        return view('home', [ 'user_count'=>$users, 'stats' => $stats, 'p_total_count' => $p_total_count, 'p_active_count' => $p_active_count]);
+        
+        return view('home', [ 'user_count'=>$users, 'stats' => $stats, 'p_total_count' => $p_total_count, 'p_active_count' => $p_active_count, 'custom_config'=> $custom_config]);
     }
 
     public function config()
@@ -86,15 +89,26 @@ class HomeController extends Controller
 
     public function restartParser(Request $request)
     {
-        $res = exec('python3 ' . base_path() . '/script.py');
-        flash("Scraper restart successfully! " . $res)->success()->important();
+        $scraper_path = config('app.scraper_path');
+        $res = exec('python3 ' . base_path() . '/booking_start_stop_script.py restart ' . $scraper_path);
+        $res_json = json_decode($res);
+        if($res_json->status == 'success'){
+            flash($res_json->message)->success()->important();
+        }else{
+            flash($res_json->message)->error()->important();
+        }
         return redirect()->back();
     }
 
     public function stopParser(Request $request)
     {
-        $res = exec('python3 ' . base_path() . '/script.py');
-        flash("Scraper stop successfully! " . $res)->success()->important();
+        $res = exec('python3 ' . base_path() . '/booking_start_stop_script.py stop');
+        $res_json = json_decode($res);
+        if($res_json->status == 'success'){
+            flash($res_json->message)->success()->important();
+        }else{
+            flash($res_json->message)->error()->important();
+        }        
         return redirect()->back();
     }
 }

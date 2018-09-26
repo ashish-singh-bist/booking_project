@@ -15,7 +15,20 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Auth::routes();
+// Authentication Routes...
+Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+Route::post('login', 'Auth\LoginController@login');
+Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+
+// Registration Routes...
+// Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+// Route::post('register', 'Auth\RegisterController@register');
+
+// Password Reset Routes...
+// Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+// Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+// Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+// Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
@@ -29,6 +42,9 @@ Route::get('/hotel_master_getdata', 'HotelMasterController@getData')->name('hote
 
 Route::get('/hotel_prices', 'HotelPricesController@index')->name('hotel_prices.index');
 Route::get('/hotel_prices_getdata', 'HotelPricesController@getData')->name('hotel_prices.index.getData');
+
+Route::get('/hotel_prices/hotel_analysis', 'ChartPricesController@index')->name('hotel_analysis.index');
+Route::get('/hotel_prices/hotel_analysis_getChartData', 'ChartPricesController@getChartData')->name('hotel_analysis.getChartData');
 
 Route::get('/room_details', 'RoomDetailsController@index')->name('room_details.index');
 Route::get('/room_details_getdata', 'RoomDetailsController@getData')->name('room_details.index.getData');

@@ -260,4 +260,6 @@ return [
         'available_only' => 'Available Only',
         'created_at' => 'Create Time',
     ],
+
+    'scraper_path' => env('SCRAPER_PATH', ''),
 ];

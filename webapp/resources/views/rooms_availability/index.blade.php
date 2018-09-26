@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 @section('title')
-    Room Avaibility
+    Room Availability
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="content-panel">
         <!-- content header (page header) -->
         <section class="content-header">
-            <h1>Room<small>Avaibility</small></h1>
+            <h1>Room<small>Availability</small></h1>
         </section>
         <!-- end of content header (page header) -->
         <!-- main content-->
@@ -29,60 +29,85 @@
                             </div>                             
                         </div>
                         <div class="box-body">
-                            <div class="form-group col-sm-6">
-                                <label>CheckIn Date</label>
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <label for="checkin_date_from">From</label>
-                                        <p class="input-group date" data-provide="datepicker">
-                                            <input type="text" class="form-control filter_class" id="checkin_date_from" readonly="readonly">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
-                                            </span>
-                                        </p>
-                                        <label for="checkin_date_to">To</label>
-                                        <p class="input-group date" data-provide="datepicker">
-                                            <input type="text" class="form-control filter_class" id="checkin_date_to" readonly="readonly">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
-                                            </span>
-                                        </p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">CheckIn Date</h4>
+                                        </div>
+                                        <div class="box-body overflow-0">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <label for="checkin_date_from">From</label>
+                                                    <p class="input-group date" data-provide="datepicker">
+                                                        <input type="text" class="form-control filter_class" id="checkin_date_from" readonly="readonly">
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <label for="checkin_date_to">To</label>
+                                                    <p class="input-group date" data-provide="datepicker">
+                                                        <input type="text" class="form-control filter_class" id="checkin_date_to" readonly="readonly">
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Parse Date</h4>
+                                        </div>
+                                        <div class="box-body overflow-0">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <label for="created_at_from">From</label>
+                                                    <p class="input-group date" data-provide="datepicker">
+                                                        <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <label for="created_at_to">To</label>
+                                                    <p class="input-group date" data-provide="datepicker">
+                                                        <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="form-group col-sm-6">
-                                <label>Parse Date</label>
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <label for="created_at_from">From</label>
-                                        <p class="input-group date" data-provide="datepicker">
-                                            <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
-                                            </span>
-                                        </p>
-                                        <label for="created_at_to">To</label>
-                                        <p class="input-group date" data-provide="datepicker">
-                                            <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
-                                            </span>
-                                        </p>
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Room Type</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="room_types" multiple="multiple">
+                                                @foreach($room_type_list as $room_type)
+                                                    <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="col-md-6 col-sm-12 text-right">
+                                    <a id='filter_apply' class="btn btn-success">Apply Filters</a>
+                                </div>    
                             </div>
-
-                            <div class="form-group col-sm-6">
-                                <div class="input-group">
-                                    <label>Room Type &nbsp;&nbsp;</label>
-                                    <select class="form-control filter_class" id="room_types" multiple="multiple">
-                                        @foreach($room_type_list as $room_type)
-                                            <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div> 
                         </div>
                     </div>
                 </div>
@@ -128,10 +153,11 @@
                 },
                 dom: "<'row'<'col-sm-2'l><'col-sm-6'B>>",
                 buttons: [
-                    'copyHtml5',
-                    'excelHtml5',
-                    'csvHtml5',
-                    'pdfHtml5'
+                    // 'copyHtml5',
+                    // 'excelHtml5',
+                    // 'csvHtml5',
+                    // 'pdfHtml5'
+                    'csvHtml5'
                 ],                
                 ajax: {
                     @if(isset($id))
@@ -152,7 +178,7 @@
                 ]
             });
 
-            $('.filter_class').on('change', function(e) {
+            $('#filter_apply').on('click', function(e) {
                 oTable.draw();
             });
 

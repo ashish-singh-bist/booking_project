@@ -30,12 +30,50 @@ table.dataTable{
 .content-header{
     padding-top: 2px;
 }
+.filter-box{
+    margin-bottom: 10px;
+}
+.filter-box-fix-height .box-body{
+    height: 160px;
+}
 
-.filter-outer-box{
-    height: 200px;
+.hotel-price .filter-box-fix-height .box-body{
+    height: 140px;
+}
+
+.filter-box-fix-height .box-body ul li{
+    margin-bottom: 1px;
+}
+.filter-box .box-body{
     overflow: auto;
-    border: 1px solid #3c8dbc;
-    border-radius: 5px;    
+    padding: 4px 10px;
+}
+.filter-box .box-header {
+    padding: 4px 6px;
+}
+.filter-box .box-header .box-title{
+    font-size: 14px;
+}
+.filter-box .box-body ul{
+    margin-bottom: 0;
+    margin-left: -40px;
+}
+
+.filter-box .box-body ul li{
+    list-style: none;
+}
+.filter-box .box-body ul li label{
+    cursor: pointer;
+    font-weight: normal;
+    margin: 0;
+}
+.filter-box .box-body ul li input{
+    margin-right: 5px;
+}
+
+.filter-box .box-body .form-inline .input-group{
+    margin-bottom: 0;
+    display: inline-block;
 }
 
 .custome_badge{
@@ -80,4 +118,22 @@ table.dataTable{
     border-radius: 10px;    
     font-size: 16px;
     background: lightblue;
+}
+.font-normal {
+    font-weight: normal !important;
+}
+.script_status{
+    font-size: 16px;
+}
+.overflow-0{
+    overflow: hidden !important;
+}
+@media (max-width: 767px) {
+    .filter-box-fix-height .box-body {
+        height: auto;
+        max-height: 120px;
+    }
+    .filter-box .box-body .form-inline label{
+        vertical-align: top;
+    }
 }

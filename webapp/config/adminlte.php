@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'title' => 'B Parsing',
+    'title' => 'LimeHome',
 
     'title_prefix' => '',
 
@@ -30,9 +30,9 @@ return [
     |
     */
 
-    'logo' => '<b>B</b>P',
+    'logo' => 'LimeHome',
 
-    'logo_mini' => '<b>B</b>P',
+    'logo_mini' => '<b>L</b>H',
 
     /*
     |--------------------------------------------------------------------------
@@ -142,7 +142,7 @@ return [
              'icon'        => 'file',
         ],
         [
-             'text'        => 'Hotel Master',
+             'text'        => 'Hotel Details',
              'url'         => '/hotel_master',
              'icon'        => 'play',
              'icon_color'  => 'green',

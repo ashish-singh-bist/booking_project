@@ -29,75 +29,127 @@
                             </div>
                         </div>
                         <div class="box-body">
-                            <div class="form-group col-sm-2 filter-outer-box">
-                                <label>Category</label>
-                                @foreach($category_list as $category)
-                                    <li><input type="checkbox" name="category[]" value="{{$category[0]}}"/> {{$category[0]}}</li>
-                                @endforeach
-{{--                                 <select class="form-control filter_class" id="category">
-                                    <option value="">Any</option>
-                                    @foreach($category_list as $category)
-                                        <option value="{{$category[0]}}">{{$category[0]}}</option>
-                                    @endforeach
-                                </select> --}}
-                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="box box-primary box-solid filter-box filter-box-fix-height">
+                                                <div class="box-header">
+                                                    <h4 class="box-title">Category</h4>
+                                                </div>
+                                                <div class="box-body">
+                                                    <ul>
+                                                    @foreach($category_list as $category)
+                                                        <li><label><input class="flat-icheck"  type="checkbox" name="category[]" value="{{$category[0]}}"/> {{$category[0]}}</label></li>
+                                                    @endforeach
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="form-group col-sm-2 filter-outer-box">
-                                <label>Star</label>
-                                <li><input type="checkbox" name="stars[]" value="1"/> 1 stars</li>
-                                <li><input type="checkbox" name="stars[]" value="2"/> 2 stars</li>
-                                <li><input type="checkbox" name="stars[]" value="3"/> 3 stars</li>
-                                <li><input type="checkbox" name="stars[]" value="4"/> 4 stars</li>
-                                <li><input type="checkbox" name="stars[]" value="5"/> 5 stars</li>
-                                <li><input type="checkbox" name="stars[]" value="6"/> 6 stars</li>
-                                <li><input type="checkbox" name="stars[]" value="7"/> 7 stars</li>
-                            </div>
+                                        <div class="col-sm-4">
+                                            <div class="box box-primary box-solid filter-box filter-box-fix-height">
+                                                <div class="box-header">
+                                                    <h4 class="box-title">Star</h4>
+                                                </div>
+                                                <div class="box-body">
+                                                    <ul>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="1"/> 1 stars</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="2"/> 2 stars</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="3"/> 3 stars</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="4"/> 4 stars</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="5"/> 5 stars</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="6"/> 6 stars</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="stars[]" value="7"/> 7 stars</label></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="form-group col-sm-2 filter-outer-box">
-                                <label>Rating</label>
-                                <li><input type="checkbox" name="ratings[]" value="0"/> 0 - 1</li>
-                                <li><input type="checkbox" name="ratings[]" value="1"/> 1 - 2</li>
-                                <li><input type="checkbox" name="ratings[]" value="2"/> 2 - 3</li>
-                                <li><input type="checkbox" name="ratings[]" value="3"/> 3 - 4</li>
-                                <li><input type="checkbox" name="ratings[]" value="4"/> 4 - 5</li>
-                                <li><input type="checkbox" name="ratings[]" value="5"/> 5 - 6</li>
-                                <li><input type="checkbox" name="ratings[]" value="6"/> 6 - 7</li>
-                                <li><input type="checkbox" name="ratings[]" value="7"/> 7 - 8</li>
-                                <li><input type="checkbox" name="ratings[]" value="8"/> 8 - 9</li>
-                                <li><input type="checkbox" name="ratings[]" value="9"/> 9 - 10</li>
-                            </div>
+                                        <div class="col-sm-4">
+                                            <div class="box box-primary box-solid filter-box filter-box-fix-height">
+                                                <div class="box-header">
+                                                    <h4 class="box-title">Rating</h4>
+                                                </div>
+                                                <div class="box-body">
+                                                    <ul>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="0"/> 0 - 1</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="1"/> 1 - 2</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="2"/> 2 - 3</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="3"/> 3 - 4</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="4"/> 4 - 5</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="5"/> 5 - 6</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="6"/> 6 - 7</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="7"/> 7 - 8</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="8"/> 8 - 9</label></li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="9"/> 9 - 10</label></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>    
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="box box-primary box-solid filter-box">
+                                                <div class="box-header">
+                                                    <h4 class="box-title">Country</h4>
+                                                </div>
+                                                <div class="box-body">
+                                                    <select class="form-control filter_class select2-country" id="countries" multiple="multiple"></select>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="form-group col-sm-6">
-                                <label>Country</label>
-                                <select class="form-control filter_class select2-country" id="countries" multiple="multiple">
-                                </select>
-                            </div>
-
-                            <div class="form-group col-sm-6">
-                                <label>City</label>
-                                <select class="form-control filter_class select2-city" id="cities" multiple="multiple">
-                                </select>
-                            </div>                                                 
-
-                            <div class="form-group col-sm-6">
-                                <label>Parse Date</label>
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <label for="created_at_from">From</label>
-                                        <p class="input-group date" data-provide="datepicker">
-                                            <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
-                                            </span>
-                                        </p>
-                                        <label for="created_at_to">To</label>
-                                        <p class="input-group date" data-provide="datepicker">
-                                            <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
-                                            </span>
-                                        </p>
+                                        <div class="col-md-6">
+                                            <div class="box box-primary box-solid filter-box">
+                                                <div class="box-header">
+                                                    <h4 class="box-title">City</h4>
+                                                </div>
+                                                <div class="box-body">
+                                                    <select class="form-control filter_class select2-city" id="cities" multiple="multiple"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>    
+                                    <div class="row">
+                                        <div class="col-md-12 col-sm-12">
+                                            <div class="box box-primary box-solid filter-box">
+                                                <div class="box-header">
+                                                    <h4 class="box-title">Parse Date</h4>
+                                                </div>
+                                                <div class="box-body overflow-0">
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <label for="created_at_from">From</label>
+                                                            <p class="input-group date" data-provide="datepicker">
+                                                                <input type="text" class="form-control filter_class" id="created_at_from" readonly="readonly">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <label for="created_at_to">To</label>
+                                                            <p class="input-group date" data-provide="datepicker">
+                                                                <input type="text" class="form-control filter_class" id="created_at_to" readonly="readonly">
+                                                                <span class="input-group-addon">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>                            
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12 text-right">
+                                    <a id='filter_apply' class="btn btn-success">Apply Filters</a>
                                 </div>
                             </div>
                         </div>
@@ -143,12 +195,12 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B>>",
+                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>",
                 buttons: [
-                    'copyHtml5',
-                    'excelHtml5',
+                    // 'copyHtml5',
+                    // 'excelHtml5',
                     'csvHtml5',
-                    'pdfHtml5'
+                    // 'pdfHtml5'
                 ],
                 ajax: {
                     @if(isset($id))
@@ -189,36 +241,25 @@
                 ]
             });
 
-            $('.filter_class, .filter-outer-box input').on('change', function(e) {
+            $('#filter_apply').on('click', function(e) {
                 oTable.draw();
             });
 
-            // $('#star').change( function(e) {
-            //     oTable.draw();
-            // });
-            // $('#rating').change( function(e) {
-            //     oTable.draw();
-            // });
-            // $('#created_at').change( function(e) {
-            //     oTable.draw();
-            // });
-            // $('#category').change( function(e) {
-            //     oTable.draw();
-            // });
-
             $('#clear_filter').on('click',function(){
-                $('input[name="category[]"]:checked')
-                .map(function() {
-                    $(this).prop( "checked", false );
-                });
-                $('input[name="stars[]"]:checked')
-                .map(function() {
-                    $(this).prop( "checked", false );
-                });
-                $('input[name="ratings[]"]:checked')
-                .map(function() {
-                    $(this).prop( "checked", false );
-                });
+                // $('input[name="category[]"]:checked')
+                // .map(function() {
+                //     $(this).prop( "checked", false );
+                // });
+                $('.flat-icheck').iCheck('uncheck');
+
+                // $('input[name="stars[]"]:checked')
+                // .map(function() {
+                //     $(this).prop( "checked", false );
+                // });
+                // $('input[name="ratings[]"]:checked')
+                // .map(function() {
+                //     $(this).prop( "checked", false );
+                // });
                 $(".select2-country").val('').trigger('change');
                 $(".select2-city").val('').trigger('change');
                 $("#created_at_to").val('');
@@ -281,7 +322,7 @@
                     cache: true
                 }
             });
-
         });
+    
     </script>
 @endsection

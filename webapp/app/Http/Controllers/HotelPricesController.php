@@ -7,6 +7,7 @@ use Yajra\Datatables\Datatables;
 use App\HotelPrices;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDatetime;
+use App\HotelMaster;
 
 class HotelPricesController extends Controller
 {
@@ -36,6 +37,78 @@ class HotelPricesController extends Controller
         }
 
         $hotelprices = new HotelPrices();
+        $hotelmaster = HotelMaster::select('hotel_id');
+        if(count($request->get('stars'))>0){
+            $stars = $request->get('stars');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($stars) {
+                foreach($stars as $key => $star){
+                    if($key == 0){
+                        $query = $query->where('hotel_stars', $star);
+                    }else{
+                        $query = $query->orWhere('hotel_stars', $star);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('ratings'))>0){
+            $ratings = $request->get('ratings');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
+                foreach($ratings as $key => $rating){
+                    $start = intval($rating);
+                    $end = $rating + 1;
+                    if($key == 0){
+                        $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
+                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+                        });
+                    }else{
+                        $query = $query->orWhere(function ($query_inner) use ($ratings,$start,$end) {
+                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+                        });
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('countries'))>0){
+            $countries = $request->get('countries');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($countries) {
+                foreach($countries as $key => $country){
+                    if($key == 0){
+                        $query = $query->where('country', $country);
+                    }else{
+                        $query = $query->orWhere('country', $country);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('cities'))>0){
+            $cities = $request->get('cities');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($cities) {
+                foreach($cities as $key => $city){
+                    if($key == 0){
+                        $query = $query->where('city', $city);
+                    }else{
+                        $query = $query->orWhere('city', $city);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0){
+            $hotel_id_data = $hotelmaster->get();
+            $hotel_id_array = [];
+            foreach($hotel_id_data as $value){
+                array_push($hotel_id_array,$value->hotel_id);
+            }
+            $hotelprices = $hotelprices->whereIn('hotel_id',$hotel_id_array);
+        }
+
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
         } 
@@ -78,17 +151,6 @@ class HotelPricesController extends Controller
             $hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
         }
 
-        // if($request->get('created_at') != Null && $request->get('created_at') != ''){
-        //     $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
-        //     $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
-        //     $hotelprices = $hotelprices->whereBetween(
-        //      'created_at', array(
-        //          $start_date,
-        //          $end_date
-        //      )
-        //  );
-        // }
-
         if($request->get('min_price') != Null && $request->get('min_price') != ''){
             $hotelprices = $hotelprices->whereBetween(
              'raw_price', array(
@@ -110,7 +172,6 @@ class HotelPricesController extends Controller
             $search_meal_plan = $request->get('meal_plan');
             if($search_meal_plan == 'empty'){
                 $hotelprices = $hotelprices->whereNull('mealplan_included_name');
-                // dd("condition obtained ".$search_meal_plan);
             } else if($search_meal_plan == 'not-empty'){
                 $hotelprices = $hotelprices->whereNotNull('mealplan_included_name');
             }
@@ -145,17 +206,6 @@ class HotelPricesController extends Controller
             });
         }
 
-        // if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
-        //     $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
-        //     $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();
-        //     $hotelprices = $hotelprices->whereBetween(
-        //      'checkin_date', array(
-        //          $start_date,
-        //          $end_date
-        //      )
-        //  );
-        // }
-
         if(count($request->get('days'))>0){
             $days = $request->get('days');
             $hotelprices = $hotelprices->where(function ($query) use ($days) {
@@ -169,12 +219,12 @@ class HotelPricesController extends Controller
                 }
                 return $query;
             });
-        }        
+        }
 
         $statistics = [];
-        $statistics['avg_price'] = $hotelprices->avg('raw_price');
-        $statistics['max_price'] = $hotelprices->max('raw_price');
-        $statistics['min_price'] = $hotelprices->min('raw_price');
+        $statistics['avg_price'] = $hotelprices->avg('raw_price') ?: 0;
+        $statistics['max_price'] = $hotelprices->max('raw_price') ?: 0;
+        $statistics['min_price'] = $hotelprices->min('raw_price') ?: 0;
 
         $totalData = $hotelprices->count();
         $totalFiltered = $totalData; 

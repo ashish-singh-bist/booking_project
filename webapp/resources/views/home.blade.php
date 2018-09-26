@@ -1,13 +1,27 @@
 @extends('adminlte::page')
 
-@section('title', 'AdminLTE')
+@section('title', 'LimeHome')
 
 @section('content')
     <!-- content wrapper. contains page content -->
     <div class="content-panel">
         <!-- content header (page header) -->
         <section class="content-header">
-            <h1>Dashboard</h1>
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 text-right">
+                    <span class="custome_badge bg-warning script_status">
+                        Scraper Status:- {{ ucwords($custom_config->script_status) }}
+                        @if($custom_config->script_status == 'running')
+                            ({{ $custom_config->started_at->toDateTime()->format('M d h:i A') }})
+                        @else
+                            ({{ $custom_config->ended_at->toDateTime()->format('M d h:i A') }})
+                        @endif
+                    </span>
+                </div>
+            </div>
         </section>
         <!-- end of content header (page header) -->
         <!-- main content-->
@@ -29,7 +43,7 @@
                         <span class="info-box-icon bg-yellow"><i class="ion ion-ios-people-outline"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Property</span>
-                            <span class="info-box-number">Active:- {{$p_active_count}} <br>Total:- {{$p_total_count}}</span>
+                            <span class="info-box-number"><span class="font-normal">Active:- </span>{{$p_active_count}} <br><span class="font-normal">Total:- </span>{{$p_total_count}}</span>
                         </div>
                     </div>
                 </div>
@@ -66,16 +80,16 @@
                           <tr>
                             <td>{{ $stat->date->toDateTime()->format('Y M d') }}</td>
                             <td>{{ $stat->total_property }}</td>
-                            <td><span class="custome_badge bg-success">{{ $stat->property_parsed }}</span></td>
+                            <td>{{ $stat->property_parsed }}</td>
                             <td>
                                 <span class="custome_badge bg-success">{{ number_format(($stat->property_parsed*100)/$stat->total_property) }}%</span>
                             </td>
                             <td>
                               <span class="custome_badge bg-danger">{{ 100 - number_format(($stat->property_parsed*100)/$stat->total_property) }}%</span>
                             </td>
-                            <td>{{ $stat->price_parsed }}</td>
-                            <td>{{ $stat->room_details_parsed }}</td>
-                            <td>{{ $stat->rooms_availability_parsed }}</td>
+                            <td>{{ number_format($stat->price_parsed,0 , '' , ',') }}</td>
+                            <td>{{ number_format($stat->room_details_parsed,0 , '' , ',') }}</td>
+                            <td>{{ number_format($stat->rooms_availability_parsed,0 , '' , ',') }}</td>
                           </tr>              
                       @endforeach
                     </tbody></table>
@@ -87,5 +101,4 @@
             </div>
         </section>
     </div>
-
-@stop
+@endsection
