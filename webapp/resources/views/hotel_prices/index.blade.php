@@ -210,9 +210,6 @@
                                         </div>
                                         <div class="box-body">
                                             <select class="form-control filter_class" id="room_types" multiple="multiple">
-                                                @foreach($room_type_list as $room_type)
-                                                    <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
-                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -270,7 +267,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4 col-sm-12 text-right">
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Hotel Name</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class select2-hotel_names" id="hotel_names" multiple="multiple"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 text-right">
                                     <a id='filter_apply' class="btn btn-success">Apply Filters</a>
                                 </div>
                             </div>
@@ -285,7 +294,13 @@
                         <div class="box-body table-responsive">
                             <table class="table table-bordered" id="hotel_prices">
                                 <thead><tr>
-                                    @foreach (config('app.hotel_prices_header_key') as $value) <th>{{$value}}</th> @endforeach
+                                    @foreach (config('app.hotel_prices_header_key') as $key => $value)
+                                        @if($key == 'raw_price')
+                                            <th>{{$value}}(&euro;)</th>
+                                        @else
+                                            <th>{{$value}}</th>
+                                        @endif
+                                    @endforeach
                                 </tr></thead>
                             </table>
                         </div>
@@ -319,13 +334,28 @@
                     style: 'multi'
                 },
                 dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>rt<'bottom'ip><'clear'>",
-                buttons: [
-                    // 'copyHtml5',
-                    // 'excelHtml5',
-                    // 'csvHtml5',
-                    // 'pdfHtml5'
-                    'csvHtml5'
-                ],
+                buttons: [{
+                          text: 'Export CSV',
+                          action: function (e, dt, node, config)
+                          {
+                            $.ajax({
+                                @if(isset($id))
+                                    "url": "{!! route('hotel_prices.index.getData') !!}?id={{$id}}?export=csv",
+                                @else
+                                    "url": "{!! route('hotel_prices.index.getData') !!}?export=csv",
+                                @endif
+                                "data": dt.ajax.params(),
+                                "success": function(res, status, xhr) {
+                                    var csvData = new Blob([res], {type: 'text/csv;charset=utf-8;'});
+                                    var csvURL = window.URL.createObjectURL(csvData);
+                                    var tempLink = document.createElement('a');
+                                    tempLink.href = csvURL;
+                                    tempLink.setAttribute('download', 'data.csv');
+                                    tempLink.click();
+                                }
+                            });
+                          }
+                        }],
                 ajax: {
                     @if(isset($id))
                         url: "{!! route('hotel_prices.index.getData') !!}?id={{$id}}",
@@ -365,13 +395,14 @@
                         d.max_persons = max_persons;
                         d.cities = $("#cities").val();
                         d.countries = $("#countries").val();
+                        d.hotel_names = $("#hotel_names").val();
                     },
-                    // "dataSrc": function(json_data){
-                    //     console.log(json_data + "dfs");
-                    // },
-                   dataFilter: function(response) {
+                    dataFilter: function(response) {
                         var statistics = JSON.parse(response)['statistics'];
-                        console.log(statistics);
+                        var room_array = JSON.parse(response)['room_array'];
+                        var room_types = $("#room_types").val();
+                        $("#room_types").empty().select2( { data : room_array, placeholder: 'Select room type' });
+                        $('#room_types').val(room_types).trigger('change');
                         $("#statistics").html('<div><span class="p_badge"><b>Max Price : </b>&euro;'+statistics['max_price'].toFixed(2)+'</span>|<span class="p_badge"><b>Min Price : </b>&euro;'+statistics['min_price'].toFixed(2)+'</span>|<span class="p_badge"><b>Avg. Price : </b>&euro;'+statistics['avg_price'].toFixed(2)+'</span></div>');
                         return response;
                     },
@@ -381,10 +412,6 @@
                     @endforeach
                 ]
             });
-
-            // $('.filter_class, .filter-outer-box input').on('change', function(e) {
-            //     oTable.draw();
-            // });
 
             $('#filter_apply').on('click', function(e) {
                 oTable.draw();
@@ -408,14 +435,6 @@
                 $("#checkin_date_to").val('');
                 $("#checkin_date_from").val('');
                 $("#room_types").val('').trigger('change');
-                // $('input[name="max_persons[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
-                // $('input[name="days[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
                 $("#meal_plan").val('').trigger('change');
@@ -423,14 +442,7 @@
                 $("#others_desc").val('').trigger('change');
                 $(".select2-country").val('').trigger('change');
                 $(".select2-city").val('').trigger('change');
-                // $('input[name="stars[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
-                // $('input[name="ratings[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
+                $(".select2-hotel_names").val('').trigger('change');
                 $('.flat-icheck').iCheck('uncheck');
                 resetSlider();
                 oTable.draw();
@@ -462,11 +474,33 @@
                 allowClear: true,
             });
 
+            $('#hotel_names').select2({
+                placeholder: 'Select a hotel',
+                allowClear: true,
+                minimumInputLength: 3,
+                ajax: {
+                    url: '{{route("get_filter_list")}}',
+                    dataType: 'json',
+                    data: function (params) {
+                      var query = {
+                        search: params.term,
+                        type: 'HotelName'
+                      }
+                      return query;
+                    },
+                    processResults: function (data) {
+                        console.log(data)
+                        return {
+                          results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
             $('#countries').select2({
-                //data: ['s','y','z'],
                 placeholder: 'Select a country',
                 allowClear: true,
-                //minimumResultsForSearch: 5,
                 minimumInputLength: 3,
                 ajax: {
                     url: '{{route("get_filter_list")}}',
@@ -476,8 +510,6 @@
                         search: params.term,
                         type: 'Country'
                       }
-
-                      // Query parameters will be ?search=[term]&type=public
                       return query;
                     },
                     processResults: function (data) {
@@ -491,10 +523,8 @@
             });
 
             $('#cities').select2({
-                //data: ['s','y','z'],
                 placeholder: 'Select a city',
                 allowClear: true,
-                //minimumResultsForSearch: 5,
                 minimumInputLength: 3,
                 ajax: {
                     url: '{{route("get_filter_list")}}',
@@ -504,8 +534,6 @@
                         search: params.term,
                         type: 'City'
                       }
-
-                      // Query parameters will be ?search=[term]&type=public
                       return query;
                     },
                     processResults: function (data) {

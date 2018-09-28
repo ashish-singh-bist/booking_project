@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use App\RoomDetails;
 use Carbon\Carbon;
+use Response;
 
 class RoomDetailsController extends Controller
 {
@@ -27,10 +28,11 @@ class RoomDetailsController extends Controller
     public function getData(Request $request)
     {
         $columns = [];
+        $columns_header = [];
         foreach (config('app.room_details_header_key') as $key => $value){
             array_push($columns,$key);
+            array_push($columns_header,$value);
         }
-
         $roomdetails = new RoomDetails();
         if($request->get('id') != Null && $request->get('id') != ''){
             $roomdetails = $roomdetails->where('hotel_id',$request->get('id'));
@@ -86,23 +88,57 @@ class RoomDetailsController extends Controller
         //      )
         //  );
         // }
-        $totalData = $roomdetails->count();
-        $totalFiltered = $totalData;
 
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
-        $dir = $request->input('order.0.dir');
+        $dir = $request->input('order.0.dir');        
 
-        $roomdetails_data = $roomdetails->offset(intval($start))
-                     ->limit(intval($limit))
-                     ->orderBy($order,$dir)
-                     ->get();
+        #############################################################################
+        if($request->get('export') != null && $request->get('export') == 'csv'){
+            $roomdetails_data = $roomdetails->offset(intval($start))
+                         ->limit(intval(config('app.data_export_row_limit')))
+                         ->orderBy($order,$dir)
+                         ->get();            
+            $headers = array(
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=file.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+
+            $callback = function() use ($roomdetails_data, $columns, $columns_header)
+            {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns_header);
+
+                foreach($roomdetails_data as $row) {
+                    $row->checkin_date =  $row->checkin_date->toDateTime()->format('y-m-d');
+                    $data_row = [];
+                    foreach ($columns as $key) {
+                        array_push($data_row, $row->{$key});
+                    }
+                    fputcsv($file, $data_row);
+                }
+                fclose($file);
+            };
+            return Response::stream($callback, 200, $headers);
+        }#############################################################################
+        else{
+            $totalData = $roomdetails->count();
+            $totalFiltered = $totalData;
+
+            $roomdetails_data = $roomdetails->offset(intval($start))
+                         ->limit(intval($limit))
+                         ->orderBy($order,$dir)
+                         ->get();
+        }                   
 
         for($i=0; $i < count($roomdetails_data); $i++)
         {
             $roomdetails_data[$i]['created_at'] = $roomdetails_data[$i]['created_at'];
-            $roomdetails_data[$i]['checkin_date'] =  $roomdetails_data[$i]['checkin_date']->toDateTime()->format('Y M d');
+            $roomdetails_data[$i]['checkin_date'] =  $roomdetails_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
         }
 
         $json_data = array(

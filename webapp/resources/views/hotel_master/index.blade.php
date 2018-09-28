@@ -196,12 +196,28 @@
                     style: 'multi'
                 },
                 dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>rt<'bottom'ip><'clear'>",
-                buttons: [
-                    // 'copyHtml5',
-                    // 'excelHtml5',
-                    'csvHtml5',
-                    // 'pdfHtml5'
-                ],
+                buttons: [{
+                          text: 'Export CSV',
+                          action: function (e, dt, node, config)
+                          {
+                            $.ajax({
+                                @if(isset($id))
+                                    "url": "{!! route('hotel_master.getData') !!}?id={{$id}}?export=csv",
+                                @else
+                                    "url": "{!! route('hotel_master.getData') !!}?export=csv",
+                                @endif
+                                "data": dt.ajax.params(),
+                                "success": function(res, status, xhr) {
+                                    var csvData = new Blob([res], {type: 'text/csv;charset=utf-8;'});
+                                    var csvURL = window.URL.createObjectURL(csvData);
+                                    var tempLink = document.createElement('a');
+                                    tempLink.href = csvURL;
+                                    tempLink.setAttribute('download', 'data.csv');
+                                    tempLink.click();
+                                }
+                            });
+                          }
+                        }],
                 ajax: {
                     @if(isset($id))
                         url: "{!! route('hotel_master.getData') !!}?id={{$id}}",

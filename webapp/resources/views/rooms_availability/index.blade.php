@@ -117,9 +117,9 @@
                 <div class="col-xs-12">
                     <div class="box box-primary">
                         <div class="box-body table-responsive">
-                            <table class="table table-bordered" id="room_details">
+                            <table class="table table-bordered" id="rooms_availability">
                                 <thead><tr>
-                                    @foreach (config('app.room_details_header_key') as $value) <th>{{$value}}</th> @endforeach
+                                    @foreach (config('app.rooms_availability_header_key') as $value) <th>{{$value}}</th> @endforeach
                                 </tr></thead>
                             </table>
                         </div>
@@ -141,7 +141,7 @@
     <script type="text/javascript">
         $(function() {
             $.fn.dataTable.ext.errMode = 'none';
-            var oTable = $('#room_details').DataTable({
+            var oTable = $('#rooms_availability').DataTable({
                 "aLengthMenu": [5, 10, 25, 50, 100, 500, 1000],
                 "iDisplayLength": 100,
                 "sPaginationType" : "full_numbers",
@@ -152,18 +152,33 @@
                     style: 'multi'
                 },
                 dom: "<'row'<'col-sm-2'l><'col-sm-6'B>>rt<'bottom'ip><'clear'>",
-                buttons: [
-                    // 'copyHtml5',
-                    // 'excelHtml5',
-                    // 'csvHtml5',
-                    // 'pdfHtml5'
-                    'csvHtml5'
-                ],                
+                buttons: [{
+                          text: 'Export CSV',
+                          action: function (e, dt, node, config)
+                          {
+                            $.ajax({
+                                @if(isset($id))
+                                    "url": "{!! route('rooms_availability.index.getData') !!}?id={{$id}}?export=csv",
+                                @else
+                                    "url": "{!! route('rooms_availability.index.getData') !!}?export=csv",
+                                @endif
+                                "data": dt.ajax.params(),
+                                "success": function(res, status, xhr) {
+                                    var csvData = new Blob([res], {type: 'text/csv;charset=utf-8;'});
+                                    var csvURL = window.URL.createObjectURL(csvData);
+                                    var tempLink = document.createElement('a');
+                                    tempLink.href = csvURL;
+                                    tempLink.setAttribute('download', 'data.csv');
+                                    tempLink.click();
+                                }
+                            });
+                          }
+                        }],                
                 ajax: {
                     @if(isset($id))
-                        url: "{!! route('room_details.index.getData') !!}?id={{$id}}",
+                        url: "{!! route('rooms_availability.index.getData') !!}?id={{$id}}",
                     @else
-                        url: "{!! route('room_details.index.getData') !!}",
+                        url: "{!! route('rooms_availability.index.getData') !!}",
                     @endif                    
                     data: function (d) {
                         d.room_types = $("#room_types").val();
@@ -174,8 +189,18 @@
                     }
                 },                
                 columns: [
-                    @foreach (config('app.room_details_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, @endforeach
-                ]
+                    @foreach (config('app.rooms_availability_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, @endforeach
+                ],
+                drawCallback: function () {
+                    $('.popoverMsg').popover({
+                        "html": true,
+                        trigger: 'manual',
+                        placement: 'left',
+                        "content": function () {
+                            return "<div>Popover content</div>";
+                        }
+                    })
+                }
             });
 
             $('#filter_apply').on('click', function(e) {
@@ -195,7 +220,15 @@
                 placeholder: 'Select room type',
                 allowClear: true,
                 //minimumResultsForSearch: 5,
-            });             
+            });
+
+            $('table').on('click', function(e){
+                if($('.popoverMsg').length>1){
+                    console.log($('.popoverMsg').length);
+                    $('.popoverMsg').popover('hide');
+                }
+                $(e.target).popover('toggle');
+            });
         });
     </script>
 @endsection

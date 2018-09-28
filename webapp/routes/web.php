@@ -62,3 +62,5 @@ Route::post('/config', 'HomeController@configUpdate')->name('config_update');
 Route::get('/get_filter_list', 'HomeController@getFilterList')->name('get_filter_list');
 Route::get('/restart_parser', 'HomeController@restartParser')->name('restart_parser');
 Route::get('/stop_parser', 'HomeController@stopParser')->name('stop_parser');
+
+Route::get('/export_csv', 'HomeController@exportCSV')->name('export_csv');

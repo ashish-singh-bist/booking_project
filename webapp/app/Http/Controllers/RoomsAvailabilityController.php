@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use App\RoomsAvailability;
+use Response;
 
 class RoomsAvailabilityController extends Controller
 {
@@ -28,8 +29,10 @@ class RoomsAvailabilityController extends Controller
     public function getData(Request $request)
     {
         $columns = [];
+        $columns_header =[];
         foreach (config('app.rooms_availability_header_key') as $key => $value){
             array_push($columns,$key);
+            array_push($columns_header,$value);
         }
 
         $roomsavailability = new RoomsAvailability();
@@ -90,24 +93,58 @@ class RoomsAvailabilityController extends Controller
         //      )
         //  );
         // } 
-        
-        $totalData = $roomsavailability->count();
-        $totalFiltered = $totalData; 
 
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
-            
-        $roomsavailability_data = $roomsavailability->offset((int)$start)
-                     ->limit((int)$limit)
-                     ->orderBy($order,$dir)
-                     ->get();
+
+        #############################################################################
+        if($request->get('export') != null && $request->get('export') == 'csv'){
+            $roomsavailability_data = $roomsavailability->offset(intval($start))
+                         ->limit(intval(config('app.data_export_row_limit')))
+                         ->orderBy($order,$dir)
+                         ->get();                       
+            $headers = array(
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=file.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+
+            $callback = function() use ($roomsavailability_data, $columns, $columns_header)
+            {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns_header);
+
+                foreach($roomsavailability_data as $row) {
+                    $row->checkin_date =  $row->checkin_date->toDateTime()->format('y-m-d');
+                    $data_row = [];
+                    foreach ($columns as $key) {
+                        array_push($data_row, $row->{$key});
+                    }
+                    fputcsv($file, $data_row);
+                }
+                fclose($file);
+            };
+            return Response::stream($callback, 200, $headers);
+        }#############################################################################   
+        else{
+            $totalData = $roomsavailability->count();
+            $totalFiltered = $totalData; 
+
+            $roomsavailability_data = $roomsavailability->offset((int)$start)
+                         ->limit((int)$limit)
+                         ->orderBy($order,$dir)
+                         ->get();
+        }                  
 
         for($i=0; $i < count($roomsavailability_data); $i++)
         {
             //$roomsavailability_data[$i]['created_at'] = $roomsavailability_data[$i]['created_at'];
-            $roomsavailability_data[$i]['checkin_date'] =  $roomsavailability_data[$i]['checkin_date']->toDateTime()->format('Y M d');
+            // $roomsavailability_data[$i]['room_type'] = '<span class="popoverMsg">'. $roomsavailability_data[$i]['room_type'] .'</span>';
+            $roomsavailability_data[$i]['checkin_date'] =  $roomsavailability_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
         }
 
         $json_data = array(

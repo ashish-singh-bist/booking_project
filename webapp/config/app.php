@@ -229,7 +229,7 @@ return [
     ],    
 
     'hotel_prices_header_key' => [
-        'hotel_id' => 'Hotel Id',
+        'hotel_title' => 'Hotel Title',
         'checkin_date' => 'Check In',
         'number_of_days' => 'Days',
         'number_of_guests' => 'Guests',
@@ -239,7 +239,7 @@ return [
         'mealplan_included_name' => 'Meal plan Included Name',
         'mealplan_desc' => 'Meal plan Desc',
         'cancellation_type' => 'Cancellation Type',
-        'cancellation_desc' => 'Cancellation Desc',
+        // 'cancellation_desc' => 'Cancellation Desc',
         'other_desc' => 'Other Desc',
         'created_at' => 'Create Time',
     ],
@@ -262,4 +262,5 @@ return [
     ],
 
     'scraper_path' => env('SCRAPER_PATH', ''),
+    'data_export_row_limit' => env('DATA_EXPORT_ROW_LIMIT', 5000),
 ];

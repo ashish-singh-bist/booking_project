@@ -8,6 +8,8 @@ use App\HotelPrices;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDatetime;
 use App\HotelMaster;
+use Response;
+use DB;
 
 class HotelPricesController extends Controller
 {
@@ -18,22 +20,32 @@ class HotelPricesController extends Controller
 
     public function index(Request $request)
     {
-        $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
+        // $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
         $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
         $other_desc_list = HotelPrices::select('other_desc')->distinct()->get()->toArray();
-        
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices.index',['id'=>$request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
+            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
         }else{
-            return view('hotel_prices.index', ['room_type_list' => $room_type_list, 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
+            return view('hotel_prices.index', ['cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
         }        
     }
 
     public function getData(Request $request)
     {
         $columns = [];
+        $columns_header = [];
         foreach (config('app.hotel_prices_header_key') as $key => $value){
             array_push($columns,$key);
+            array_push($columns_header,$value);
+        }
+
+        $hotel_name_list = HotelMaster::select('hotel_id','hotel_name', DB::raw('SUM(total) as total'))
+                    ->groupBy('hotel_id')
+                    ->get();
+
+        $hotel_name_array= [];
+        foreach ($hotel_name_list as $item){
+            $hotel_name_array[$item->hotel_id] = $item->hotel_name;
         }
 
         $hotelprices = new HotelPrices();
@@ -100,7 +112,21 @@ class HotelPricesController extends Controller
             });
         }
 
-        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0){
+        if(count($request->get('hotel_names'))>0){
+            $hotel_name = $request->get('hotel_names');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($hotel_name) {
+                foreach($hotel_name as $key => $name){
+                    if($key == 0){
+                        $query = $query->where('hotel_name', $name);
+                    }else{
+                        $query = $query->orWhere('hotel_name', $name);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
             foreach($hotel_id_data as $value){
@@ -221,30 +247,82 @@ class HotelPricesController extends Controller
             });
         }
 
-        $statistics = [];
-        $statistics['avg_price'] = $hotelprices->avg('raw_price') ?: 0;
-        $statistics['max_price'] = $hotelprices->max('raw_price') ?: 0;
-        $statistics['min_price'] = $hotelprices->min('raw_price') ?: 0;
-
-        $totalData = $hotelprices->count();
-        $totalFiltered = $totalData; 
-
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
+
+        #############################################################################
+        if($request->get('export') != null && $request->get('export') == 'csv'){
+            $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
+                         ->limit(intval(config('app.data_export_row_limit')))
+                         ->orderBy($order,$dir)
+                         ->get();             
+            $headers = array(
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=file.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+
+            $callback = function() use ($hotelprices_data, $columns, $columns_header, $hotel_name_array)
+            {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns_header);
+
+                foreach($hotelprices_data as $row) {
+                    $row->checkin_date =  $row->checkin_date->toDateTime()->format('Y-m-d');
+                    $row->hotel_title = $hotel_name_array[$row->hotel_id];
+                    $row->other_desc =  json_encode($row->other_desc);
+                    $data_row = [];
+                    foreach ($columns as $key) {
+                        array_push($data_row, $row->{$key});
+                    }
+                    fputcsv($file, $data_row);
+                }
+                fclose($file);
+            };
+            return Response::stream($callback, 200, $headers);
+        }#############################################################################
+        else{
+            $room_array = [];
+            $hotelprices_roomtype = clone $hotelprices;
+            $room_type_array = $hotelprices_roomtype->select('room_type')->distinct()->get()->toarray();
+            for($i=0; $i < count($room_type_array); $i++)
+            {
+                $temp_array = [];
+                $temp_array['id'] = $room_type_array[$i][0];
+                $temp_array['text'] = $room_type_array[$i][0];
+                array_push($room_array,$temp_array);
+            }
             
-        $hotelprices_data = $hotelprices->offset(intval($start))
-                     ->limit(intval($limit))
-                     ->orderBy($order,$dir)
-                     ->get();
+            $statistics = [];
+            $statistics['avg_price'] = $hotelprices->avg('raw_price') ?: 0;
+            $statistics['max_price'] = $hotelprices->max('raw_price') ?: 0;
+            $statistics['min_price'] = $hotelprices->min('raw_price') ?: 0;
+
+            $totalData = $hotelprices->count();
+            $totalFiltered = $totalData;
+
+            $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
+                         ->limit(intval($limit))
+                         ->orderBy($order,$dir)
+                         ->get();            
+        }
 
         for($i=0; $i < count($hotelprices_data); $i++)
         {
-            //dd($hotelprices_data[$i]['created_at']);
-            //$hotelprices_data[$i]['created_at'] = date('Y-m-d H:i:s',strtotime($hotelprices_data[$i]['created_at']));
-            $hotelprices_data[$i]['raw_price'] = "&euro;" . $hotelprices_data[$i]['raw_price'];
-            $hotelprices_data[$i]['checkin_date'] =  $hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y M d');
+            $hotelprices_data[$i]['hotel_title'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']];
+            $hotelprices_data[$i]['raw_price'] = $hotelprices_data[$i]['raw_price'];
+            $hotelprices_data[$i]['checkin_date'] =  $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
+            if($hotelprices_data[$i]['cancellation_desc']!= ''){
+                $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'] ." ( ".$hotelprices_data[$i]['cancellation_desc']. " )";    
+            }
+            else{
+                $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'];
+            }
+            
         }
         
         $json_data = array(
@@ -252,7 +330,8 @@ class HotelPricesController extends Controller
                     "recordsTotal"    => intval($totalData),  
                     "recordsFiltered" => intval($totalFiltered), 
                     "data"            => $hotelprices_data,
-                    "statistics" => $statistics
+                    "statistics"      => $statistics,
+                    "room_array"      => $room_array
                     );
             
         echo json_encode($json_data);

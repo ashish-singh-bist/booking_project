@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use App\HotelMaster;
 use Carbon\Carbon;
+use Response;
 
 class HotelMasterController extends Controller
 {
@@ -28,8 +29,10 @@ class HotelMasterController extends Controller
     public function getData(Request $request)
     {
         $columns = [];
+        $columns_header =[];
         foreach (config('app.hotel_master_header_key') as $key => $value){
             array_push($columns,$key);
+            array_push($columns_header,$value);
         }
 
         $hotelmaster = new HotelMaster();
@@ -79,17 +82,6 @@ class HotelMasterController extends Controller
             $hotelmaster = $hotelmaster->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
         }
 
-        // if($request->get('created_at') != Null && $request->get('created_at') != ''){
-        //     $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
-        //     $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
-        //     $hotelmaster = $hotelmaster->whereBetween(
-        //         'created_at', array(
-        //             $start_date,
-        //             $end_date
-        //         )
-        //     );
-        // }
-
         if(count($request->get('countries'))>0){
             $countries = $request->get('countries');
             $hotelmaster = $hotelmaster->where(function ($query) use ($countries) {
@@ -135,28 +127,55 @@ class HotelMasterController extends Controller
             });
         }
 
-        $statistics = [];
-        $statistics['avg_rating'] = $hotelmaster->avg('booking_rating') ?: 0;
-        $statistics['max_rating'] = $hotelmaster->max('booking_rating') ?: 0;
-        $statistics['min_rating'] = $hotelmaster->min('booking_rating') ?: 0;
-
-        // $hotelmaster = $hotelmaster->where('lng_lat', 'near', [
-        //     '$geometry' => ['type' => 'Point', 'coordinates' => [51.33631274, 12.39401847]],
-        //     '$maxDistance' => 200000,
-        // ]);
-        // print_r($hotelmaster);
-        $totalData = $hotelmaster->count();
-        $totalFiltered = $totalData; 
-
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
 
-        $hotelmaster_data = $hotelmaster->offset(intval($start))
-                     ->limit(intval($limit))
-                     ->orderBy($order,$dir)
-                     ->get();
+        #############################################################################
+        if($request->get('export') != null && $request->get('export') == 'csv'){
+            $hotelmaster_data = $hotelmaster->offset(intval($start))
+                         ->limit(intval(config('app.data_export_row_limit')))
+                         ->orderBy($order,$dir)
+                         ->get();                       
+            $headers = array(
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=file.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+
+            $callback = function() use ($hotelmaster_data, $columns, $columns_header)
+            {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns_header);
+
+                foreach($hotelmaster_data as $row) {
+                    $data_row = [];
+                    foreach ($columns as $key) {
+                        array_push($data_row, $row->{$key});
+                    }
+                    fputcsv($file, $data_row);
+                }
+                fclose($file);
+            };
+            return Response::stream($callback, 200, $headers);
+        }#############################################################################
+        else{
+            $statistics = [];
+            $statistics['avg_rating'] = $hotelmaster->avg('booking_rating') ?: 0;
+            $statistics['max_rating'] = $hotelmaster->max('booking_rating') ?: 0;
+            $statistics['min_rating'] = $hotelmaster->min('booking_rating') ?: 0;
+
+            $totalData = $hotelmaster->count();
+            $totalFiltered = $totalData; 
+
+            $hotelmaster_data = $hotelmaster->offset(intval($start))
+                         ->limit(intval($limit))
+                         ->orderBy($order,$dir)
+                         ->get();            
+        }                     
         
         for($i=0; $i < count($hotelmaster_data); $i++)
         {

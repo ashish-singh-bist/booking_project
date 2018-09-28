@@ -15,7 +15,7 @@ class PropertyUrl extends Eloquent
      * @var array
      */
     protected $fillable = [
-        'city','url',
+        'city','url','hotel_id','is_active',
     ];
 
     /**

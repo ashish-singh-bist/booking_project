@@ -11,6 +11,7 @@ use App\StatsBooking;
 use App\PropertyUrl;
 use App\HotelPrices;
 use Carbon\Carbon;
+use Response;
 
 class HomeController extends Controller
 {
@@ -72,11 +73,13 @@ class HomeController extends Controller
     public function getFilterList(Request $request)
     {
         if($request->get('type') == 'Country'){
-            $filter_list = HotelMaster::select('country')->where('country', 'like',$request->get('search') . '%')->distinct()->get()->toArray();
+            $filter_list = HotelMaster::select('country')->where('country', 'like', '%' .$request->get('search') . '%')->distinct()->get()->toArray();
         }elseif($request->get('type') == 'City'){
-            $filter_list = HotelMaster::select('city')->where('city', 'like',$request->get('search') . '%')->distinct()->get()->toArray();
+            $filter_list = HotelMaster::select('city')->where('city', 'like', '%' .$request->get('search') . '%')->distinct()->get()->toArray();
         }
-
+        elseif($request->get('type')=='HotelName'){
+            $filter_list = HotelMaster::select('hotel_name')->where('hotel_name', 'like', '%' .$request->get('search') . '%')->distinct()->get()->toArray();
+        }
         $final_array = [];
         foreach($filter_list as $item) {
             $temp['id'] = $item[0];
@@ -111,4 +114,42 @@ class HomeController extends Controller
         }        
         return redirect()->back();
     }
+
+    public function exportCSV()
+    {
+        $headers = array(
+            "Content-type" => "plain/html",
+            "Content-Disposition" => "attachment; filename=file.csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $data_array = HotelPrices::limit(100)->get();
+        //dd($data_array);
+        $columns = [];
+        $columns_header = [];
+
+        foreach (config('app.hotel_prices_header_key') as $key => $value){
+            array_push($columns,$key);
+            array_push($columns_header,$key);
+        }        
+
+        $callback = function() use ($data_array, $columns, $columns_header)
+        {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns_header);
+
+            foreach($data_array as $row) {
+
+                $data_row = [];
+                foreach ($columns as $key) {
+                    array_push($data_row, $row->{$key});
+                }
+                fputcsv($file, $data_row);
+            }
+            fclose($file);
+        };
+        return Response::stream($callback, 200, $headers);
+    }    
 }

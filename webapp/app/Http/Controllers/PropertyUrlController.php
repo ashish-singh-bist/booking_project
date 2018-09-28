@@ -55,29 +55,83 @@ class PropertyUrlController extends Controller
         return redirect()->route('property_url.index');
     }
 
-    public function getData()
+    public function getData(Request $request)
     {
-        $propertyurl = PropertyUrl::all();
-        return Datatables::of($propertyurl)
-        ->addColumn('link', function ($propertyurl) {
-            $disable_param = $propertyurl->hotel_id ? '' : ' disabled';
-            $html =  '<a href="' . route('hotel_master.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Hotel Details"><i class="fa fa-info fa-size"></i></a>';
-            $html .=  '&nbsp;<a href="' . route('hotel_prices.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Hotel Prices"><i class="fa fa-euro fa-size"></i></a>';
-            $html .=  '&nbsp;<a href="' . route('room_details.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Room Details"><i class="fa fa-home fa-size"></i></a>';
-            $html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl->hotel_id . '" class="btn btn-xs btn-success' . $disable_param . '" title="Room Availability"><i class="fa fa-font fa-size"></i></a>';
-            return $html;
-        })
-        ->addColumn('action', function ($propertyurl) {
-            if($propertyurl->is_active == '1'){
-                $html = '&nbsp;<button  prop_id="'. $propertyurl->_id.'" status="1" class="btn btn-xs btn-success update_status" title="Active"><i class="fa fa-check"></i> Active</button>';
+        $columns = ['url', 'hotel_name', 'hotel_id', 'city', 'created_at', 'updated_at', 'link', 'action'];
+
+        $propertyurl = new PropertyUrl();
+
+        if(count($request->get('countries'))>0){
+            $countries = $request->get('countries');
+            $propertyurl = $propertyurl->where(function ($query) use ($countries) {
+                foreach($countries as $key => $country){
+                    if($key == 0){
+                        $query = $query->where('country', $country);
+                    }else{
+                        $query = $query->orWhere('country', $country);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('cities'))>0){
+            $cities = $request->get('cities');
+            $propertyurl = $propertyurl->where(function ($query) use ($cities) {
+                foreach($cities as $key => $city){
+                    if($key == 0){
+                        $query = $query->where('city', $city);
+                    }else{
+                        $query = $query->orWhere('city', $city);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        $totalData = $propertyurl->count();
+        $totalFiltered = $totalData;
+
+        $limit = $request->input('length');
+        $start = $request->input('start');
+        $order = $columns[$request->input('order.0.column')];
+        $dir = $request->input('order.0.dir');
+
+        $propertyurl_data = $propertyurl->offset(intval($start))
+                     ->limit(intval($limit))
+                     ->orderBy($order,$dir)
+                     ->get();
+
+        for($i=0; $i < count($propertyurl_data); $i++)
+        {
+            $link_html= '';            
+            if(isset($propertyurl_data[$i]->hotel_id)){
+                $link_html =  '<a href="' . route('hotel_master.index') . '?id=' . $propertyurl_data[$i]->hotel_id. '" class="btn btn-xs btn-success" title="Hotel Details"><i class="fa fa-info fa-size"></i></a>';
+                $link_html .=  '&nbsp;<a href="' . route('hotel_prices.index') . '?id=' .$propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Hotel Prices"><i class="fa fa-euro fa-size"></i></a>';
+                $link_html .=  '&nbsp;<a href="' . route('room_details.index') . '?id=' . $propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Room Details"><i class="fa fa-home fa-size"></i></a>';
+                $link_html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Room Availability"><i class="fa fa-font fa-size"></i></a>';
             }
-            else{
-                $html = '&nbsp;<button  prop_id="'. $propertyurl->_id.'" status="0" class="btn btn-xs btn-danger update_status" title="Inactive"><i class="fa fa-close"></i> Inactive</button>';
+
+            $action_html = '';
+            if($propertyurl_data[$i]->is_active == 1){
+                $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="1" class="btn btn-xs btn-success update_status" title="Active"><i class="fa fa-check"></i> Active</button>';
             }
-            return $html;
-        })
-        ->rawColumns([ 'link','action' ])
-        ->make(true);
+            else if($propertyurl_data[$i]->is_active == 0){
+                $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="0" class="btn btn-xs btn-danger update_status" title="Inactive"><i class="fa fa-close"></i> Inactive</button>';
+            }
+
+            $propertyurl_data[$i]['link'] = $link_html;
+            $propertyurl_data[$i]['action'] = $action_html;
+        }
+        
+        $json_data = array(
+                    "draw"            => intval($request->input('draw')),
+                    "recordsTotal"    => intval($totalData),
+                    "recordsFiltered" => intval($totalFiltered),
+                    "data"            => $propertyurl_data,
+                    );
+            
+        echo json_encode($json_data);
     }
 
     public function updatePropertyUrlStatus(Request $request)
