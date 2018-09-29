@@ -15,8 +15,8 @@ class Booking(Master):
     #self.params['proxy_ip'] = { 'https': 'socks5://127.0.0.1:9050',}
     self.proxy_list = self.initProxies()
     self.params['return_error_page'] = 1
-  def __del__(self):
-        print('Destructor called, Booking deleted..............')
+  #def __del__(self):
+  #      print('Destructor called, Booking deleted..............')
   def initProxies(self):
     arr_proxies = []
     if self.obj_helper.isFileExists( "proxies.txt" ):
@@ -26,25 +26,38 @@ class Booking(Master):
         if line:
           arr_proxies.append(line)
     return arr_proxies
-  def parseProductDetails(self,url,file_name,checkin_date,checkout_date):
-    data_dic = {}
-    html_dir_path = self.obj_config.html_dir_path
+  def getProxyIp(self):
     ###################
     if self.proxy_list:      
       proxy_ip = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]
-      self.params['proxy_ip'] = { 'https': proxy_ip,}
+      return proxy_ip
+      #self.params['proxy_ip'] = { 'https': proxy_ip,}
       #print(self.params['proxy_ip'])    
+    ###################  
+    return ""
+  def parseProductDetails(self,url,checkin_date,checkout_date):
+    data_dic = {}
+    html_dir_path = self.obj_config.html_dir_path
     ###################
+    # if self.proxy_list:      
+    #   proxy_ip = self.proxy_list[ random.randint(0,len(self.proxy_list)-1) ]
+    #   self.params['proxy_ip'] = { 'https': proxy_ip,}
+    #   #print(self.params['proxy_ip'])    
+    # ###################
     CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
     self.params['headers'] = { 'user-agent':CHROME_UA , 'host' : 'www.booking.com' , 'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8','Accept-Language':'en-US,en;q=0.9','Accept-Encoding':'gzip, deflate, br','Upgrade-Insecure-Requests':1 }
     
-    html = ""
-    #html = self.obj_helper.readFile( "booking_new.html" ) 
-    if self.obj_helper.isFileExists( html_dir_path + file_name ):
-      html = self.obj_helper.readFile( html_dir_path + file_name ) 
-      print( "File Already exists" )      
-    else:      
-      html = self.obj_req.getPage( "GET", url , self.params )
+    html = ""    
+    #get one random proxy and set
+    proxy_ip = self.getProxyIp()
+    if proxy_ip:
+      self.params['proxy_ip'] = { 'https': proxy_ip,}
+    ########################
+    #for now we are using tor proxy.
+    self.params['proxy_ip'] = { 'https': 'socks5://127.0.0.1:9050',}
+    ########################
+    ###########################
+    html = self.obj_req.getPage( "GET", url , self.params )
     if not html:
       print("\nCould not get html for url:"+url)
       self.obj_helper.writeFile( "Log.txt" , "\nCould not get html for:"+url )   #save log in log file
@@ -52,34 +65,21 @@ class Booking(Master):
     result_dict = {}
     if html:
       html = re.sub(r'&amp;', '&', html,flags=re.S|re.M)
-      html = re.sub(r'&nbsp;', ' ', html,flags=re.S|re.M)
-      if not self.obj_helper.isFileExists( html_dir_path+file_name ):
-        print( "Saved successfully................." )
-        self.obj_helper.writeFileNewUTF( html_dir_path+file_name , html )   #save log in log file      
-      dict_hotel_info = {}
-
-      #print( "\nBeautiful soup start:" + str(datetime.datetime.now()) )
+      html = re.sub(r'&nbsp;', ' ', html,flags=re.S|re.M)      
+      dict_hotel_info = {}      
       #<div id="wrap-hotelpage-top" class="wrap-hotelpage-top" >
-      header_html = self.obj_helper.getContainerHtml(html,'div','id','wrap-hotelpage-top')
-      #print( "\nBeautiful soup end:" + str(datetime.datetime.now()) )
-
-      #html = re.sub(r'\n+', '', html,flags=re.S|re.M)
-      #self.obj_helper.writeFileNewUTF( "booking_new.html" , html )   #save log in log file
-      #exit()
-      #<h2 class="hp__hotel-name" id="hp_hotel_name">Le Méridien Goa, Calangute</h2>
-      #title = self.obj_helper.getContainerText(html,'h2','id','hp_hotel_name')
+      header_html = self.obj_helper.getContainerHtml(html,'div','id','wrap-hotelpage-top')      
+      
+      #<h2 class="hp__hotel-name" id="hp_hotel_name">Le Méridien Goa, Calangute</h2>      
       title = self.obj_helper.getContainerText(header_html,'h2','id','hp_hotel_name')
       if title:        
         dict_hotel_info['hotel_name'] = self.obj_helper.removeHtml(title)
 
-      #<span class="hp_address_subtitle js-hp_address_subtitle jq_tooltip " data-source="top_link" data-coords="," data-node_tt_id="location_score_tooltip" title="">
-      #location = self.obj_helper.getContainerText(html,'span','class','hp_address_subtitle')
+      #<span class="hp_address_subtitle js-hp_address_subtitle jq_tooltip " data-source="top_link" data-coords="," data-node_tt_id="location_score_tooltip" title="">      
       location = self.obj_helper.getContainerText(header_html,'span','class','hp_address_subtitle')
       if location:
         dict_hotel_info['location'] = self.obj_helper.removeHtml(location)
-      #<span class="hp__hotel_ratings">
-      #star_ratings = self.obj_helper.getContainerText(html,'span','class','hp__hotel_ratings')
-      #star_ratings = self.obj_helper.getContainerHtml(html,'span','class','hp__hotel_ratings')      
+      #<span class="hp__hotel_ratings">      
       star_ratings = self.obj_helper.getContainerHtml(header_html,'span','class','hp__hotel_ratings')      
       if star_ratings:
         #<svg class="bk-icon -sprite-ratings_stars_4"
@@ -88,11 +88,13 @@ class Booking(Master):
           m = re.search(r'ratings_stars_(\d+)', temp_class,re.S)
           if m:          
             dict_hotel_info['hotel_stars'] = m.group(1)
+            dict_hotel_info['self_verified'] = 0
           else:            
             #<svg class="bk-icon -sprite-ratings_circles_4"             
             m = re.search(r'sprite-ratings_circles_(\d+)', temp_class,re.S)
             if m:              
               dict_hotel_info['hotel_stars'] = int(m.group(1))
+              dict_hotel_info['self_verified'] = 1
       
       #atnm: 'Hotels',
       m = re.search(r'atnm\s*:\s*\'(.+?)\'', html,re.S)
@@ -103,15 +105,12 @@ class Booking(Master):
       longitude_temp = ""
       #booking.env.b_map_center_latitude = 15.55752173;      
       m = re.search(r'booking.env.b_map_center_latitude\s*=\s*(.+?)\;', html,re.S)
-      if m:
-        #dict_hotel_info['latitude'] = m.group(1)
-        latitude_temp = float(m.group(1))        
-
-      
+      if m:        
+        latitude_temp = float(m.group(1))
+              
       #booking.env.b_map_center_longitude = 73.75393242; 
       m = re.search(r'booking.env.b_map_center_longitude\s*=\s*(.+?)\;', html,re.S)
-      if m:
-        #dict_hotel_info['longitude'] = m.group(1)
+      if m:        
         longitude_temp = float(m.group(1))
 
       if latitude_temp and longitude_temp:
@@ -154,6 +153,19 @@ class Booking(Master):
       ##################################################################
       result_dict['checkin_date'] = checkin_date
       result_dict['checkout_date'] = checkout_date
+
+      #####################
+      dict_hotel_info['guests_favorite_area'] = 0
+      #<p class="geo_information">
+      #Laut unabhängiger Gästebewertungen ist das der beliebteste Teil von Leipzig.
+      #Laut unabhängiger Gästebewertungen ist das der beliebteste Teil von Leipzig.
+      #</p>
+      temp_p_html = self.obj_helper.getContainerText(html,'p','class','geo_information')
+      if temp_p_html:
+        if 'Laut unabhängiger Gästebewertungen ist das der beliebteste Teil von' in temp_p_html:
+          dict_hotel_info['guests_favorite_area'] = 1
+      #####################
+
       #<div class="av-summary-content">
       summary_html = self.obj_helper.getContainerHtml(html,'div','class','av-summary-content')
       #checkin and checkout date is input string so no need to parse it from html
@@ -232,7 +244,7 @@ class Booking(Master):
                 for temp_key in room_equp_desc_price_dict['dict_price_desc']:
                   dict_price_info[temp_key] = room_equp_desc_price_dict['dict_price_desc'][temp_key]                
             arr_price_info.append(dict_price_info)
-          dict_room_info[room_type]['price_info'] = arr_price_info          
+          dict_room_info[room_type]['price_info'] = arr_price_info
           arr_room_data_final.append(dict_room_info)
           result_dict['price_details'] = arr_room_data_final
         #print( "\nprice scrape end:"+str(datetime.datetime.now()) )
@@ -241,7 +253,7 @@ class Booking(Master):
     ##################        
     final_result = {}
     final_result['hotel_info'] = dict_hotel_info    
-    final_result['hotel_info']['hotel_equipments'] = hotel_equipments
+    final_result['hotel_info']['hotel_equipments'] = json.dumps(hotel_equipments)
     final_result['room_price_details'] = {}
     if 'price_details' in result_dict and result_dict['price_details']:
       final_result['room_price_details']['price_details'] = result_dict['price_details']
@@ -347,6 +359,7 @@ class Booking(Master):
               arr_other_desc.append(temp_desc)
         if len(arr_other_desc):
           dict_price_desc['other_desc'] = arr_other_desc
+    dict_room_equipment = json.dumps(dict_room_equipment)
     return { 'dict_room_equipment':dict_room_equipment , 'dict_price_desc':dict_price_desc }
 
 

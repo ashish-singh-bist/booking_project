@@ -45,8 +45,8 @@ Route::get('/hotel_prices_getdata', 'HotelPricesController@getData')->name('hote
 Route::post('/get_hotel_equipment', 'HotelPricesController@getHotelEquipment')->name('getHotelEquipment');
 Route::post('/get_room_equipment', 'HotelPricesController@getRoomEquipment')->name('getRoomEquipment');
 
-Route::get('/hotel_prices/hotel_analysis', 'ChartPricesController@index')->name('hotel_analysis.index');
-Route::get('/hotel_prices/hotel_analysis_getChartData', 'ChartPricesController@getChartData')->name('hotel_analysis.getChartData');
+Route::get('/hotel_prices/chart_prices', 'ChartPricesController@index')->name('chart_prices.index');
+Route::get('/hotel_prices/chart_prices_getChartData', 'ChartPricesController@getChartData')->name('chart_prices.getChartData');
 
 Route::get('/room_details', 'RoomDetailsController@index')->name('room_details.index');
 Route::get('/room_details_getdata', 'RoomDetailsController@getData')->name('room_details.index.getData');
