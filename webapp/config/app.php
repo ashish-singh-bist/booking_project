@@ -235,6 +235,7 @@ return [
         'number_of_guests' => 'Guests',
         'room_type' => 'Room Type',
         'raw_price' => 'Room Price',
+        'available_only' => 'Available Only',
         'max_persons' => 'Max Persons',
         'mealplan_included_name' => 'Meal plan Included Name',
         'mealplan_desc' => 'Meal plan Desc',
@@ -246,7 +247,7 @@ return [
 
     'room_details_header_key' => [
         'hotel_id' => 'Hotel Id',
-        'checkin_date' => 'Check In',
+        // 'checkin_date' => 'Check In',
         'room_type' => 'Room Type',
         // 'room_equipments' => 'Room Equipments',
         'created_at' => 'Create Time',

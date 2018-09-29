@@ -8,6 +8,7 @@ use App\HotelPrices;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDatetime;
 use App\HotelMaster;
+use App\RoomDetails;
 use Response;
 use DB;
 
@@ -20,13 +21,14 @@ class HotelPricesController extends Controller
 
     public function index(Request $request)
     {
-        // $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
+        $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
         $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
         $other_desc_list = HotelPrices::select('other_desc')->distinct()->get()->toArray();
+        $category_list = HotelMaster::select('hotel_category')->distinct()->get()->toArray();
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
+            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list, 'category_list'=>$category_list, 'room_type_list' => $room_type_list]);
         }else{
-            return view('hotel_prices.index', ['cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list]);
+            return view('hotel_prices.index', ['cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list, 'category_list'=>$category_list, 'room_type_list' => $room_type_list]);
         }        
     }
 
@@ -126,7 +128,21 @@ class HotelPricesController extends Controller
             });
         }
 
-        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0){
+        if(count($request->get('categories'))>0){
+            $categories = $request->get('categories');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($categories) {
+                foreach($categories as $key => $category){
+                    if($key == 0){
+                        $query = $query->where('hotel_category', $category);
+                    }else{
+                        $query = $query->orWhere('hotel_category', $category);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
             foreach($hotel_id_data as $value){
@@ -152,7 +168,7 @@ class HotelPricesController extends Controller
                 }
                 return $query;
             });
-        }        
+        }
 
         if(count($request->get('max_persons'))>0){
             $max_persons = $request->get('max_persons');
@@ -167,8 +183,23 @@ class HotelPricesController extends Controller
                 }
                 return $query;
             });
-        }           
+        }
 
+        if(count($request->get('available_only'))>0){
+            $available_only = $request->get('available_only');
+            $hotelprices = $hotelprices->where(function ($query) use ($available_only) {
+                foreach($available_only as $key => $availableonly){
+                    if($key == 0){
+                        $query = $query->where('available_only', intval($availableonly));
+                    }else{
+
+                        $query = $query->orWhere('available_only', intval($availableonly));
+                    }
+                }
+                return $query;
+            });
+        }
+        
         if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
             $hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
         }
@@ -178,13 +209,12 @@ class HotelPricesController extends Controller
         }
 
         if($request->get('min_price') != Null && $request->get('min_price') != ''){
-            $hotelprices = $hotelprices->whereBetween(
-             'raw_price', array(
-                 (int)$request->get('min_price'),
-                 (int)$request->get('max_price')
-             )
-         );
+            $hotelprices = $hotelprices->where('raw_price','>=',(int)$request->get('min_price')); 
         }
+
+        if($request->get('max_price') != Null && $request->get('max_price') != ''){
+            $hotelprices = $hotelprices->where('raw_price','<=',(int)$request->get('max_price')); 
+        }          
 
         if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
             $hotelprices = $hotelprices->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
@@ -202,6 +232,7 @@ class HotelPricesController extends Controller
                 $hotelprices = $hotelprices->whereNotNull('mealplan_included_name');
             }
         }
+
         if(count($request->get('cancellation_type'))>0){
             $cancel_type = $request->get('cancellation_type');
             $hotelprices = $hotelprices->where(function ($query) use ($cancel_type) {
@@ -273,8 +304,9 @@ class HotelPricesController extends Controller
 
                 foreach($hotelprices_data as $row) {
                     $row->checkin_date =  $row->checkin_date->toDateTime()->format('Y-m-d');
+                    $row->raw_price =  str_replace(".",",",$row->raw_price);
                     $row->hotel_title = $hotel_name_array[$row->hotel_id];
-                    $row->other_desc =  json_encode($row->other_desc);
+                    $row->other_desc =  join("|",$row->other_desc);
                     $data_row = [];
                     foreach ($columns as $key) {
                         array_push($data_row, $row->{$key});
@@ -314,15 +346,17 @@ class HotelPricesController extends Controller
         for($i=0; $i < count($hotelprices_data); $i++)
         {
             $hotelprices_data[$i]['hotel_title'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']];
-            $hotelprices_data[$i]['raw_price'] = $hotelprices_data[$i]['raw_price'];
+
+            $hotelprices_data[$i]['room_type'] = $hotelprices_data[$i]['room_type'] . ' <br><button class="btn btn-info btn-xs hotel_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$hotelprices_data[$i]['hotel_id']] . '"><i class="fa fa-info-circle"> H-E</i></button> <button class="btn btn-info btn-xs room_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="room equipment" data-title="' . $hotelprices_data[$i]['room_type'] . '"><i class="fa fa-info-circle"> R-E</i></button>';
+            $hotelprices_data[$i]['raw_price'] = str_replace(".",",",$hotelprices_data[$i]['raw_price']);
             $hotelprices_data[$i]['checkin_date'] =  $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
+
             if($hotelprices_data[$i]['cancellation_desc']!= ''){
                 $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'] ." ( ".$hotelprices_data[$i]['cancellation_desc']. " )";    
             }
             else{
                 $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'];
             }
-            
         }
         
         $json_data = array(
@@ -335,5 +369,17 @@ class HotelPricesController extends Controller
                     );
             
         echo json_encode($json_data);
+    }
+
+    public function getHotelEquipment(Request $request)
+    {
+        $hotel_master = HotelMaster::select('hotel_equipments')->where('hotel_id',$request->get('hotel_id'))->first();
+        return response()->json(["status"=>"success","data"=>$hotel_master->hotel_equipments]);
+    }
+
+    public function getRoomEquipment(Request $request)
+    {
+        $room_types = RoomDetails::select('room_equipment')->where('room_type',$request->get('room_type'))->latest()->first();
+        return response()->json(["status"=>"success", "data"=>$room_types->room_equipment]);
     }
 }

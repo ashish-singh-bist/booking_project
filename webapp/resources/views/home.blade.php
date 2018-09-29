@@ -66,13 +66,13 @@
                     <table class="table table-bordered">
                       <tbody><tr>
                         <th>Date</th>
-                        <th>Total</th>
-                        <th>Parsed</th>
+                        <th>Total Property</th>
+                        <th>Property Parsed</th>
                         <th>Success(%)</th>
                         <th>Pending</th>
                         <th>Price Parsed</th>
-                        <th>Room Details Parsed</th>
-                        <th>Availability Parsed</th>
+                        {{-- <th>Room Details Parsed</th> --}}
+                        {{-- <th>Availability Parsed</th> --}}
                       </tr>
 
 
@@ -88,8 +88,8 @@
                               <span class="custome_badge bg-danger">{{ 100 - number_format(($stat->property_parsed*100)/$stat->total_property) }}%</span>
                             </td>
                             <td>{{ number_format($stat->price_parsed,0 , '' , ',') }}</td>
-                            <td>{{ number_format($stat->room_details_parsed,0 , '' , ',') }}</td>
-                            <td>{{ number_format($stat->rooms_availability_parsed,0 , '' , ',') }}</td>
+                            {{-- <td>{{ number_format($stat->room_details_parsed,0 , '' , ',') }}</td> --}}
+                            {{-- <td>{{ number_format($stat->rooms_availability_parsed,0 , '' , ',') }}</td> --}}
                           </tr>              
                       @endforeach
                     </tbody></table>

@@ -57,7 +57,7 @@ class PropertyUrlController extends Controller
 
     public function getData(Request $request)
     {
-        $columns = ['url', 'hotel_name', 'hotel_id', 'city', 'created_at', 'updated_at', 'link', 'action'];
+        $columns = ['hotel_name', 'hotel_id', 'city', 'created_at', 'updated_at', 'link', 'action'];
 
         $propertyurl = new PropertyUrl();
 
@@ -104,12 +104,18 @@ class PropertyUrlController extends Controller
 
         for($i=0; $i < count($propertyurl_data); $i++)
         {
+            $link_hotel_name = '';
+            if($propertyurl_data[$i]->hotel_name != '' && $propertyurl_data[$i]->hotel_name != Null){
+                $link_hotel_name =  '<a href="' . $propertyurl_data[$i]->url . '" target="_blank" title="'. $propertyurl_data[$i]->hotel_name .'">'. $propertyurl_data[$i]->hotel_name .'</a>';
+            }else{
+                $link_hotel_name =  '<a href="' .$propertyurl_data[$i]->url . '" target="_blank" title="'. $propertyurl_data[$i]->url .'">'. $propertyurl_data[$i]->url .'</a>';
+            }
             $link_html= '';            
             if(isset($propertyurl_data[$i]->hotel_id)){
                 $link_html =  '<a href="' . route('hotel_master.index') . '?id=' . $propertyurl_data[$i]->hotel_id. '" class="btn btn-xs btn-success" title="Hotel Details"><i class="fa fa-info fa-size"></i></a>';
                 $link_html .=  '&nbsp;<a href="' . route('hotel_prices.index') . '?id=' .$propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Hotel Prices"><i class="fa fa-euro fa-size"></i></a>';
                 $link_html .=  '&nbsp;<a href="' . route('room_details.index') . '?id=' . $propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Room Details"><i class="fa fa-home fa-size"></i></a>';
-                $link_html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Room Availability"><i class="fa fa-font fa-size"></i></a>';
+                // $link_html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Room Availability"><i class="fa fa-font fa-size"></i></a>';
             }
 
             $action_html = '';
@@ -119,7 +125,7 @@ class PropertyUrlController extends Controller
             else if($propertyurl_data[$i]->is_active == 0){
                 $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="0" class="btn btn-xs btn-danger update_status" title="Inactive"><i class="fa fa-close"></i> Inactive</button>';
             }
-
+            $propertyurl_data[$i]['hotel_name'] = $link_hotel_name;
             $propertyurl_data[$i]['link'] = $link_html;
             $propertyurl_data[$i]['action'] = $action_html;
         }

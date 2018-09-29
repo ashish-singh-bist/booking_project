@@ -151,7 +151,7 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-6'B>>rt<'bottom'ip><'clear'>",
+                dom: "<'row'<'col-sm-2'li><'col-sm-10'B><'col-sm-10'p>>rt<'bottom'ip><'clear'>",
                 buttons: [{
                           text: 'Export CSV',
                           action: function (e, dt, node, config)

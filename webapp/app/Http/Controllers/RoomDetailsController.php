@@ -53,17 +53,6 @@ class RoomDetailsController extends Controller
             });
         }    
 
-        // if($request->get('created_at') != Null && $request->get('created_at') != ''){
-        //     $start_date = Carbon::parse($request->get('created_at'))->startOfDay();
-        //     $end_date = Carbon::parse($request->get('created_at'))->endOfDay();
-        //     $roomdetails = $roomdetails->whereBetween(
-        //      'created_at', array(
-        //          $start_date,
-        //          $end_date
-        //      )
-        //  );
-        // }
-
         if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
             $roomdetails = $roomdetails->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
         }
@@ -72,21 +61,12 @@ class RoomDetailsController extends Controller
             $roomdetails = $roomdetails->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
         }
 
-        if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
-            $roomdetails = $roomdetails->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
-        }
-        if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
-            $roomdetails = $roomdetails->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
-        }
-        // if($request->get('checkin_date') != Null && $request->get('checkin_date') != ''){
-        //     $start_date = Carbon::parse($request->get('checkin_date'))->startOfDay();
-        //     $end_date = Carbon::parse($request->get('checkin_date'))->endOfDay();
-        //     $roomdetails = $roomdetails->whereBetween(
-        //      'checkin_date', array(
-        //          $start_date,
-        //          $end_date
-        //      )
-        //  );
+        // Check-in date have been removed from Room_Detail Collections
+        // if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
+        //     $roomdetails = $roomdetails->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
+        // }
+        // if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
+        //     $roomdetails = $roomdetails->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
         // }
 
         $limit = $request->input('length');
@@ -114,7 +94,7 @@ class RoomDetailsController extends Controller
                 fputcsv($file, $columns_header);
 
                 foreach($roomdetails_data as $row) {
-                    $row->checkin_date =  $row->checkin_date->toDateTime()->format('y-m-d');
+                    // $row->checkin_date =  $row->checkin_date->toDateTime()->format('y-m-d');
                     $data_row = [];
                     foreach ($columns as $key) {
                         array_push($data_row, $row->{$key});
@@ -138,7 +118,7 @@ class RoomDetailsController extends Controller
         for($i=0; $i < count($roomdetails_data); $i++)
         {
             $roomdetails_data[$i]['created_at'] = $roomdetails_data[$i]['created_at'];
-            $roomdetails_data[$i]['checkin_date'] =  $roomdetails_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
+            // $roomdetails_data[$i]['checkin_date'] =  $roomdetails_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
         }
 
         $json_data = array(
@@ -148,7 +128,7 @@ class RoomDetailsController extends Controller
                     "data"            => $roomdetails_data   
                     );
             
-        echo json_encode($json_data);         
+        echo json_encode($json_data);
 
         // $roomdetails_data = Datatables::of($roomdetails_data)
         //     ->editColumn('created_at', function(RoomDetails $roomdetails_data) {
@@ -159,7 +139,6 @@ class RoomDetailsController extends Controller
         //         'recordsFiltered' => intval($totalFiltered),
         //     ])
         //     ->make(true);
-
         // return $roomdetails_data;
     }
 }

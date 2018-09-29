@@ -17,20 +17,19 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="box box-primary">
-                        <div class="box-header with-border">
+{{--                         <div class="box-header with-border">
                             <h3 class="box-title">Upload CSV File</h3>
-                        </div>
-                            {!! Form::open(array('url' => 'property_url', 'method' => 'POST', 'enctype' =>'multipart/form-data') ) !!}
+                        </div> --}}
+                            
                             <div class="box-body">
+                                {!! Form::open(array('url' => 'property_url', 'method' => 'POST', 'enctype' =>'multipart/form-data', 'class' => 'form-inline') ) !!}
                                 <div class="form-group">
-                                    {!! Form::label('name', 'Name') !!}
-                                    {!! Form::file('property_url_file', array('required' => 'required')) !!}
+                                    {!! Form::label('property_url_file', 'Upload CSV File') !!}
+                                    {!! Form::file('property_url_file', array('required' => 'required', 'class' => 'form-control')) !!}
                                 </div>
-                            </div>
-                            <div class="box-footer">
                                 {!! Form::submit('Upload', array('class' => 'btn btn-primary')) !!}
+                                {!! Form::close() !!}
                             </div>
-                            {!! Form::close() !!}
                     </div>
                 </div>
             </div>
@@ -82,9 +81,8 @@
                             <table class="table table-bordered" id="property-table">
                                 <thead>
                                     <tr>
-                                        <th>Url</th>
-                                        <th>Hotel Name</th>
-                                        <th>Hotel Id</th>
+                                        <th>Hotel Title/Url</th>
+                                        {{-- <th>Hotel Id</th> --}}
                                         <th>City</th>
                                         <th>Created At</th>
                                         <th>Updated At</th>
@@ -115,6 +113,7 @@
                 select: {
                     style: 'multi'
                 },
+                dom: "<'row'<'col-sm-2'li><'col-sm-10'f><'col-sm-10'p>>rt<'bottom'ip><'clear'>",
                 ajax: {
                         url: "{!! route('property_url.index.getData') !!}",
                     data: function (d) {
@@ -123,9 +122,9 @@
                     },
                 },
                 columns: [
-                    { data: 'url', name: 'url', 'render' : function ( data, type, row) { return '<a target="_blank" href="' + data + '">' + data + '</a>'; } },
+                    // { data: 'url', name: 'url', 'render' : function ( data, type, row) { return '<a target="_blank" href="' + data + '">' + data + '</a>'; } },
                     { data: 'hotel_name', name: 'hotel_name'},
-                    { data: 'hotel_id', name: 'hotel_id' },
+                    // { data: 'hotel_id', name: 'hotel_id' },
                     { data: 'city', name: 'city' },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'updated_at', name: 'updated_at' },

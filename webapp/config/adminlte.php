@@ -154,17 +154,23 @@ return [
              'icon_color'  => 'green',
         ],
         [
+             'text'        => 'Chart Prices',
+             'url'         => '/hotel_prices/chart_prices',
+             'icon'        => 'play',
+             'icon_color'  => 'green',
+        ],
+        [
              'text'        => 'Room Details',
              'url'         => '/room_details',
              'icon'        => 'play',
              'icon_color'  => 'green',
         ],
-        [
-             'text'        => 'Rooms Availability',
-             'url'         => '/rooms_availability',
-             'icon'        => 'play',
-             'icon_color'  => 'green',
-        ],
+        // [
+        //      'text'        => 'Rooms Availability',
+        //      'url'         => '/rooms_availability',
+        //      'icon'        => 'play',
+        //      'icon_color'  => 'green',
+        // ],
         [
              'text'        => 'Config',
              'url'         => '/config',

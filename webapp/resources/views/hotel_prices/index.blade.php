@@ -109,37 +109,41 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="box box-primary box-solid filter-box">
-                                                <div class="box-header">
-                                                    <h4 class="box-title">Price Range</h4>
-                                                </div>
-                                                <div class="box-body">
-                                                    <div id="slider-range"></div>
-                                                        <input class="slider-range-data" type="text" id="amount" readonly>
-                                                        <input class="slider-range-data" type="hidden" id="min_price" readonly>
-                                                        <input class="slider-range-data" type="hidden" id="max_price" readonly>
-                                                </div>
-                                            </div>
+                                <div class="col-sm-2">
+                                    <div class="box box-primary box-solid filter-box filter-box-fix-height">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Available Only</h4>
                                         </div>
-                                        <div class="col-md-12">
-                                            <div class="box box-primary box-solid filter-box">
-                                                <div class="box-header">
-                                                    <h4 class="box-title">Meal Plan</h4>
-                                                </div>
-                                                <div class="box-body">
-                                                    <select class="form-control filter_class" id="meal_plan">
-                                                        <option value="">Any</option>
-                                                        <option value="empty">Empty</option>
-                                                        <option value="not-empty">Not Empty</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                        <div class="box-body">
+                                            <ul>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="1"/> 1 room</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="2"/> 2 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="3"/> 3 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="4"/> 4 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="5"/> 5 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="6"/> 6 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="7"/> 7 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="8"/> 8 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="9"/> 9 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="10"/> 10 rooms</li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-sm-2">
+                                    <div class="box box-primary box-solid filter-box filter-box-fix-height">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Category</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <ul>
+                                            @foreach($category_list as $category)
+                                                <li><label><input class="flat-icheck"  type="checkbox" name="category[]" value="{{$category[0]}}"/> {{$category[0]}}</label></li>
+                                            @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>                                                            
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
@@ -210,10 +214,43 @@
                                         </div>
                                         <div class="box-body">
                                             <select class="form-control filter_class" id="room_types" multiple="multiple">
+                                                @foreach($room_type_list as $room_type)
+                                                    <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                                @endforeach                                     
                                             </select>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Price Range</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <div id="slider-range"></div>
+                                                <input class="slider-range-data" type="text" id="amount" readonly>
+                                                <input class="slider-range-data" type="hidden" id="min_price" readonly>
+                                                <input class="slider-range-data" type="hidden" id="max_price" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Meal Plan</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="meal_plan">
+                                                <option value="">Any</option>
+                                                <option value="empty">Empty</option>
+                                                <option value="not-empty">Not Empty</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-md-4 col-sm-12">
                                     <div class="box box-primary box-solid filter-box">
                                         <div class="box-header">
@@ -244,9 +281,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
                                 <div class="col-md-4 col-sm-12">
                                     <div class="box box-primary box-solid filter-box">
                                         <div class="box-header">
@@ -256,7 +290,10 @@
                                             <select class="form-control filter_class select2-country" id="countries" multiple="multiple"></select>
                                         </div>
                                     </div>
-                                </div>
+                                </div>                                
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-4 col-sm-12">
                                     <div class="box box-primary box-solid filter-box">
                                         <div class="box-header">
@@ -277,11 +314,9 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12 text-right">
+                                <div class="col-md-4 col-sm-12 text-right">
                                     <a id='filter_apply' class="btn btn-success">Apply Filters</a>
-                                </div>
+                                </div>                                
                             </div>
                         </div>
                     </div>
@@ -311,16 +346,40 @@
         <!-- end of main content-->
     </div>
     <!-- end of content wrapper. contains page content -->
+    <!-- Modal -->
+    <div id="equip_model" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('js')
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+{{--     <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script> --}}
     <script type="text/javascript">
         $(function () {
             $('#datepicker').datepicker();
         });
     </script>
     <script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
         $(function() {
             $.fn.dataTable.ext.errMode = 'none';
             var oTable = $('#hotel_prices').DataTable({
@@ -333,7 +392,14 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>rt<'bottom'ip><'clear'>",
+                scrollY:        "300px",
+                scrollX:        true,
+                scrollCollapse: true,
+                // fixedColumns:   {
+                //     leftColumns: 1
+                // },
+                deferLoading: false,
+                dom: "<'row'<'col-sm-2'li><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>p>>rt<'bottom'ip><'clear'>",
                 buttons: [{
                           text: 'Export CSV',
                           action: function (e, dt, node, config)
@@ -391,11 +457,21 @@
                         .map(function() {
                             return $(this).val();
                         }).get();
+                        var categories = $('input[name="category[]"]:checked')
+                        .map(function() {
+                            return $(this).val();
+                        }).get();
+                        var available_only = $('input[name="available_only[]"]:checked')
+                        .map(function() {
+                            return $(this).val();
+                        }).get();
                         d.days = days;
                         d.max_persons = max_persons;
                         d.cities = $("#cities").val();
                         d.countries = $("#countries").val();
                         d.hotel_names = $("#hotel_names").val();
+                        d.categories = categories;
+                        d.available_only = available_only;
                     },
                     dataFilter: function(response) {
                         var statistics = JSON.parse(response)['statistics'];
@@ -408,7 +484,8 @@
                     },
                 },
                 columns: [
-                    @foreach (config('app.hotel_prices_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, 
+                    @foreach (config('app.hotel_prices_header_key') as $key => $value) 
+                        { data: '{{$key}}', name: '{{$key}}' },
                     @endforeach
                 ]
             });
@@ -420,16 +497,21 @@
             $( "#slider-range" ).slider({
                 range: true,
                 min: 0,
-                max: 5000,
-                values: [ 0, 5000 ],
+                max: 500,
+                values: [ 0, 500 ],
                 change: function( event, ui ) { },
                 slide: function( event, ui ) {
                     $( "#min_price" ).val( ui.values[ 0 ] );
-                    $( "#max_price" ).val( ui.values[ 1 ] );
-                    $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+                    if(ui.values[ 1 ] >= 500){
+                        $( "#max_price" ).val( '' );
+                        $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] + "+" );
+                    }else{
+                        $( "#max_price" ).val( ui.values[ 1 ] );
+                        $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+                    }
                 }
             });
-            setTimeout(function(){ $( "#amount" ).val("$0" + " - $5000"); }, 1000);
+            setTimeout(function(){ $( "#amount" ).val("$0" + " - $500+"); }, 1000);
 
             $('#clear_filter').on('click',function(){
                 $("#checkin_date_to").val('');
@@ -451,12 +533,12 @@
             function resetSlider() {
                 var $slider = $("#slider-range");
                 var min_value = 0;
-                var max_value = 5000;
+                var max_value = 500;
                 $slider.slider("values", 0, min_value);
                 $slider.slider("values", 1, max_value);
                 $( "#min_price" ).val(0);
-                $( "#max_price" ).val(5000);
-                $( "#amount" ).val( "$" + min_value + " - $" + max_value );
+                $( "#max_price" ).val(500);
+                $( "#amount" ).val( "$" + min_value + " - $" + max_value + "+" );
             }
 
             $('#room_types').select2({
@@ -544,6 +626,76 @@
                     },
                     cache: true
                 }
+            });
+
+            $('#hotel_prices tbody').on('click', '.hotel_equip_popup', function() {
+                var data_title = $(this).attr("data-title");
+                var hotel_id = $(this).attr("hotel-id");
+                var data = {'hotel_id':hotel_id};
+                $.ajax({
+                    type: "POST",
+                    url: '{{route("getHotelEquipment")}}',
+                    dataType: "json",
+                    data: data,
+                    success:function(data){
+                        var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        var html = '';
+                        $.each(equipment_data, function(key, value){
+                            html += '<div class="col-sm-12"><h5>' + key + '</h5></div>';
+                            html_inner = '<div class="col-sm-12">';
+                            $.each(value, function(key, value){
+                                html_inner += '<div class="equip_badge">' + key + '</div>';
+                            });
+                            if(html_inner != '<div class="col-sm-12">'){
+                                html += html_inner + '</div>';
+                            }
+                        });
+                        if(html == ''){
+                            html = '<div class="col-sm-12">No data found.</div>';
+                        }                        
+                        $('#equip_model .modal-body').html(html);
+                        $('#equip_model h4').html('<b>Hotel Name:-</b> ' + data_title);
+                        $('#equip_model').modal('toggle');
+                        console.log(equipment_data);
+                    },
+                    error: function(error) {
+                        $('#equip_model .modal-body').html('Something Went Wrong');
+                        $('#equip_model h4').html('Warning');
+                        $('#equip_model').modal('toggle');
+                    }
+                });
+            });
+
+            $('#hotel_prices tbody').on('click', '.room_equip_popup', function() {
+                var room_type = $(this).attr("data-title");
+                var hotel_id = $(this).attr("hotel-id");
+                var data = {'room_type':room_type};
+                $.ajax({
+                    type: "POST",
+                    url: '{{route("getRoomEquipment")}}',
+                    dataType: "json",
+                    data: data,
+                    success:function(data){
+                        var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        var html = '<div class="col-sm-12">';
+                        $.each(equipment_data, function(key, value){
+                            html += '<div class="equip_badge">' + key + '</div>';
+                        });
+                        html += '</div>';
+                        if(html == '<div class="col-sm-12"></div>'){
+                            html = '<div class="col-sm-12">No data found.</div>';
+                        }
+                        $('#equip_model .modal-body').html(html);
+                        $('#equip_model h4').html('<b>Room Type:-</b> ' + room_type);
+                        $('#equip_model').modal('toggle');
+                        console.log(data);
+                    },
+                    error: function(error) {
+                        $('#equip_model .modal-body').html('Something Went Wrong');
+                        $('#equip_model h4').html('Warning');
+                        $('#equip_model').modal('toggle');
+                    }
+                });
             });
         });
     </script> 

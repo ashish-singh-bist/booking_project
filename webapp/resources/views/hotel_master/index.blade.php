@@ -195,7 +195,7 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>rt<'bottom'ip><'clear'>",
+                dom: "<'row'<'col-sm-2'li><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>p>>rt<'bottom'ip><'clear'>",
                 buttons: [{
                           text: 'Export CSV',
                           action: function (e, dt, node, config)
@@ -262,20 +262,7 @@
             });
 
             $('#clear_filter').on('click',function(){
-                // $('input[name="category[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
                 $('.flat-icheck').iCheck('uncheck');
-
-                // $('input[name="stars[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
-                // $('input[name="ratings[]"]:checked')
-                // .map(function() {
-                //     $(this).prop( "checked", false );
-                // });
                 $(".select2-country").val('').trigger('change');
                 $(".select2-city").val('').trigger('change');
                 $("#created_at_to").val('');
@@ -284,10 +271,8 @@
             });
 
             $('#countries').select2({
-                //data: ['s','y','z'],
                 placeholder: 'Select a country',
                 allowClear: true,
-                //minimumResultsForSearch: 5,
                 minimumInputLength: 3,
                 ajax: {
                     url: '{{route("get_filter_list")}}',
@@ -297,8 +282,6 @@
                         search: params.term,
                         type: 'Country'
                       }
-
-                      // Query parameters will be ?search=[term]&type=public
                       return query;
                     },
                     processResults: function (data) {
@@ -312,10 +295,8 @@
             });
 
             $('#cities').select2({
-                //data: ['s','y','z'],
                 placeholder: 'Select a city',
                 allowClear: true,
-                //minimumResultsForSearch: 5,
                 minimumInputLength: 3,
                 ajax: {
                     url: '{{route("get_filter_list")}}',
@@ -325,8 +306,6 @@
                         search: params.term,
                         type: 'City'
                       }
-
-                      // Query parameters will be ?search=[term]&type=public
                       return query;
                     },
                     processResults: function (data) {
@@ -339,6 +318,5 @@
                 }
             });
         });
-    
     </script>
 @endsection

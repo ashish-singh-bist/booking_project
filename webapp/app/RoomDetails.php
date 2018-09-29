@@ -15,7 +15,7 @@ class RoomDetails extends Eloquent
      * @var array
      */
     protected $fillable = [
-        'hotel_id','room_type','room_equipments',
+        'hotel_id','room_type','room_equipment',
     ];
 
     /**

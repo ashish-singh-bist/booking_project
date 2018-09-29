@@ -30,7 +30,7 @@
                         </div>
                         <div class="box-body">
                             <div class="row">
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <div class="box box-primary box-solid filter-box">
                                         <div class="box-header">
                                             <h4 class="box-title">CheckIn Date</h4>
@@ -58,7 +58,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-6">
                                     <div class="box box-primary box-solid filter-box">
                                         <div class="box-header">
@@ -88,9 +88,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 col-sm-12">
+                                <div class="col-md-4 col-sm-12">
                                     <div class="box box-primary box-solid filter-box">
                                         <div class="box-header">
                                             <h4 class="box-title">Room Type</h4>
@@ -104,10 +102,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-sm-12 text-right">
+                                <div class="col-md-2 col-sm-12 text-right">
                                     <a id='filter_apply' class="btn btn-success">Apply Filters</a>
                                 </div>    
-                            </div>                            
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -151,7 +149,7 @@
                 select: {
                     style: 'multi'
                 },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B>>rt<'bottom'ip><'clear'>",
+                dom: "<'row'<'col-sm-2'li><'col-sm-10'B><'col-sm-10'p>>rt<'bottom'ip><'clear'>",
                 buttons: [{
                           text: 'Export CSV',
                           action: function (e, dt, node, config)
@@ -184,8 +182,8 @@
                         d.room_types = $("#room_types").val();
                         d.created_at_to = $('#created_at_to').val();
                         d.created_at_from = $('#created_at_from').val();
-                        d.checkin_date_to = $('#checkin_date_to').val();
-                        d.checkin_date_from = $('#checkin_date_from').val();
+                        // d.checkin_date_to = $('#checkin_date_to').val();
+                        // d.checkin_date_from = $('#checkin_date_from').val();
                     }
                 },                
                 columns: [
@@ -199,8 +197,8 @@
 
             $('#clear_filter').on('click',function(){
                 $("#room_types").val('').trigger('change');
-                $("#checkin_date_to").val('');
-                $("#checkin_date_from").val('');
+                // $("#checkin_date_to").val('');
+                // $("#checkin_date_from").val('');
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
                 oTable.draw();

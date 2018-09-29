@@ -179,7 +179,6 @@ class HotelMasterController extends Controller
         
         for($i=0; $i < count($hotelmaster_data); $i++)
         {
-            //$hotelmaster_data[$i]['created_at'] = $hotelmaster_data[$i]['created_at'];
             $hotelmaster_data[$i]['hotel_id'] = '<a target="_blank" href="' . $hotelmaster_data[$i]['prop_url'] . '" title="View Property">' . $hotelmaster_data[$i]['hotel_id'] . '</a>';
         }
 
