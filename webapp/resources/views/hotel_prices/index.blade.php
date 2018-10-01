@@ -314,9 +314,53 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Guest Available</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="guest_available">
+                                                <option value="">Any</option>
+                                                <option value="empty">Empty</option>
+                                                <option value="not-empty">Not Empty</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                 <div class="col-md-4">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Self Verified</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="self_verified">
+                                                <option value="">Any</option>
+                                                <option value="1">Verified</option>
+                                                <option value="0">Not Verified</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Guest Favourite Area</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="guest_favourite">
+                                                <option value="">Any</option>
+                                                <option value="1">Favourite</option>
+                                                <option value="0">Not Favourite</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-4 col-sm-12 text-right">
                                     <a id='filter_apply' class="btn btn-success">Apply Filters</a>
-                                </div>                                
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -465,6 +509,7 @@
                         .map(function() {
                             return $(this).val();
                         }).get();
+                        d.guest_available = $('#guest_available').val();
                         d.days = days;
                         d.max_persons = max_persons;
                         d.cities = $("#cities").val();
@@ -472,6 +517,8 @@
                         d.hotel_names = $("#hotel_names").val();
                         d.categories = categories;
                         d.available_only = available_only;
+                        d.self_verified = $("#self_verified").val();
+                        d.guest_favourite = $("#guest_favourite").val();
                     },
                     dataFilter: function(response) {
                         var statistics = JSON.parse(response)['statistics'];
@@ -487,7 +534,26 @@
                     @foreach (config('app.hotel_prices_header_key') as $key => $value) 
                         { data: '{{$key}}', name: '{{$key}}' },
                     @endforeach
-                ]
+                ],
+                columnDefs: [
+                    { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6] },
+                    { "orderable": true, "targets": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+                    { "width": "120px", "targets": 0 },
+                    { "width": "60px", "targets": 1 },
+                    { "width": "30px", "targets": 2 },
+                    { "width": "100px", "targets": 3 },
+                    { "width": "40px", "targets": 4 },
+                    { "width": "40px", "targets": 5 },
+                    { "width": "40px", "targets": 6 },
+                    { "width": "40px", "targets": 7 },
+                    { "width": "30px", "targets": 8 },
+                    { "width": "30px", "targets": 9 },
+                    { "width": "100px", "targets": 10 },
+                    { "width": "50px", "targets": 11 },
+                    { "width": "100px", "targets": 16 },
+                    { "width": "100px", "targets": 17 }
+                ],
+                "order": [[ 7, "desc" ]]
             });
 
             $('#filter_apply').on('click', function(e) {
@@ -520,12 +586,15 @@
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
                 $("#meal_plan").val('').trigger('change');
+                $('#guest_available').val('').trigger('change');
                 $("#cancellation_type").val('').trigger('change');
                 $("#others_desc").val('').trigger('change');
                 $(".select2-country").val('').trigger('change');
                 $(".select2-city").val('').trigger('change');
                 $(".select2-hotel_names").val('').trigger('change');
                 $('.flat-icheck').iCheck('uncheck');
+                $('#self_verified').val('').trigger('change');
+                $('#guest_favourite').val('').trigger('change');
                 resetSlider();
                 oTable.draw();
             });

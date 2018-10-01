@@ -11,6 +11,7 @@ use App\HotelMaster;
 use App\RoomDetails;
 use Response;
 use DB;
+use App\PropertyUrl;
 
 class HotelPricesController extends Controller
 {
@@ -41,13 +42,16 @@ class HotelPricesController extends Controller
             array_push($columns_header,$value);
         }
 
-        $hotel_name_list = HotelMaster::select('hotel_id','hotel_name', DB::raw('SUM(total) as total'))
-                    ->groupBy('hotel_id')
-                    ->get();
-
+        $hotel_name_list = HotelMaster::select('hotel_id', 'hotel_name', 'hotel_category', 'hotel_stars', 'location', 'booking_rating','guests_favorite_area', 'self_verified', DB::raw('SUM(total) as total'))->groupBy('hotel_id')->get();
         $hotel_name_array= [];
         foreach ($hotel_name_list as $item){
-            $hotel_name_array[$item->hotel_id] = $item->hotel_name;
+            $hotel_name_array[$item->hotel_id] = ['hotel_name'=>$item->hotel_name, 'hotel_category'=>$item->hotel_category, 'hotel_stars'=>$item->hotel_stars , 'location'=>$item->location, 'booking_rating'=>$item->booking_rating, 'guests_favorite_area'=>$item->guests_favorite_area, 'self_verified'=>$item->self_verified];
+        }
+
+        $property_urls = PropertyUrl::select('hotel_id','url')->get();
+        $property_url_array = [];
+        foreach ($property_urls as $item){
+            $property_url_array[$item->hotel_id] = $item->url;
         }
 
         $hotelprices = new HotelPrices();
@@ -142,7 +146,25 @@ class HotelPricesController extends Controller
             });
         }
 
-        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0){
+        if($request->get('self_verified')!=Null && $request->get('self_verified')!=''){
+            $is_verified = $request->get('self_verified');
+            if($is_verified == '1'){
+                $hotelmaster = $hotelmaster->Where('self_verified','>',0);
+            } else if($is_verified == '0'){
+                $hotelmaster = $hotelmaster->whereNull('self_verified')->orWhere('self_verified','=',0);
+            }
+        }
+
+        if($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!=''){
+            $is_favourite = $request->get('guest_favourite');
+            if($is_favourite == '1'){
+                $hotelmaster = $hotelmaster->Where('guests_favorite_area','>',0);
+            } else if($is_favourite == '0'){
+                $hotelmaster = $hotelmaster->whereNull('guests_favorite_area')->orWhere('guests_favorite_area','=',0);
+            }
+        }
+
+        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0 || ($request->get('self_verified')!=Null && $request->get('self_verified')!='') || ($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!='')){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
             foreach($hotel_id_data as $value){
@@ -198,6 +220,15 @@ class HotelPricesController extends Controller
                 }
                 return $query;
             });
+        }
+
+        if($request->get('guest_available')!=Null && $request->get('guest_available')!=''){
+            $is_guest_available = $request->get('guest_available');
+            if($is_guest_available == 'empty'){
+                $hotelprices = $hotelprices->whereNull('number_of_guests')->orWhere('number_of_guests','=',0);
+            } else if($is_guest_available == 'not-empty'){
+                $hotelprices = $hotelprices->whereNotNull('number_of_guests')->orWhere('number_of_guests','>',0);
+            }
         }
         
         if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
@@ -305,8 +336,19 @@ class HotelPricesController extends Controller
                 foreach($hotelprices_data as $row) {
                     $row->checkin_date =  $row->checkin_date->toDateTime()->format('Y-m-d');
                     $row->raw_price =  str_replace(".",",",$row->raw_price);
-                    $row->hotel_title = $hotel_name_array[$row->hotel_id];
-                    $row->other_desc =  join("|",$row->other_desc);
+                    $row->hotel_title = $hotel_name_array[$row->hotel_id]['hotel_name'];
+                    $row->hotel_category = $hotel_name_array[$row->hotel_id]['hotel_category'];
+                    $row->hotel_stars = $hotel_name_array[$row->hotel_id]['hotel_stars'];
+                    $row->location = $hotel_name_array[$row->hotel_id]['location'];
+                    $row->booking_rating = $hotel_name_array[$row->hotel_id]['booking_rating'];
+                    $row->guests_favorite_area = $hotel_name_array[$row->hotel_id]['guests_favorite_area'];
+                    $row->self_verified = $hotel_name_array[$row->hotel_id]['self_verified'];
+                    if(count($row->other_desc) > 0){
+                        $row->other_desc =  join("|",$row->other_desc);
+                    }
+                    else{
+                        $row->other_desc =  '';
+                    }
                     $data_row = [];
                     foreach ($columns as $key) {
                         array_push($data_row, $row->{$key});
@@ -345,11 +387,24 @@ class HotelPricesController extends Controller
 
         for($i=0; $i < count($hotelprices_data); $i++)
         {
-            $hotelprices_data[$i]['hotel_title'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']];
+            $hotelprices_data[$i]['hotel_title'] = '<a class="hotel_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_name'] . '">' . $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_name'] . ' <i class="fa fa-info-circle"></i></a>';
 
-            $hotelprices_data[$i]['room_type'] = $hotelprices_data[$i]['room_type'] . ' <br><button class="btn btn-info btn-xs hotel_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$hotelprices_data[$i]['hotel_id']] . '"><i class="fa fa-info-circle"> H-E</i></button> <button class="btn btn-info btn-xs room_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="room equipment" data-title="' . $hotelprices_data[$i]['room_type'] . '"><i class="fa fa-info-circle"> R-E</i></button>';
+            $hotelprices_data[$i]['hotel_category'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_category'];
+            $hotelprices_data[$i]['hotel_stars'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_stars'];
+            $hotelprices_data[$i]['location'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['location'];
+            $hotelprices_data[$i]['booking_rating'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['booking_rating'];
+            $hotelprices_data[$i]['guests_favorite_area'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['guests_favorite_area'];
+            $hotelprices_data[$i]['self_verified'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['self_verified'];
+
+            $hotelprices_data[$i]['room_type'] = '<a class="room_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="room equipment" data-title="' . $hotelprices_data[$i]['room_type'] . '">' . $hotelprices_data[$i]['room_type'] . ' <i class="fa fa-info-circle"></i></a>';
             $hotelprices_data[$i]['raw_price'] = str_replace(".",",",$hotelprices_data[$i]['raw_price']);
-            $hotelprices_data[$i]['checkin_date'] =  $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
+
+
+            $checkin_date = $hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y-m-d');
+            $checkout_date = Carbon::parse($hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y-m-d'))->addDays($hotelprices_data[$i]['number_of_days'])->format('Y-m-d');
+
+            $url = $property_url_array[$hotelprices_data[$i]['hotel_id']] . "?checkin=" . $checkin_date . "&checkout=" . $checkout_date . "&selected_currency=EUR&group_adults=" . $hotelprices_data[$i]['number_of_guests'];
+            $hotelprices_data[$i]['checkin_date'] =  '<a href="' . $url . '" target="_blank">' . $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d') . "</a>";
 
             if($hotelprices_data[$i]['cancellation_desc']!= ''){
                 $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'] ." ( ".$hotelprices_data[$i]['cancellation_desc']. " )";    

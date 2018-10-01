@@ -127,6 +127,24 @@ class HotelMasterController extends Controller
             });
         }
 
+        if($request->get('self_verified')!=Null && $request->get('self_verified')!=''){
+            $is_verified = $request->get('self_verified');
+            if($is_verified == '1'){
+                $hotelmaster = $hotelmaster->Where('self_verified','>',0);
+            } else if($is_verified == '0'){
+                $hotelmaster = $hotelmaster->whereNull('self_verified')->orWhere('self_verified','=',0);
+            }
+        }
+
+        if($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!=''){
+            $is_favourite = $request->get('guest_favourite');
+            if($is_favourite == '1'){
+                $hotelmaster = $hotelmaster->Where('guests_favorite_area','>',0);
+            } else if($is_favourite == '0'){
+                $hotelmaster = $hotelmaster->whereNull('guests_favorite_area')->orWhere('guests_favorite_area','=',0);
+            }
+        }
+
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];

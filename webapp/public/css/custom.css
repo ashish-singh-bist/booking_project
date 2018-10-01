@@ -3,11 +3,16 @@
     padding: 10px;
 }
 table.dataTable{
-    width: 100% !important;
+    border-collapse: collapse;
+    clear: both;
+    margin: 0 auto;
+    table-layout: fixed;
+    /*width: 100% !important;*/
+    word-wrap:break-word;
 }
 .dataTable tr th, .dataTable tr td {
-    min-width: 80px;
-    max-width: 300px;
+    /*min-width: 80px;*/
+    /*max-width: 300px;*/
     overflow-wrap: break-word;
 }
 
@@ -152,8 +157,7 @@ table.dataTable{
     border-color: #1b6d85;
 }
 .room_equip_popup, .hotel_equip_popup{
-    background: lightblue;
-    color: #000;
+    cursor: pointer;
 }
 .font-normal {
     font-weight: normal !important;

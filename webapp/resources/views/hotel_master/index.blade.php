@@ -148,8 +148,38 @@
                                 </div>                            
                             </div>
                             <div class="row">
-                                <div class="col-md-12 col-sm-12 text-right">
-                                    <a id='filter_apply' class="btn btn-success">Apply Filters</a>
+                                <div class="col-md-12 col-sm-12">
+                                    <div class="col-md-4">
+                                        <div class="box box-primary box-solid filter-box">
+                                            <div class="box-header">
+                                                <h4 class="box-title">Self Verified</h4>
+                                            </div>
+                                            <div class="box-body">
+                                                <select class="form-control filter_class" id="self_verified">
+                                                    <option value="">Any</option>
+                                                    <option value="1">Verified</option>
+                                                    <option value="0">Not Verified</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="box box-primary box-solid filter-box">
+                                            <div class="box-header">
+                                                <h4 class="box-title">Guest Favourite Area</h4>
+                                            </div>
+                                            <div class="box-body">
+                                                <select class="form-control filter_class" id="guest_favourite">
+                                                    <option value="">Any</option>
+                                                    <option value="1">Favourite</option>
+                                                    <option value="0">Not Favourite</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-12 text-right">
+                                        <a id='filter_apply' class="btn btn-success">Apply Filters</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -244,6 +274,8 @@
                         d.categories = categories;
                         d.cities = $("#cities").val();
                         d.countries = $("#countries").val();
+                        d.self_verified = $("#self_verified").val();
+                        d.guest_favourite = $("#guest_favourite").val();
                     },
                     dataFilter: function(response) {
                         var statistics = JSON.parse(response)['statistics'];
@@ -265,6 +297,8 @@
                 $('.flat-icheck').iCheck('uncheck');
                 $(".select2-country").val('').trigger('change');
                 $(".select2-city").val('').trigger('change');
+                $("#self_verified").val('').trigger('change');
+                $("#guest_favourite").val('').trigger('change');
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
                 oTable.draw();
