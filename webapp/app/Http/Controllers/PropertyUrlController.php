@@ -118,13 +118,35 @@ class PropertyUrlController extends Controller
                 // $link_html .=  '&nbsp;<a href="' . route('rooms_availability.index') . '?id=' . $propertyurl_data[$i]->hotel_id . '" class="btn btn-xs btn-success" title="Room Availability"><i class="fa fa-font fa-size"></i></a>';
             }
 
-            $action_html = '';
-            if($propertyurl_data[$i]->is_active == 1){
-                $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="1" class="btn btn-xs btn-success update_status" title="Active"><i class="fa fa-check"></i> Active</button>';
+            // $action_html = '';
+            // if($propertyurl_data[$i]->is_active == 1){
+            //     $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="1" class="btn btn-xs btn-success update_status" title="Active"><i class="fa fa-check"></i> Active</button>';
+            // }
+            // else if($propertyurl_data[$i]->is_active == 0){
+            //     $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="0" class="btn btn-xs btn-danger update_status" title="Inactive"><i class="fa fa-close"></i> Inactive</button>';
+            // }
+
+            $static_array = [0,1,2,3,4,5,6,7,14,30];
+            $action_html = '&nbsp;<select prop_id="'. $propertyurl_data[$i]->_id.'" class="form-control filter_class update_status" title="Active">';
+            for($j=0;$j<count($static_array);$j++){
+                if($j == $propertyurl_data[$i]->is_active){
+                    if($static_array[$j] == 0){
+                        $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].' selected ">'.$static_array[$j].' (inactive)</option>';
+                    }
+                    else {
+                        $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].'" selected>'.$static_array[$j].' days</option>';
+                    }
+                    
+                }else{
+                    if($static_array[$j] == 0){
+                        $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].'">'.$static_array[$j].' (inactive)</option>';
+                    }
+                    else{
+                        $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].'">'.$static_array[$j].' days</option>';
+                    }
+                }
             }
-            else if($propertyurl_data[$i]->is_active == 0){
-                $action_html = '&nbsp;<button  prop_id="'. $propertyurl_data[$i]->_id.'" status="0" class="btn btn-xs btn-danger update_status" title="Inactive"><i class="fa fa-close"></i> Inactive</button>';
-            }
+            $action_html .= '</select>';
             $propertyurl_data[$i]['hotel_name'] = $link_hotel_name;
             $propertyurl_data[$i]['link'] = $link_html;
             $propertyurl_data[$i]['action'] = $action_html;

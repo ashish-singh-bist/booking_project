@@ -87,7 +87,7 @@
                                         <th>Created At</th>
                                         <th>Updated At</th>
                                         <th>Links</th>
-                                        <th>Action</th>
+                                        <th>Select Parsing Interval (in days)</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -130,7 +130,12 @@
                     { data: 'updated_at', name: 'updated_at' },
                     { data: 'link', name: 'link' },
                     { data: 'action', name: 'action' },
-                ]
+                ],
+                columnDefs: [
+                    { "orderable": false, "targets": [4, 5] },
+                    { "orderable": true, "targets": [0, 1, 2, 3] }
+                ],
+                "order": [[ 2, "desc" ]]
             });
 
             $('#filter_apply').on('click', function(e) {
@@ -191,7 +196,7 @@
                 }
             });
 
-            $('#property-table').on('click', '.update_status', function (e) { 
+             $('#property-table').on('change', '.update_status', function (e) { 
                 e.preventDefault();
                 $.ajaxSetup({
                     headers: {
@@ -200,12 +205,9 @@
                 });
                 var data = {};
                 data._id = $(this).attr('prop_id');
-                var is_active = $(this).attr('status');
-                if(is_active == '1'){
-                    data.is_active = 0;
-                }else{
-                    data.is_active = 1;
-                }
+                var is_active = $(this).val();
+                data.is_active = is_active;
+
                 if(data.is_active != '' || data.is_active !=null){
                     $.ajax({
                         type: "POST",
@@ -225,6 +227,7 @@
                     alert("Please Add Message.");
                 }
             });
+            
         });
     </script>
 @endsection

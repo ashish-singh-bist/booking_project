@@ -168,6 +168,9 @@ table.dataTable{
 .overflow-0{
     overflow: hidden !important;
 }
+.datepicker{
+    z-index: 99999 !important;
+}
 div.dataTables_wrapper div.dataTables_processing {
     background-color: black;
     color: white;

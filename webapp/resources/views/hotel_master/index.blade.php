@@ -148,38 +148,36 @@
                                 </div>                            
                             </div>
                             <div class="row">
-                                <div class="col-md-12 col-sm-12">
-                                    <div class="col-md-4">
-                                        <div class="box box-primary box-solid filter-box">
-                                            <div class="box-header">
-                                                <h4 class="box-title">Self Verified</h4>
-                                            </div>
-                                            <div class="box-body">
-                                                <select class="form-control filter_class" id="self_verified">
-                                                    <option value="">Any</option>
-                                                    <option value="1">Verified</option>
-                                                    <option value="0">Not Verified</option>
-                                                </select>
-                                            </div>
+                                <div class="col-md-4">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Self Verified</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="self_verified">
+                                                <option value="">Any</option>
+                                                <option value="1">Verified</option>
+                                                <option value="0">Not Verified</option>
+                                            </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="box box-primary box-solid filter-box">
-                                            <div class="box-header">
-                                                <h4 class="box-title">Guest Favourite Area</h4>
-                                            </div>
-                                            <div class="box-body">
-                                                <select class="form-control filter_class" id="guest_favourite">
-                                                    <option value="">Any</option>
-                                                    <option value="1">Favourite</option>
-                                                    <option value="0">Not Favourite</option>
-                                                </select>
-                                            </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Guest Favourite Area</h4>
+                                        </div>
+                                        <div class="box-body">
+                                            <select class="form-control filter_class" id="guest_favourite">
+                                                <option value="">Any</option>
+                                                <option value="1">Favourite</option>
+                                                <option value="0">Not Favourite</option>
+                                            </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 col-sm-12 text-right">
-                                        <a id='filter_apply' class="btn btn-success">Apply Filters</a>
-                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-12 text-right">
+                                    <a id='filter_apply' class="btn btn-success">Apply Filters</a>
                                 </div>
                             </div>
                         </div>
@@ -204,6 +202,23 @@
         <!-- end of main content-->
     </div>
     <!-- end of content wrapper. contains page content -->
+    <!-- Modal -->
+    <div id="equip_model" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('js')
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.js"></script>
@@ -213,6 +228,12 @@
         });
     </script>
     <script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
         $(function() {
             $.fn.dataTable.ext.errMode = 'none';
             var oTable = $('#hotel_master').DataTable({
@@ -279,7 +300,6 @@
                     },
                     dataFilter: function(response) {
                         var statistics = JSON.parse(response)['statistics'];
-                        console.log(statistics);
                         $("#statistics").html('<div><span class="p_badge"><b>Max Rating : </b>'+statistics['max_rating'].toFixed(1)+'</span>|<span class="p_badge"><b>Min Rating : </b>'+statistics['min_rating'].toFixed(1)+'</span>|<span class="p_badge"><b>Avg. Rating : </b>'+statistics['avg_rating'].toFixed(1)+'</span></div>');
                         return response;
                     },
@@ -319,7 +339,6 @@
                       return query;
                     },
                     processResults: function (data) {
-                        console.log(data)
                         return {
                           results: data
                         };
@@ -343,13 +362,53 @@
                       return query;
                     },
                     processResults: function (data) {
-                        console.log(data)
                         return {
                           results: data
                         };
                     },
                     cache: true
                 }
+            });
+
+            $('#hotel_master tbody').on('click', '.hotel_equip_popup', function() {
+                var data_title = $(this).attr("data-title");
+                var hotel_id = $(this).attr("hotel-id");
+                var data = {'hotel_id':hotel_id};
+                $.ajax({
+                    type: "POST",
+                    url: '{{route("getHotelEquipment")}}',
+                    dataType: "json",
+                    data: data,
+                    success:function(data){
+                        if(typeof(data.data) == 'string'){
+                            var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        }else{
+                            var equipment_data = data.data
+                        }
+                        var html = '';
+                        $.each(equipment_data, function(key, value){
+                            html += '<div class="col-sm-12"><h5>' + key + '</h5></div>';
+                            html_inner = '<div class="col-sm-12">';
+                            $.each(value, function(key, value){
+                                html_inner += '<div class="equip_badge">' + key + '</div>';
+                            });
+                            if(html_inner != '<div class="col-sm-12">'){
+                                html += html_inner + '</div>';
+                            }
+                        });
+                        if(html == ''){
+                            html = '<div class="col-sm-12">No data found.</div>';
+                        }                        
+                        $('#equip_model .modal-body').html(html);
+                        $('#equip_model h4').html('<b>Hotel Name:-</b> ' + data_title);
+                        $('#equip_model').modal('toggle');
+                    },
+                    error: function(error) {
+                        $('#equip_model .modal-body').html('Something Went Wrong');
+                        $('#equip_model h4').html('Warning');
+                        $('#equip_model').modal('toggle');
+                    }
+                });
             });
         });
     </script>

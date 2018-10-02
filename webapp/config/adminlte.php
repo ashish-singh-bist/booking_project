@@ -155,7 +155,7 @@ return [
         ],
         [
              'text'        => 'Chart Prices',
-             'url'         => '/hotel_prices/chart_prices',
+             'url'         => '/price_chart',
              'icon'        => 'play',
              'icon_color'  => 'green',
         ],

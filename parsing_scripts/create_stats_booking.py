@@ -61,7 +61,7 @@ if __name__ == '__main__':
   dict_stats['hotel_parsed'] = obj_master.obj_mongo_db.getCount('hotel_master',None,dict_where)
   dict_stats['price_parsed'] = obj_master.obj_mongo_db.getCount('hotel_prices',None,dict_where)
   dict_stats['room_details_parsed'] = obj_master.obj_mongo_db.getCount('room_details',None,dict_where)
-  dict_stats['rooms_availability_parsed'] = obj_master.obj_mongo_db.getCount('rooms_availability',None,dict_where)
+  # dict_stats['rooms_availability_parsed'] = obj_master.obj_mongo_db.getCount('rooms_availability',None,dict_where)
   
   dict_stats['total_property'] = obj_master.obj_mongo_db.getCount('property_urls')
   dict_stats['active_property'] = obj_master.obj_mongo_db.getCount('property_urls',None,{'is_active':1})

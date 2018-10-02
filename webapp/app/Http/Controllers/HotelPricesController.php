@@ -56,6 +56,7 @@ class HotelPricesController extends Controller
 
         $hotelprices = new HotelPrices();
         $hotelmaster = HotelMaster::select('hotel_id');
+
         if(count($request->get('stars'))>0){
             $stars = $request->get('stars');
             $hotelmaster = $hotelmaster->where(function ($query) use ($stars) {
@@ -151,7 +152,10 @@ class HotelPricesController extends Controller
             if($is_verified == '1'){
                 $hotelmaster = $hotelmaster->Where('self_verified','>',0);
             } else if($is_verified == '0'){
-                $hotelmaster = $hotelmaster->whereNull('self_verified')->orWhere('self_verified','=',0);
+                $hotelmaster = $hotelmaster->where(function ($query) {
+                    $query = $query->whereNull('self_verified');
+                    $query = $query->orWhere('self_verified','=',0);
+                });
             }
         }
 
@@ -160,7 +164,10 @@ class HotelPricesController extends Controller
             if($is_favourite == '1'){
                 $hotelmaster = $hotelmaster->Where('guests_favorite_area','>',0);
             } else if($is_favourite == '0'){
-                $hotelmaster = $hotelmaster->whereNull('guests_favorite_area')->orWhere('guests_favorite_area','=',0);
+                $hotelmaster = $hotelmaster->where(function ($query) {
+                    $query = $query->whereNull('guests_favorite_area');
+                    $query = $query->orWhere('guests_favorite_area','=',0);
+                });
             }
         }
 
@@ -175,7 +182,7 @@ class HotelPricesController extends Controller
 
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
-        } 
+        }
 
         if(count($request->get('room_types'))>0){
             $room_types = $request->get('room_types');
@@ -184,7 +191,6 @@ class HotelPricesController extends Controller
                     if($key == 0){
                         $query = $query->where('room_type', $room_type);
                     }else{
-
                         $query = $query->orWhere('room_type', $room_type);
                     }
                 }
@@ -199,7 +205,6 @@ class HotelPricesController extends Controller
                     if($key == 0){
                         $query = $query->where('max_persons', intval($max_person));
                     }else{
-
                         $query = $query->orWhere('max_persons', intval($max_person));
                     }
                 }
@@ -214,7 +219,6 @@ class HotelPricesController extends Controller
                     if($key == 0){
                         $query = $query->where('available_only', intval($availableonly));
                     }else{
-
                         $query = $query->orWhere('available_only', intval($availableonly));
                     }
                 }
@@ -240,12 +244,12 @@ class HotelPricesController extends Controller
         }
 
         if($request->get('min_price') != Null && $request->get('min_price') != ''){
-            $hotelprices = $hotelprices->where('raw_price','>=',(int)$request->get('min_price')); 
+            $hotelprices = $hotelprices->where('raw_price','>=',(int)$request->get('min_price'));
         }
 
         if($request->get('max_price') != Null && $request->get('max_price') != ''){
-            $hotelprices = $hotelprices->where('raw_price','<=',(int)$request->get('max_price')); 
-        }          
+            $hotelprices = $hotelprices->where('raw_price','<=',(int)$request->get('max_price'));
+        }
 
         if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
             $hotelprices = $hotelprices->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
@@ -271,7 +275,6 @@ class HotelPricesController extends Controller
                     if($key == 0){
                         $query = $query->where('cancellation_type', $cancel_type);
                     }else{
-
                         $query = $query->orWhere('cancellation_type', $cancel_type);
                     }
                 }
@@ -286,7 +289,6 @@ class HotelPricesController extends Controller
                     if($key == 0){
                         $query = $query->where('other_desc', $otherdesc);
                     }else{
-
                         $query = $query->orWhere('other_desc', $otherdesc);
                     }
                 }
@@ -301,7 +303,6 @@ class HotelPricesController extends Controller
                     if($key == 0){
                         $query = $query->where('number_of_days', intval($day));
                     }else{
-
                         $query = $query->orWhere('number_of_days', intval($day));
                     }
                 }
@@ -313,6 +314,40 @@ class HotelPricesController extends Controller
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
+
+        // Code To Test The Mongodb Aggregate Query
+
+        // $hotel_stars = $request->get('stars');
+        // $hotel_rating = $request->get('ratings');
+        // $country = $request->get('countries');
+        // $city = $request->get('cities');
+        // $self_verified = $request->get('self_verified');
+        // $guest_favourite = $request->get('guest_favourite');
+        // $hotel_category = $request->get('categories');
+        // $hotel_name = $request->get('hotel_names');
+
+        // $result = $hotelprices->raw(function($collection) use($hotel_stars, $hotel_rating, $country, $city, $self_verified, $guest_favourite, $hotel_category, $hotel_name, $start, $limit) {
+        //                     return $collection->aggregate(array(
+        //                         array( '$lookup' => array(
+        //                             'from' => 'hotel_master',
+        //                             'localField' => 'hotel_id',
+        //                             'foreignField' => 'hotel_id',
+        //                             'as' => 'hotelmaster'
+        //                         )),
+        //                         array( '$unwind' => array( 
+        //                             'path' => '$hotelmaster', 'preserveNullAndEmptyArrays' => True
+        //                         )),
+        //                         array( '$match' => array(
+        //                             '$or' => array(
+        //                                 array('hotelmaster.hotel_stars' => array('$in',$hotel_stars ))
+        //                             )
+        //                         )),
+        //                         array( '$skip' => intval($start)),
+        //                         array( '$limit' => intval($limit))
+        //                         ));
+        //                     });
+        // print_r(json_encode($result));
+        // exit();
 
         #############################################################################
         if($request->get('export') != null && $request->get('export') == 'csv'){
@@ -382,7 +417,7 @@ class HotelPricesController extends Controller
             $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
                          ->limit(intval($limit))
                          ->orderBy($order,$dir)
-                         ->get();            
+                         ->get();
         }
 
         for($i=0; $i < count($hotelprices_data); $i++)

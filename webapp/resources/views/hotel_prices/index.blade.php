@@ -640,7 +640,6 @@
                       return query;
                     },
                     processResults: function (data) {
-                        console.log(data)
                         return {
                           results: data
                         };
@@ -664,7 +663,6 @@
                       return query;
                     },
                     processResults: function (data) {
-                        console.log(data)
                         return {
                           results: data
                         };
@@ -688,7 +686,6 @@
                       return query;
                     },
                     processResults: function (data) {
-                        console.log(data)
                         return {
                           results: data
                         };
@@ -707,7 +704,11 @@
                     dataType: "json",
                     data: data,
                     success:function(data){
-                        var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        if(typeof(data.data) == 'string'){
+                            var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        }else{
+                            var equipment_data = data.data
+                        }
                         var html = '';
                         $.each(equipment_data, function(key, value){
                             html += '<div class="col-sm-12"><h5>' + key + '</h5></div>';
@@ -725,7 +726,6 @@
                         $('#equip_model .modal-body').html(html);
                         $('#equip_model h4').html('<b>Hotel Name:-</b> ' + data_title);
                         $('#equip_model').modal('toggle');
-                        console.log(equipment_data);
                     },
                     error: function(error) {
                         $('#equip_model .modal-body').html('Something Went Wrong');
@@ -745,7 +745,11 @@
                     dataType: "json",
                     data: data,
                     success:function(data){
-                        var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        if(typeof(data.data) == 'string'){
+                            var equipment_data = JSON.parse(data.data.replace(/'/g, "\""));
+                        }else{
+                            var equipment_data = data.data
+                        }
                         var html = '<div class="col-sm-12">';
                         $.each(equipment_data, function(key, value){
                             html += '<div class="equip_badge">' + key + '</div>';
@@ -757,7 +761,6 @@
                         $('#equip_model .modal-body').html(html);
                         $('#equip_model h4').html('<b>Room Type:-</b> ' + room_type);
                         $('#equip_model').modal('toggle');
-                        console.log(data);
                     },
                     error: function(error) {
                         $('#equip_model .modal-body').html('Something Went Wrong');
