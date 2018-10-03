@@ -59,7 +59,7 @@ class HotelMasterController extends Controller
             $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
                 foreach($ratings as $key => $rating){
                     $start = intval($rating);
-                    $end = $rating + 1;                     
+                    $end = $rating + 1;
                     if($key == 0){
                         $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
                             return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);

@@ -20,14 +20,14 @@
         <section class="content">
             <div class="row">
                 <div class="col-xs-12">
-                    <div class="box box-solid box-primary">                   
+                    <div class="box box-solid box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">Filters</h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                                 {{-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> --}}
-                                <a id='clear_filter' class="btn btn-danger">Clear Filters</a>
-                            </div>                            
+                                <a id='clear_filter' class="btn btn-danger">Reset Filters</a>
+                            </div>
                         </div>
                         <div class="box-body hotel-price">
                             <div class="row">
@@ -73,7 +73,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <ul>
-                                                    <li><label><input class="flat-icheck" type="checkbox" name="days[]" value="1"/ checked="checked"> 1 day</li>
+                                                    <li><label><input class="flat-icheck" type="checkbox" id="default_day" name="days[]" value="1"/ checked="checked"> 1 day</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="days[]" value="2"/> 2 day</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="days[]" value="3"/> 3 day</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="days[]" value="5"/> 5 day</li>
@@ -90,7 +90,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <ul>
-                                                    <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="1"/ checked="checked"> 1 person</li>
+                                                    <li><label><input class="flat-icheck" type="checkbox" id="default_person" name="max_persons[]" value="1"/ checked="checked"> 1 person</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="2"/> 2 person</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="3"/> 3 person</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="4"/> 4 person</li>
@@ -128,11 +128,72 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>                                   
-                                    <div class="col-sm-12 text-right">
-                                        <a id='filter_apply' class="btn btn-success">Apply Filters</a>
+                                    </div>
+                                    <div class="box box-primary box-solid filter-box">
+                                        <div class="box-header">
+                                            <h4 class="box-title">Hotel Name</h4>
+                                        </div>
+                                        <div class="box-body overflow-0">
+                                            <select class="form-control filter_class" id="hotel_type" multiple="multiple">
+                                                @foreach($hotel_type as $hoteltype)
+                                                    <option value="{{$hoteltype[0]}}">{{$hoteltype[0]}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="col-md-4 col-sm-12">
+                                        <div class="box box-primary box-solid filter-box">
+                                            <div class="box-header">
+                                                <h4 class="box-title">Room Type</h4>
+                                            </div>
+                                            <div class="box-body">
+                                                <select class="form-control filter_class" id="room_types" multiple="multiple">
+                                                    @foreach($room_type_list as $room_type)
+                                                        <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
 
+                                    <div class="col-md-4 col-sm-12">
+                                        <div class="box box-primary box-solid filter-box">
+                                            <div class="box-header">
+                                                <h4 class="box-title">Cancellation Type</h4>
+                                            </div>
+                                            <div class="box-body">
+                                                <select class="form-control filter_class" id="cancellation_type" multiple="multiple">
+                                                    @foreach($cancel_type_list as $cancel_type)
+                                                        <option value="{{$cancel_type[0]}}">{{$cancel_type[0]}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-sm-12">
+                                        <div class="box box-primary box-solid filter-box">
+                                            <div class="box-header">
+                                                <h4 class="box-title">Meal Plan</h4>
+                                            </div>
+                                            <div class="box-body">
+                                                <select class="form-control filter_class" id="meal_type" multiple="multiple">
+                                                    @foreach($meal_type_list as $meal_type)
+                                                        <option value="{{$meal_type[0]}}">{{$meal_type[0]}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 text-right">
+                                    <a id='filter_apply' class="btn btn-success">Apply Filters</a>
                                 </div>
                             </div>
                         </div>
@@ -142,19 +203,6 @@
             <div>
                 <h3 class="card-title text-center">Statistics</h3>
                 <canvas id="line-chart" width="800" height="450"></canvas>
-            </div>
-            <div class="row" style="display: none;">
-                <div class="col-xs-12">
-                    <div class="box box-primary">
-                        <div class="box-body table-responsive">
-                            <table class="table table-bordered" id="hotel_prices">
-                                <thead><tr>
-                                    @foreach (config('app.hotel_prices_header_key') as $value) <th>{{$value}}</th> @endforeach
-                                </tr></thead>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
         <!-- end of main content-->
@@ -166,62 +214,57 @@
     {{-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script> --}}
     <script type="text/javascript">
         $(function() {
-            var price_chart;
-            $.fn.dataTable.ext.errMode = 'none';
-            var oTable = $('#hotel_prices').DataTable({
-                "aLengthMenu": [5, 10, 25, 50, 100, 500, 1000],
-                "iDisplayLength": 100,
-                "sPaginationType" : "full_numbers",
-                processing: true,
-                serverSide: true,
-                searching: false,
-                deferLoading: false,
-                select: {
-                    style: 'multi'
-                },
-                dom: "<'row'<'col-sm-2'l><'col-sm-4'B><'col-sm-6'<'#statistics.text-right'>>>",
-                buttons: [
-                    'csvHtml5'
-                ],
-                ajax: {
-                    @if(isset($id))
-                        url: "{!! route('chart_prices.getChartData') !!}?id={{$id}}",
-                    @else
-                        url: "{!! route('chart_prices.getChartData') !!}",
-                    @endif
-                    data: function (d) {
-                       
-                        d.created_at = $('#created_at').val();
-                       
-                        d.checkin_date_to = $('#checkin_date_to').val();
-                        d.checkin_date_from = $('#checkin_date_from').val();
-                       
-                        var days = $('input[name="days[]"]:checked')
-                        .map(function() {
-                            return $(this).val();
-                        }).get();
-                        var max_persons = $('input[name="max_persons[]"]:checked')
-                        .map(function() {
-                            return $(this).val();
-                        }).get();
-                        d.days = days;
-                        d.max_persons = max_persons;
-                        d.cities = $("#cities").val();
-                        d.hotel_type = $("#hotel_types").val();
-                    },
-                   dataFilter: function(response) {
-                        var chart_data_array = JSON.parse(response)['chart_data_array'];
-                        bindChartData(chart_data_array);
-                    },
-                },
-                columns: [
-                    @foreach (config('app.hotel_prices_header_key') as $key => $value) { data: '{{$key}}', name: '{{$key}}' }, 
-                    @endforeach
-                ]
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
             });
 
+            var price_chart;
+            function searchFilterForChart(){
+                var data = {};
+                data.created_at = $('#created_at').val();
+                data.room_types = $("#room_types").val();
+                data.checkin_date_to = $('#checkin_date_to').val();
+                data.checkin_date_from = $('#checkin_date_from').val();
+                data.meal_plan = $('#meal_type').val();
+                data.cancellation_type = $('#cancellation_type').val();
+                var days = $('input[name="days[]"]:checked')
+                .map(function() {
+                    return $(this).val();
+                }).get();
+                var max_persons = $('input[name="max_persons[]"]:checked')
+                .map(function() {
+                    return $(this).val();
+                }).get();
+                data.days = days;
+                data.max_persons = max_persons;
+                data.cities = $("#cities").val();
+                data.hotel_type = $("#hotel_types").val();
+
+                if(data.created_at != '' && data.checkin_date_to != '' && data.checkin_date_from != '' && days.length>0 && max_persons.length>0){
+                    $.ajax({
+                        type: "POST",
+                        url: "{!! route('chart_prices.getChartData') !!}",
+                        dataType: "json",
+                        async:false,
+                        data: JSON.stringify(data),
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            var chart_data = data.chart_data;
+                            bindChartData(chart_data);
+                        },
+                        error: function (textStatus, errorThrown) {
+                            console.log(errorThrown);
+                        }
+                    });
+                }else{
+                    alert("Required:- Parse date, Check-in date, Booking days, Max Person");
+                }
+            }
+
             $('#filter_apply').on('click', function(e) {
-                oTable.draw();
+                searchFilterForChart();
             });
 
             $('#clear_filter').on('click',function(){
@@ -232,8 +275,15 @@
                 $(".select2-city").val('').trigger('change');
                 $("#hotel_types").val('').trigger('change');
                 $('.flat-icheck').iCheck('uncheck');
-                resetSlider();
-                oTable.draw();
+                $("#room_types").val('').trigger('change');
+                $("#meal_type").val('').trigger('change');
+                $("#cancellation_type").val('').trigger('change');
+                $("#hotel_type").val('').trigger('change');
+                var current_date = new Date;
+                $('.created_at, .checkin_date_from').datepicker("setDate", current_date);
+                $('.created_at, .checkin_date_to').datepicker();
+                $('#default_day').iCheck('check');
+                $('#default_person').iCheck('check');
             });
 
             $('#hotel_types').select2({
@@ -264,11 +314,31 @@
                 }
             });
 
-            function bindChartData(chart_data_array){
+            $('#room_types').select2({
+                placeholder: 'Select room type',
+                allowClear: true,
+            });
+
+            $('#cancellation_type').select2({
+                placeholder: 'Select cancellation type',
+                allowClear: true,
+            });
+
+            $('#meal_type').select2({
+                placeholder: 'Select meal type',
+                allowClear: true,
+            });
+
+            $('#hotel_type').select2({
+                placeholder: 'Select hotel',
+                allowClear: true,
+            });
+
+            function bindChartData(chart_data){
                 if (price_chart) {
                     price_chart.destroy();
                 }            
-                date_array = chart_data_array['checkin_date'];
+                date_array = chart_data['checkin_date'];
                 var ctx  = document.getElementById("line-chart").getContext("2d");
                 price_chart = new Chart(ctx, {
                   type: 'line',
@@ -276,18 +346,7 @@
                   data: {
                     labels: date_array,
                     datasets: [
-                    //{ 
-                    //         data: price_array,
-                    //         label: "Africa",
-                    //         borderColor: "#3e95cd",
-                    //         fill: false
-                    //     },
-                    //     { 
-                    //         data: price_array,
-                    //         label: "India",
-                    //         borderColor: "#000000",
-                    //         fill: false
-                    //     }
+                   
                     ]
                     },
                     options: {
@@ -296,17 +355,6 @@
                             text: 'Price chart'
                         },
                         responsive: true,
-                        scales: {
-                          yAxes: [{
-
-                              stacked: true,
-                               ticks: {
-                                  min: 0,
-                                  stepSize: 100,
-                              }
-
-                          }]
-                        },
                         legend: {
                             display: false
                         },
@@ -327,9 +375,8 @@
                     }
                 });
 
-                
                 var i =0;
-                for (var key in chart_data_array) {
+                for (var key in chart_data) {
                     var r = Math.floor((Math.random() * 255));
                     var g = Math.floor((Math.random() * 255));
                     var b = Math.floor((Math.random() * 255));
@@ -337,8 +384,9 @@
                         price_chart.data.datasets.push({
                             label: key,
                             backgroundColor: '#ff0000',
+                            spanGaps: false,
                             borderColor: "rgba(" + r + "," + g + ","+ b +",.5)",
-                            data: chart_data_array[key],
+                            data: chart_data[key],
                             fill: false,
                         });
                         price_chart.update();
@@ -347,11 +395,9 @@
                 }
             }
             
-            //$('#created_at').datepicker({setDate: new Date()});
             var current_date = new Date;
             $('.created_at, .checkin_date_from').datepicker("setDate", current_date);
-            $('.created_at, .checkin_date_to').datepicker();
-
+            $('.checkin_date_to').datepicker("setDate",new Date(current_date.getFullYear(), current_date.getMonth() + 1, current_date.getDate()));
         });
     </script> 
 @endsection

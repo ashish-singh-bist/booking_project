@@ -136,7 +136,6 @@ class PropertyUrlController extends Controller
                     else {
                         $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].'" selected>'.$static_array[$j].' days</option>';
                     }
-                    
                 }else{
                     if($static_array[$j] == 0){
                         $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].'">'.$static_array[$j].' (inactive)</option>';

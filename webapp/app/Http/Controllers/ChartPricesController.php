@@ -14,16 +14,16 @@ class ChartPricesController extends Controller
 {
     public function index(Request $request)
     {
-    	$date_array = [];
+        $date_array = [];
         $price_array = [];
         $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
         $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
-        $other_desc_list = HotelPrices::select('other_desc')->distinct()->get()->toArray();
+        $meal_type_list = HotelPrices::select('mealplan_included_name')->distinct()->get()->toArray();
         $hotel_type = HotelMaster::select('hotel_name')->distinct()->get()->toarray();
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices/chart_prices',['id'=>$request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list, 'hotel_type'=>$hotel_type, 'date_array'=> json_encode($date_array), 'price_array'=>json_encode($price_array)]);
+            return view('hotel_prices/chart_prices', ['id' => $request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_type' => $hotel_type, 'meal_type_list' => $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' =>json_encode($price_array)]);
         }else{
-            return view('hotel_prices/chart_prices', ['room_type_list' => $room_type_list, 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list, 'hotel_type'=>$hotel_type, 'date_array'=>json_encode($date_array), 'price_array'=>json_encode($price_array)]);
+            return view('hotel_prices/chart_prices', ['room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_type' => $hotel_type, 'meal_type_list'=> $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' => json_encode($price_array)]);
         }
     }
 
@@ -54,7 +54,21 @@ class ChartPricesController extends Controller
             });
         }
 
-        if(count($request->get('cities'))>0){
+        if(count($request->get('hotel_type'))>0){
+            $hotel_name = $request->get('hotel_type');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($hotel_name) {
+                foreach($hotel_name as $key => $name){
+                    if($key == 0){
+                        $query = $query->where('hotel_name', $name);
+                    }else{
+                        $query = $query->orWhere('hotel_name', $name);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        if(count($request->get('cities'))>0 || count($request->get('hotel_type'))>0){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
             foreach($hotel_id_data as $value){
@@ -65,7 +79,21 @@ class ChartPricesController extends Controller
 
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
-        } 
+        }
+
+        if(count($request->get('room_types'))>0){
+            $room_types = $request->get('room_types');
+            $hotelprices = $hotelprices->where(function ($query) use ($room_types) {
+                foreach($room_types as $key => $room_type){
+                    if($key == 0){
+                        $query = $query->where('room_type', $room_type);
+                    }else{
+                        $query = $query->orWhere('room_type', $room_type);
+                    }
+                }
+                return $query;
+            });
+        }
 
         if(count($request->get('max_persons'))>0){
             $max_persons = $request->get('max_persons');
@@ -110,6 +138,41 @@ class ChartPricesController extends Controller
             });
         }
 
+        if($request->get('meal_plan')!=Null && $request->get('meal_plan')!=''){
+            $search_meal_plan = $request->get('meal_plan');
+            if($search_meal_plan == 'empty'){
+                $hotelprices = $hotelprices->whereNull('mealplan_included_name');
+            } else if($search_meal_plan == 'not-empty'){
+                $hotelprices = $hotelprices->whereNotNull('mealplan_included_name');
+            }
+        }
+
+        if(count($request->get('cancellation_type'))>0){
+            $cancel_type = $request->get('cancellation_type');
+            $hotelprices = $hotelprices->where(function ($query) use ($cancel_type) {
+                foreach($cancel_type as $key => $cancel_type){
+                    if($key == 0){
+                        $query = $query->where('cancellation_type', $cancel_type);
+                    }else{
+                        $query = $query->orWhere('cancellation_type', $cancel_type);
+                    }
+                }
+                return $query;
+            });
+        }
+
+        // To Filter Room Type on search condition
+        // $room_array = [];
+        // $hotelprices_roomtype = clone $hotelprices;
+        // $room_type_array = $hotelprices_roomtype->select('room_type')->distinct()->get()->toarray();
+        // for($i=0; $i < count($room_type_array); $i++)
+        // {
+        //     $temp_array = [];
+        //     $temp_array['id'] = $room_type_array[$i][0];
+        //     $temp_array['text'] = $room_type_array[$i][0];
+        //     array_push($room_array,$temp_array);
+        // }
+
         $hotelprices_data = $hotelprices->select('*')->orderBy('checkin_date','ASC')->get();
 
         $chart_data_array = ['checkin_date' => []];
@@ -123,6 +186,8 @@ class ChartPricesController extends Controller
             
             for($i=0; $i < count($hotelprices_data); $i++){
                 $unique_key = $hotelprices_data[$i]['room_type'] . '|' . $hotelprices_data[$i]['number_of_days'] . '|' . $hotelprices_data[$i]['nr_stays'] . '|' . $hotelprices_data[$i]['max_persons'] . '|' . $hotelprices_data[$i]['cancellation_type'] . '|' . $hotelprices_data[$i]['mealplan_included_name'];
+                //$unique_key = $hotelprices_data[$i]['room_type'] . '|' . $hotelprices_data[$i]['cancellation_type'] . '|' . $hotelprices_data[$i]['mealplan_included_name'];
+
                 $check_in_date = $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
                 if($c_date->format('y-m-d') == $check_in_date){
 
@@ -156,12 +221,13 @@ class ChartPricesController extends Controller
                 }
             }
         }
-
-        $json_data = array(
-                    "data"            => [],
-                    "chart_data_array" 	  => $chart_data_array,
-                    );
+        return response()->json(['status'=>'success','chart_data'=>$chart_data_array]);
+        
+        // $json_data = array(
+        //             "chart_data_array"  => $chart_data_array,
+        //             "room_array"        => $room_array
+        //             );
             
-        echo json_encode($json_data);
+        // echo json_encode($json_data);
     }
 }
