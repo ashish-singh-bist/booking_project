@@ -24,7 +24,7 @@
                             <div class="box-body">
                                 {!! Form::open(array('url' => 'property_url', 'method' => 'POST', 'enctype' =>'multipart/form-data', 'class' => 'form-inline') ) !!}
                                 <div class="form-group">
-                                    {!! Form::label('property_url_file', 'Upload CSV File') !!}
+                                    {!! Form::label('property_url_file', 'Upload CSV File (city,url)') !!}
                                     {!! Form::file('property_url_file', array('required' => 'required', 'class' => 'form-control')) !!}
                                 </div>
                                 {!! Form::submit('Upload', array('class' => 'btn btn-primary')) !!}

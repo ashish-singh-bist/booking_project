@@ -164,6 +164,7 @@ class PropertyUrlController extends Controller
     public function updatePropertyUrlStatus(Request $request)
     {
         $property_url = PropertyUrl::find($request->_id);
+        $property_url->timestamps = false;
         $property_url->is_active = intval($request->is_active);
         $property_url->save();
         return  response()->json([

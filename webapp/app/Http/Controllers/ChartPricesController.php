@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use MongoDB\BSON\UTCDatetime;
 use App\HotelMaster;
 use DB;
+use App\PropertyUrl;
 
 class ChartPricesController extends Controller
 {
@@ -19,11 +20,11 @@ class ChartPricesController extends Controller
         $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
         $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
         $meal_type_list = HotelPrices::select('mealplan_included_name')->distinct()->get()->toArray();
-        $hotel_type = HotelMaster::select('hotel_name')->distinct()->get()->toarray();
+        $hotel_name_list = HotelMaster::select('hotel_name')->distinct()->get()->toarray();
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices/chart_prices', ['id' => $request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_type' => $hotel_type, 'meal_type_list' => $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' =>json_encode($price_array)]);
+            return view('hotel_prices/chart_prices', ['id' => $request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_name_list' => $hotel_name_list, 'meal_type_list' => $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' =>json_encode($price_array)]);
         }else{
-            return view('hotel_prices/chart_prices', ['room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_type' => $hotel_type, 'meal_type_list'=> $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' => json_encode($price_array)]);
+            return view('hotel_prices/chart_prices', ['room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_name_list' => $hotel_name_list, 'meal_type_list'=> $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' => json_encode($price_array)]);
         }
     }
 
@@ -39,6 +40,12 @@ class ChartPricesController extends Controller
 
         $hotelprices = HotelPrices::select('_id','checkin_date','raw_price');
         $hotelmaster = HotelMaster::select('hotel_id');
+
+        $property_urls = PropertyUrl::select('hotel_id','url')->get();
+        $property_url_array = [];
+        foreach ($property_urls as $item){
+            $property_url_array[$item->hotel_id] = $item->url;
+        }        
         
         if(count($request->get('cities'))>0){
             $cities = $request->get('cities');
@@ -54,29 +61,29 @@ class ChartPricesController extends Controller
             });
         }
 
-        if(count($request->get('hotel_type'))>0){
-            $hotel_name = $request->get('hotel_type');
-            $hotelmaster = $hotelmaster->where(function ($query) use ($hotel_name) {
-                foreach($hotel_name as $key => $name){
+        if(count($request->get('hotel_names'))>0){
+            $hotel_names = $request->get('hotel_names');
+            $hotelmaster = $hotelmaster->where(function ($query) use ($hotel_names) {
+                foreach($hotel_names as $key => $hotel_name){
                     if($key == 0){
-                        $query = $query->where('hotel_name', $name);
+                        $query = $query->where('hotel_name', $hotel_name);
                     }else{
-                        $query = $query->orWhere('hotel_name', $name);
+                        $query = $query->orWhere('hotel_name', $hotel_name);
                     }
                 }
                 return $query;
             });
         }
 
-        if(count($request->get('cities'))>0 || count($request->get('hotel_type'))>0){
+        if(count($request->get('cities'))>0 || count($request->get('hotel_names'))>0){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
-            foreach($hotel_id_data as $value){
-                array_push($hotel_id_array,$value->hotel_id);
+            foreach($hotel_id_data as $hotel){
+                array_push($hotel_id_array,$hotel->hotel_id);
             }
             $hotelprices = $hotelprices->whereIn('hotel_id',$hotel_id_array);
         }
-
+        
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
         }
@@ -110,9 +117,9 @@ class ChartPricesController extends Controller
             });
         }           
 
-        if($request->get('created_at') != Null && $request->get('created_at') != ''){
-            $hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('created_at'))->startOfDay());
-            $hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('created_at'))->endOfDay());
+        if($request->get('calendar_date') != Null && $request->get('calendar_date') != ''){
+            $hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('calendar_date'))->startOfDay());
+            $hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('calendar_date'))->endOfDay());
         }
 
         if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
@@ -176,6 +183,7 @@ class ChartPricesController extends Controller
         $hotelprices_data = $hotelprices->select('*')->orderBy('checkin_date','ASC')->get();
 
         $chart_data_array = ['checkin_date' => []];
+        $dataset_property_urls = [];
         if(count($hotelprices_data)){
             $c_date = Carbon::parse($hotelprices_data[0]['checkin_date']->toDateTime()->format('y-m-d'));
             $end_date = $hotelprices_data[(count($hotelprices_data)-1)]['checkin_date']->toDateTime();
@@ -185,24 +193,34 @@ class ChartPricesController extends Controller
             }
             
             for($i=0; $i < count($hotelprices_data); $i++){
-                $unique_key = $hotelprices_data[$i]['room_type'] . '|' . $hotelprices_data[$i]['number_of_days'] . '|' . $hotelprices_data[$i]['nr_stays'] . '|' . $hotelprices_data[$i]['max_persons'] . '|' . $hotelprices_data[$i]['cancellation_type'] . '|' . $hotelprices_data[$i]['mealplan_included_name'];
+                $check_in_date = $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
+                $checkout_date = Carbon::parse($hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y-m-d'))->addDays($hotelprices_data[$i]['number_of_days'])->format('Y-m-d');
+                $url = $property_url_array[$hotelprices_data[$i]['hotel_id']] . "?checkin=" . $check_in_date . "&checkout=" . $checkout_date . "&selected_currency=EUR&group_adults=" . $hotelprices_data[$i]['number_of_guests'];
+                $unique_key = $hotelprices_data[$i]['room_type'] . '|' . $hotelprices_data[$i]['number_of_days'] . '|' . $hotelprices_data[$i]['max_persons'] . '|' . $hotelprices_data[$i]['cancellation_type'] . '|' . $hotelprices_data[$i]['mealplan_included_name'];
+                
                 //$unique_key = $hotelprices_data[$i]['room_type'] . '|' . $hotelprices_data[$i]['cancellation_type'] . '|' . $hotelprices_data[$i]['mealplan_included_name'];
 
-                $check_in_date = $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d');
                 if($c_date->format('y-m-d') == $check_in_date){
 
                     $index = array_search($check_in_date, $chart_data_array['checkin_date']);
                     
                     if (array_key_exists($unique_key,$chart_data_array)){
                         //array_push($chart_data_array[$unique_key],$hotelprices_data[$i]['raw_price']);
-                        $chart_data_array[$unique_key][$index] = $hotelprices_data[$i]['raw_price'];
+                        if($chart_data_array[$unique_key][$index] && $hotelprices_data[$i]['raw_price']>$chart_data_array[$unique_key][$index]){
+                            $chart_data_array[$unique_key][$index] = $hotelprices_data[$i]['raw_price'];
+                        }else{
+                            $chart_data_array[$unique_key][$index] = $hotelprices_data[$i]['raw_price'];
+                        }
                     }else
                     {
                         $chart_data_array[$unique_key] = [];
+                        $dataset_property_urls[$unique_key] = [];
                         for($j=0; $j<$index; $j++){
                             array_push($chart_data_array[$unique_key],null);
+                            array_push($dataset_property_urls[$unique_key],null);
                         }
                         $chart_data_array[$unique_key][$index] = $hotelprices_data[$i]['raw_price'];
+                        array_push($dataset_property_urls[$unique_key],$url);
                     }
 
                 }else{
@@ -213,6 +231,7 @@ class ChartPricesController extends Controller
                             foreach($chart_data_array as $key => $value){
                                 if($key != 'checkin_date'){
                                     array_push($chart_data_array[$key],null);
+                                    array_push($dataset_property_urls[$key],$url);
                                 }
                             }
                         }
@@ -221,7 +240,7 @@ class ChartPricesController extends Controller
                 }
             }
         }
-        return response()->json(['status'=>'success','chart_data'=>$chart_data_array]);
+        return response()->json(['status'=>'success','chart_data'=>$chart_data_array, 'dataset_property_urls' => $dataset_property_urls]);
         
         // $json_data = array(
         //             "chart_data_array"  => $chart_data_array,

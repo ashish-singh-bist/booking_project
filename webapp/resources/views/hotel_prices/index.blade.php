@@ -57,11 +57,14 @@
                                                 </div>
                                                 <div class="box-body">
                                                     <ul>
-                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="1"/> 1 person</li>
+                                                        @foreach($max_person_list as $persons_list)
+                                                            <li><label><input class="flat-icheck"  type="checkbox" name="max_persons[]" value="{{$persons_list[0]}}"/> {{$persons_list[0]}} person</label></li>
+                                                        @endforeach
+                                                        {{-- <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="1"/> 1 person</li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="2"/> 2 person</li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="3"/> 3 person</li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="4"/> 4 person</li>
-                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="5"/> 5 person</li>
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="5"/> 5 person</li> --}}
                                                     </ul>
                                                 </div>
                                             </div>
@@ -116,7 +119,10 @@
                                         </div>
                                         <div class="box-body">
                                             <ul>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="1"/> 1 room</li>
+                                                @foreach($available_room_list as $available_room)
+                                                    <li><label><input class="flat-icheck"  type="checkbox" name="available_only[]" value="{{$available_room[0]}}"/> {{$available_room[0]}} rooms</label></li>
+                                                @endforeach
+                                                {{-- <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="1"/> 1 room</li>
                                                 <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="2"/> 2 rooms</li>
                                                 <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="3"/> 3 rooms</li>
                                                 <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="4"/> 4 rooms</li>
@@ -125,7 +131,7 @@
                                                 <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="7"/> 7 rooms</li>
                                                 <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="8"/> 8 rooms</li>
                                                 <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="9"/> 9 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="10"/> 10 rooms</li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="10"/> 10 rooms</li> --}}
                                             </ul>
                                         </div>
                                     </div>
@@ -536,8 +542,8 @@
                     @endforeach
                 ],
                 columnDefs: [
-                    { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6] },
-                    { "orderable": true, "targets": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+                    { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+                    { "orderable": true, "targets": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
                     { "width": "120px", "targets": 0 },
                     { "width": "60px", "targets": 1 },
                     { "width": "30px", "targets": 2 },
@@ -553,13 +559,15 @@
                     { "width": "100px", "targets": 16 },
                     { "width": "100px", "targets": 17 }
                 ],
-                "order": [[ 7, "desc" ]]
+                "order": [[ 9, "desc" ]]
             });
 
             $('#filter_apply').on('click', function(e) {
                 oTable.draw();
             });
 
+            $( "#min_price" ).val(0);
+            $( "#max_price" ).val(500);
             $( "#slider-range" ).slider({
                 range: true,
                 min: 0,

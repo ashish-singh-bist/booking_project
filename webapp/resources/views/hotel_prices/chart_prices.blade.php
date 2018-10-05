@@ -51,9 +51,9 @@
                                             <div class="box-body overflow-0">
                                                 <div class="row">
                                                     <div class="col-sm-12">
-                                                        {{-- <label for="created_at">From</label> --}}
-                                                        <p class="input-group created_at" >
-                                                            <input type="text" class="form-control filter_class" id="created_at" readonly="readonly">
+                                                        {{-- <label for="calendar_date">From</label> --}}
+                                                        <p class="input-group calendar_date" >
+                                                            <input type="text" class="form-control filter_class" id="calendar_date" readonly="readonly">
                                                             <span class="input-group-addon">
                                                                 <i class="fa fa-calendar"></i>
                                                             </span>
@@ -90,7 +90,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <ul>
-                                                    <li><label><input class="flat-icheck" type="checkbox" id="default_person" name="max_persons[]" value="1"/ checked="checked"> 1 person</li>
+                                                    <li><label><input class="flat-icheck" type="checkbox" id="default_person" name="max_persons[]" value="1"/> 1 person</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="2"/> 2 person</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="3"/> 3 person</li>
                                                     <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="4"/> 4 person</li>
@@ -134,9 +134,9 @@
                                             <h4 class="box-title">Hotel Name</h4>
                                         </div>
                                         <div class="box-body overflow-0">
-                                            <select class="form-control filter_class" id="hotel_type" multiple="multiple">
-                                                @foreach($hotel_type as $hoteltype)
-                                                    <option value="{{$hoteltype[0]}}">{{$hoteltype[0]}}</option>
+                                            <select class="form-control filter_class" id="hotel_names" multiple="multiple">
+                                                @foreach($hotel_name_list as $hotel_name)
+                                                    <option value="{{$hotel_name[0]}}">{{$hotel_name[0]}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -223,7 +223,7 @@
             var price_chart;
             function searchFilterForChart(){
                 var data = {};
-                data.created_at = $('#created_at').val();
+                data.calendar_date = $('#calendar_date').val();
                 data.room_types = $("#room_types").val();
                 data.checkin_date_to = $('#checkin_date_to').val();
                 data.checkin_date_from = $('#checkin_date_from').val();
@@ -240,9 +240,9 @@
                 data.days = days;
                 data.max_persons = max_persons;
                 data.cities = $("#cities").val();
-                data.hotel_type = $("#hotel_types").val();
+                data.hotel_names = $("#hotel_names").val();
 
-                if(data.created_at != '' && data.checkin_date_to != '' && data.checkin_date_from != '' && days.length>0 && max_persons.length>0){
+                if(data.calendar_date != '' && data.checkin_date_to != '' && data.checkin_date_from != '' && days.length>0){
                     $.ajax({
                         type: "POST",
                         url: "{!! route('chart_prices.getChartData') !!}",
@@ -251,8 +251,7 @@
                         data: JSON.stringify(data),
                         contentType: "application/json; charset=utf-8",
                         success: function (data) {
-                            var chart_data = data.chart_data;
-                            bindChartData(chart_data);
+                            bindChartData(data.chart_data, data.dataset_property_urls);
                         },
                         error: function (textStatus, errorThrown) {
                             console.log(errorThrown);
@@ -271,24 +270,18 @@
                 $("#checkin_date_to").val('');
                 $("#checkin_date_from").val('');
                 $("#room_types").val('').trigger('change');
-                $("#created_at").val('');
+                $("#calendar_date").val('');
                 $(".select2-city").val('').trigger('change');
-                $("#hotel_types").val('').trigger('change');
+                $("#hotel_names").val('').trigger('change');
                 $('.flat-icheck').iCheck('uncheck');
                 $("#room_types").val('').trigger('change');
                 $("#meal_type").val('').trigger('change');
                 $("#cancellation_type").val('').trigger('change');
-                $("#hotel_type").val('').trigger('change');
                 var current_date = new Date;
-                $('.created_at, .checkin_date_from').datepicker("setDate", current_date);
-                $('.created_at, .checkin_date_to').datepicker();
+                $('.calendar_date, .checkin_date_from').datepicker("setDate", current_date);
+                $('.calendar_date, .checkin_date_to').datepicker();
                 $('#default_day').iCheck('check');
                 $('#default_person').iCheck('check');
-            });
-
-            $('#hotel_types').select2({
-                placeholder: 'select hotel',
-                allowClear: true,
             });
 
             $('#cities').select2({
@@ -329,17 +322,19 @@
                 allowClear: true,
             });
 
-            $('#hotel_type').select2({
+            $('#hotel_names').select2({
                 placeholder: 'Select hotel',
                 allowClear: true,
             });
 
-            function bindChartData(chart_data){
+            function bindChartData(chart_data, dataset_property_urls){
                 if (price_chart) {
                     price_chart.destroy();
                 }            
                 date_array = chart_data['checkin_date'];
-                var ctx  = document.getElementById("line-chart").getContext("2d");
+                //var ctx  = document.getElementById("line-chart").getContext("2d");
+                var canvas = document.getElementById("line-chart");
+                var ctx = canvas.getContext("2d");
                 price_chart = new Chart(ctx, {
                   type: 'line',
                   connectNullData: true,
@@ -360,21 +355,19 @@
                         },
                         tooltips: {
                             callbacks: {
-                               label: function(tooltipItem, data) {
+                                label: function(tooltipItem, data) {
                                    var data_array = data.datasets[tooltipItem.datasetIndex].label.split("|");
                                    data_array[0] = "Room Type:- " + data_array[0];
                                    data_array[1] = "Number of booking days:- " + data_array[1];
-                                   data_array[2] = "Sleeps:- " + data_array[2];
-                                   data_array[3] = "Max Person:- " + data_array[3];
-                                   data_array[4] = "Cancellation Type:- " + data_array[4];
-                                   data_array[5] = "Meal Plan Included:- " + data_array[5];
+                                   data_array[2] = "Max Person:- " + data_array[2];
+                                   data_array[3] = "Cancellation Type:- " + data_array[3];
+                                   data_array[4] = "Meal Plan Included:- " + data_array[4];
                                    return data_array;
-                               }
+                                },
                             }
-                        }
-                    }
+                        },
+                    },
                 });
-
                 var i =0;
                 for (var key in chart_data) {
                     var r = Math.floor((Math.random() * 255));
@@ -393,11 +386,37 @@
                     }
                     i++;
                 }
+
+                canvas.onclick = function(evt){
+                    var activePoints = price_chart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+                        var clickedDatasetIndex = activePoints[0]._datasetIndex;
+                        var clickedElementindex = activePoints[0]._index;
+
+                        var data_array = price_chart.data.datasets[clickedDatasetIndex].label.split("|");
+                        var url = dataset_property_urls[price_chart.data.datasets[clickedDatasetIndex].label][clickedElementindex];
+                        if(url){
+                            var win = window.open(url, '_blank');
+                            if (win) {
+                                //Browser has allowed it to be opened
+                                win.focus();
+                            } else {
+                                //Browser has blocked it
+                                alert('Please allow popups for this website');
+                            }
+                        }
+                        else{
+                            alert('No link found.');
+                        }
+
+                    }
+                };  
+
             }
             
             var current_date = new Date;
-            $('.created_at, .checkin_date_from').datepicker("setDate", current_date);
+            $('.calendar_date, .checkin_date_from').datepicker("setDate", current_date);
             $('.checkin_date_to').datepicker("setDate",new Date(current_date.getFullYear(), current_date.getMonth() + 1, current_date.getDate()));
         });
-    </script> 
+    </script>
 @endsection

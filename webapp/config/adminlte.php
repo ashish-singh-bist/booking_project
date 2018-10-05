@@ -154,7 +154,7 @@ return [
              'icon_color'  => 'green',
         ],
         [
-             'text'        => 'Chart Prices',
+             'text'        => 'Price Chart',
              'url'         => '/price_chart',
              'icon'        => 'play',
              'icon_color'  => 'green',

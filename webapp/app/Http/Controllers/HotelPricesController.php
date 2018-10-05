@@ -26,10 +26,13 @@ class HotelPricesController extends Controller
         $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
         $other_desc_list = HotelPrices::select('other_desc')->distinct()->get()->toArray();
         $category_list = HotelMaster::select('hotel_category')->distinct()->get()->toArray();
+        $max_person_list = HotelPrices::select('max_persons')->distinct()->orderBy('max_persons','desc')->get()->toArray();
+        $available_room_list = HotelPrices::select('available_only')->distinct()->orderBy('available_only','desc')->get()->toArray();
+
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list, 'category_list'=>$category_list, 'room_type_list' => $room_type_list]);
+            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=> $cancel_type_list, 'other_desc_list'=> $other_desc_list, 'category_list'=> $category_list, 'room_type_list'=> $room_type_list, 'max_person_list'=> $max_person_list, 'available_room_list'=> $available_room_list]);
         }else{
-            return view('hotel_prices.index', ['cancel_type_list'=>$cancel_type_list, 'other_desc_list'=>$other_desc_list, 'category_list'=>$category_list, 'room_type_list' => $room_type_list]);
+            return view('hotel_prices.index', ['cancel_type_list' => $cancel_type_list, 'other_desc_list' => $other_desc_list, 'category_list'=>$category_list, 'room_type_list' => $room_type_list, 'max_person_list'=>$max_person_list, 'available_room_list'=> $available_room_list]);
         }        
     }
 
@@ -247,7 +250,7 @@ class HotelPricesController extends Controller
             $hotelprices = $hotelprices->where('raw_price','>=',(int)$request->get('min_price'));
         }
 
-        if($request->get('max_price') != Null && $request->get('max_price') != ''){
+        if($request->get('max_price') != Null && $request->get('max_price') != '' && $request->get('max_price') <= 500){
             $hotelprices = $hotelprices->where('raw_price','<=',(int)$request->get('max_price'));
         }
 
@@ -448,7 +451,7 @@ class HotelPricesController extends Controller
                 $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'];
             }
         }
-        
+
         $json_data = array(
                     "draw"            => intval($request->input('draw')),  
                     "recordsTotal"    => intval($totalData),  

@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+use Carbon\Carbon;
 
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 
@@ -25,4 +26,11 @@ class PropertyUrl extends Eloquent
      */
     protected $hidden = [
     ];
+
+    public function setUpdatedAtAttribute($value)
+    {
+        // $dt = Carbon::create(1991, 1, 31, 0);
+        $dt = new \MongoDB\BSON\UTCDateTime(new \DateTime("1990-01-01"));
+        return $this->attributes['updated_at'] = $dt;
+    }
 }
