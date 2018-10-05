@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 @section('title')
-    Chart Prices
+    Price Chart
 @endsection
 
 @section('css')
@@ -13,7 +13,7 @@
     <div class="content-panel">
         <!-- content header (page header) -->
         <section class="content-header">
-            <h1>Hotel<small>Prices</small></h1>
+            <h1>Price<small>Chart</small></h1>
         </section>
         <!-- end of content header (page header) -->
         <!-- main content-->
@@ -90,11 +90,9 @@
                                             </div>
                                             <div class="box-body">
                                                 <ul>
-                                                    <li><label><input class="flat-icheck" type="checkbox" id="default_person" name="max_persons[]" value="1"/> 1 person</li>
-                                                    <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="2"/> 2 person</li>
-                                                    <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="3"/> 3 person</li>
-                                                    <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="4"/> 4 person</li>
-                                                    <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="5"/> 5 person</li>
+                                                    @foreach($max_person_list as $persons_list)
+                                                        <li><label><input class="flat-icheck"  type="checkbox" name="max_persons[]" value="{{$persons_list}}"/> {{$persons_list}} person</label></li>
+                                                    @endforeach
                                                 </ul>
                                             </div>
                                         </div>
@@ -136,7 +134,7 @@
                                         <div class="box-body overflow-0">
                                             <select class="form-control filter_class" id="hotel_names" multiple="multiple">
                                                 @foreach($hotel_name_list as $hotel_name)
-                                                    <option value="{{$hotel_name[0]}}">{{$hotel_name[0]}}</option>
+                                                    <option value="{{$hotel_name}}">{{$hotel_name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -153,7 +151,7 @@
                                             <div class="box-body">
                                                 <select class="form-control filter_class" id="room_types" multiple="multiple">
                                                     @foreach($room_type_list as $room_type)
-                                                        <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                                        <option value="{{$room_type}}">{{$room_type}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -168,7 +166,7 @@
                                             <div class="box-body">
                                                 <select class="form-control filter_class" id="cancellation_type" multiple="multiple">
                                                     @foreach($cancel_type_list as $cancel_type)
-                                                        <option value="{{$cancel_type[0]}}">{{$cancel_type[0]}}</option>
+                                                        <option value="{{$cancel_type}}">{{$cancel_type}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -183,7 +181,7 @@
                                             <div class="box-body">
                                                 <select class="form-control filter_class" id="meal_type" multiple="multiple">
                                                     @foreach($meal_type_list as $meal_type)
-                                                        <option value="{{$meal_type[0]}}">{{$meal_type[0]}}</option>
+                                                        <option value="{{$meal_type}}">{{$meal_type}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -281,7 +279,7 @@
                 $('.calendar_date, .checkin_date_from').datepicker("setDate", current_date);
                 $('.calendar_date, .checkin_date_to').datepicker();
                 $('#default_day').iCheck('check');
-                $('#default_person').iCheck('check');
+                // $('#default_person').iCheck('check');
             });
 
             $('#cities').select2({

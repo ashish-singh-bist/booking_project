@@ -40,7 +40,7 @@
                                                 <div class="box-body">
                                                     <ul>
                                                     @foreach($category_list as $category)
-                                                        <li><label><input class="flat-icheck"  type="checkbox" name="category[]" value="{{$category[0]}}"/> {{$category[0]}}</label></li>
+                                                        <li><label><input class="flat-icheck"  type="checkbox" name="category[]" value="{{$category}}"/> {{$category}}</label></li>
                                                     @endforeach
                                                     </ul>
                                                 </div>

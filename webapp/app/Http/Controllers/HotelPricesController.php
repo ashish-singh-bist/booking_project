@@ -12,6 +12,7 @@ use App\RoomDetails;
 use Response;
 use DB;
 use App\PropertyUrl;
+use App\DistinctData;
 
 class HotelPricesController extends Controller
 {
@@ -22,17 +23,17 @@ class HotelPricesController extends Controller
 
     public function index(Request $request)
     {
-        $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
-        $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
-        $other_desc_list = HotelPrices::select('other_desc')->distinct()->get()->toArray();
-        $category_list = HotelMaster::select('hotel_category')->distinct()->get()->toArray();
-        $max_person_list = HotelPrices::select('max_persons')->distinct()->orderBy('max_persons','desc')->get()->toArray();
-        $available_room_list = HotelPrices::select('available_only')->distinct()->orderBy('available_only','desc')->get()->toArray();
+        $room_type_list       = DistinctData::select('room_type')->get()->toArray();
+        $cancel_type_list     = DistinctData::select('cancellation_type')->get()->toArray();
+        $other_desc_list      = DistinctData::select('other_desc')->get()->toarray();
+        $category_list        = DistinctData::select('hotel_category')->get()->toArray();
+        $max_person_list      = DistinctData::select('max_persons')->get()->toArray();
+        $available_room_list  = DistinctData::select('available_only')->get()->toArray();
 
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=> $cancel_type_list, 'other_desc_list'=> $other_desc_list, 'category_list'=> $category_list, 'room_type_list'=> $room_type_list, 'max_person_list'=> $max_person_list, 'available_room_list'=> $available_room_list]);
+            return view('hotel_prices.index',['id'=>$request->get('id'), 'cancel_type_list'=> $cancel_type_list[0]['cancellation_type'], 'other_desc_list'=> $other_desc_list[0]['other_desc'], 'category_list'=> $category_list[0]['hotel_category'], 'room_type_list'=> $room_type_list[0]['room_type'], 'max_person_list'=> $max_person_list[0]['max_persons'], 'available_room_list'=> $available_room_list[0]['available_only']]);
         }else{
-            return view('hotel_prices.index', ['cancel_type_list' => $cancel_type_list, 'other_desc_list' => $other_desc_list, 'category_list'=>$category_list, 'room_type_list' => $room_type_list, 'max_person_list'=>$max_person_list, 'available_room_list'=> $available_room_list]);
+            return view('hotel_prices.index', ['cancel_type_list'=> $cancel_type_list[0]['cancellation_type'], 'other_desc_list'=> $other_desc_list[0]['other_desc'], 'category_list'=> $category_list[0]['hotel_category'], 'room_type_list'=> $room_type_list[0]['room_type'], 'max_person_list'=> $max_person_list[0]['max_persons'], 'available_room_list'=> $available_room_list[0]['available_only']]);
         }        
     }
 

@@ -48,10 +48,10 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 col-sm-6 col-xs-12 text-right">
+{{--                 <div class="col-md-6 col-sm-6 col-xs-12 text-right">
                     <a class="btn btn-success" href="{{ route('restart_parser') }}">Restart Scraper</a>
                     <a class="btn btn-success" href="{{ route('stop_parser') }}">Stop Scraper</a>
-                </div>
+                </div> --}}
 
             </div>
 

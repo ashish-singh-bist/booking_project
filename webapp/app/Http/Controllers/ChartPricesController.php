@@ -10,6 +10,7 @@ use MongoDB\BSON\UTCDatetime;
 use App\HotelMaster;
 use DB;
 use App\PropertyUrl;
+use App\DistinctData;
 
 class ChartPricesController extends Controller
 {
@@ -17,14 +18,16 @@ class ChartPricesController extends Controller
     {
         $date_array = [];
         $price_array = [];
-        $room_type_list = HotelPrices::select('room_type')->distinct()->get()->toArray();
-        $cancel_type_list = HotelPrices::select('cancellation_type')->distinct()->get()->toArray();
-        $meal_type_list = HotelPrices::select('mealplan_included_name')->distinct()->get()->toArray();
-        $hotel_name_list = HotelMaster::select('hotel_name')->distinct()->get()->toarray();
+        $room_type_list   =  DistinctData::select('room_type')->get();
+        $cancel_type_list =  DistinctData::select('cancellation_type')->get();
+        $meal_type_list   =  DistinctData::select('mealplan_included_name')->get();
+        $hotel_name_list  =  DistinctData::select('hotel_name')->get();
+        $max_person_list  =  DistinctData::select('max_persons')->get()->toArray();
+
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_prices/chart_prices', ['id' => $request->get('id'), 'room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_name_list' => $hotel_name_list, 'meal_type_list' => $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' =>json_encode($price_array)]);
+            return view('hotel_prices/chart_prices', ['id' => $request->get('id'), 'room_type_list' => $room_type_list[0]['room_type'], 'cancel_type_list' => $cancel_type_list[0]['cancellation_type'], 'hotel_name_list' => $hotel_name_list[0]['hotel_name'], 'meal_type_list' => $meal_type_list[0]['mealplan_included_name'], 'max_person_list'=>$max_person_list[0]['max_persons'], 'date_array' => json_encode($date_array), 'price_array' =>json_encode($price_array)]);
         }else{
-            return view('hotel_prices/chart_prices', ['room_type_list' => $room_type_list, 'cancel_type_list' => $cancel_type_list, 'hotel_name_list' => $hotel_name_list, 'meal_type_list'=> $meal_type_list, 'date_array' => json_encode($date_array), 'price_array' => json_encode($price_array)]);
+            return view('hotel_prices/chart_prices', ['room_type_list' => $room_type_list[0]['room_type'], 'cancel_type_list' => $cancel_type_list[0]['cancellation_type'], 'hotel_name_list' => $hotel_name_list[0]['hotel_name'], 'meal_type_list' => $meal_type_list[0]['mealplan_included_name'], 'max_person_list'=>$max_person_list[0]['max_persons'], 'date_array' => json_encode($date_array), 'price_array' =>json_encode($price_array)]);
         }
     }
 

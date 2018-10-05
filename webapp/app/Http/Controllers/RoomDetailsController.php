@@ -7,6 +7,7 @@ use Yajra\Datatables\Datatables;
 use App\RoomDetails;
 use Carbon\Carbon;
 use Response;
+use App\DistinctData;
 
 class RoomDetailsController extends Controller
 {
@@ -16,12 +17,12 @@ class RoomDetailsController extends Controller
     }
 
     public function index(Request $request)
-    {   
-		$room_type_list = RoomDetails::select('room_type')->distinct()->get()->toArray();
+    {
+        $room_type_list  =  DistinctData::select('room_type')->get()->toArray();
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('room_details.index',['id'=>$request->get('id'), 'room_type_list' => $room_type_list]);
+            return view('room_details.index',['id'=>$request->get('id'), 'room_type_list' => $room_type_list[0]['room_type']]);
         }else{
-            return view('room_details.index', ['room_type_list' => $room_type_list]);
+            return view('room_details.index', ['room_type_list' => $room_type_list[0]['room_type']]);
         }          
     }
 

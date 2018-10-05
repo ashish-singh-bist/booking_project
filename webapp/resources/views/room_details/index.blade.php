@@ -96,7 +96,7 @@
                                         <div class="box-body">
                                             <select class="form-control filter_class" id="room_types" multiple="multiple">
                                                 @foreach($room_type_list as $room_type)
-                                                    <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                                    <option value="{{$room_type}}">{{$room_type}}</option>
                                                 @endforeach
                                             </select>
                                         </div>

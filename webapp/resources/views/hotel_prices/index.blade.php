@@ -58,13 +58,8 @@
                                                 <div class="box-body">
                                                     <ul>
                                                         @foreach($max_person_list as $persons_list)
-                                                            <li><label><input class="flat-icheck"  type="checkbox" name="max_persons[]" value="{{$persons_list[0]}}"/> {{$persons_list[0]}} person</label></li>
+                                                            <li><label><input class="flat-icheck"  type="checkbox" name="max_persons[]" value="{{$persons_list}}"/> {{$persons_list}} person</label></li>
                                                         @endforeach
-                                                        {{-- <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="1"/> 1 person</li>
-                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="2"/> 2 person</li>
-                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="3"/> 3 person</li>
-                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="4"/> 4 person</li>
-                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="5"/> 5 person</li> --}}
                                                     </ul>
                                                 </div>
                                             </div>
@@ -120,18 +115,8 @@
                                         <div class="box-body">
                                             <ul>
                                                 @foreach($available_room_list as $available_room)
-                                                    <li><label><input class="flat-icheck"  type="checkbox" name="available_only[]" value="{{$available_room[0]}}"/> {{$available_room[0]}} rooms</label></li>
+                                                    <li><label><input class="flat-icheck"  type="checkbox" name="available_only[]" value="{{$available_room}}"/> {{$available_room}} rooms</label></li>
                                                 @endforeach
-                                                {{-- <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="1"/> 1 room</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="2"/> 2 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="3"/> 3 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="4"/> 4 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="5"/> 5 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="6"/> 6 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="7"/> 7 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="8"/> 8 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="9"/> 9 rooms</li>
-                                                <li><label><input class="flat-icheck" type="checkbox" name="available_only[]" value="10"/> 10 rooms</li> --}}
                                             </ul>
                                         </div>
                                     </div>
@@ -144,7 +129,7 @@
                                         <div class="box-body">
                                             <ul>
                                             @foreach($category_list as $category)
-                                                <li><label><input class="flat-icheck"  type="checkbox" name="category[]" value="{{$category[0]}}"/> {{$category[0]}}</label></li>
+                                                <li><label><input class="flat-icheck" type="checkbox" name="category[]" value="{{$category}}"/> {{$category}}</label></li>
                                             @endforeach
                                             </ul>
                                         </div>
@@ -221,7 +206,7 @@
                                         <div class="box-body">
                                             <select class="form-control filter_class" id="room_types" multiple="multiple">
                                                 @foreach($room_type_list as $room_type)
-                                                    <option value="{{$room_type[0]}}">{{$room_type[0]}}</option>
+                                                    <option value="{{$room_type}}">{{$room_type}}</option>
                                                 @endforeach                                     
                                             </select>
                                         </div>
@@ -265,7 +250,7 @@
                                         <div class="box-body">
                                             <select class="form-control filter_class" id="cancellation_type" multiple="multiple">
                                                 @foreach($cancel_type_list as $cancel_type)
-                                                    <option value="{{$cancel_type[0]}}">{{$cancel_type[0]}}</option>
+                                                    <option value="{{$cancel_type}}">{{$cancel_type}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -279,8 +264,8 @@
                                         <div class="box-body">
                                             <select class="form-control filter_class" id="others_desc" multiple="multiple">
                                             @foreach($other_desc_list as $other_desc)
-                                                @if ($other_desc[0])
-                                                    <option value="{{$other_desc[0]}}">{{$other_desc[0]}}</option>
+                                                @if ($other_desc)
+                                                    <option value="{{$other_desc}}">{{$other_desc}}</option>
                                                 @endif
                                             @endforeach
                                         </select>
@@ -542,8 +527,8 @@
                     @endforeach
                 ],
                 columnDefs: [
-                    { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-                    { "orderable": true, "targets": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+                    { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6] },
+                    { "orderable": true, "targets": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
                     { "width": "120px", "targets": 0 },
                     { "width": "60px", "targets": 1 },
                     { "width": "30px", "targets": 2 },
@@ -559,7 +544,7 @@
                     { "width": "100px", "targets": 16 },
                     { "width": "100px", "targets": 17 }
                 ],
-                "order": [[ 9, "desc" ]]
+                "order": [[ 7, "desc" ]]
             });
 
             $('#filter_apply').on('click', function(e) {

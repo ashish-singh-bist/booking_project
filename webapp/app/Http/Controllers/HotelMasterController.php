@@ -7,6 +7,7 @@ use Yajra\Datatables\Datatables;
 use App\HotelMaster;
 use Carbon\Carbon;
 use Response;
+use App\DistinctData;
 
 class HotelMasterController extends Controller
 {
@@ -16,13 +17,13 @@ class HotelMasterController extends Controller
     }
 
     public function index(Request $request)
-    {   
-        $category_list = HotelMaster::select('hotel_category')->distinct()->get()->toArray();
-
+    {
+        $category_list = DistinctData::select('hotel_category')->get()->toArray();
+        
         if($request->get('id') != Null && $request->get('id') != ''){
-            return view('hotel_master.index',['id'=>$request->get('id'), 'category_list' => $category_list]);
+            return view('hotel_master.index',['id'=>$request->get('id'), 'category_list' => $category_list[0]['hotel_category']]);
         }else{
-            return view('hotel_master.index', ['category_list' => $category_list]);
+            return view('hotel_master.index', ['category_list' => $category_list[0]['hotel_category']]);
         }
     }
 
