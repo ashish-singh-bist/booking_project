@@ -49,7 +49,7 @@ class PropertyUrlController extends Controller
         
         foreach ($data as $key => $value) {
             if ($key == 0) continue;
-            PropertyUrl::create([ 'city' => $value[0], 'url' => $value[1], 'is_active' => 1 ]);
+            PropertyUrl::create([ 'city' => $value[0], 'url' => $value[1], 'parse_interval' => 1 ]);
         }
         flash('CSV uploaded successfully!')->success()->important();
         return redirect()->route('property_url.index');
@@ -129,7 +129,7 @@ class PropertyUrlController extends Controller
             $static_array = [0,1,2,3,4,5,6,7,14,30];
             $action_html = '&nbsp;<select prop_id="'. $propertyurl_data[$i]->_id.'" class="form-control filter_class update_status" title="Active">';
             for($j=0;$j<count($static_array);$j++){
-                if($j == $propertyurl_data[$i]->is_active){
+                if($j == $propertyurl_data[$i]->parse_interval){
                     if($static_array[$j] == 0){
                         $action_html.= '<option name="'.$static_array[$j].'" value="'.$static_array[$j].' selected ">'.$static_array[$j].' (inactive)</option>';
                     }
@@ -165,7 +165,7 @@ class PropertyUrlController extends Controller
     {
         $property_url = PropertyUrl::find($request->_id);
         $property_url->timestamps = false;
-        $property_url->is_active = intval($request->is_active);
+        $property_url->parse_interval = intval($request->parse_interval);
         $property_url->save();
         return  response()->json([
             'status' =>true,

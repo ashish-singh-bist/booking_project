@@ -60,7 +60,7 @@ class UserController extends Controller
 
                 $currentLoginUserId = auth()->user()->id;
                 $user_type = auth()->user()->user_type;
-                if($user_type == 'admin'){
+                if($user_type == 'super_admin'){
                     $html .= '<a href="' . route('users.edit', $users->id) . '" class="btn btn-xs btn-warning" title="Edit record"><i class="fa fa-edit"></i> Edit</a>';
                     if($currentLoginUserId != $users->id){
                         $html .= ' <button type="button" title="Delete record" class="btn btn-xs btn-danger btn-delete" data-placement="left" data-remote="' . route('users.destroy', $users->id) . '"><span class="fa fa-trash-o" aria-hidden="true"></span> Delete</button>';
@@ -79,7 +79,7 @@ class UserController extends Controller
     public function create()
     {
         $user_role = auth()->user()->user_type;
-        if($user_role == 'admin'){
+        if($user_role == 'super_admin'){
             $validator = JsValidator::make($this->validationRules, array(), array(), "form.create_user");
             $user_type = User::select('user_type')->distinct()->get();
             return view('users.create', compact('validator','user_type'));
@@ -98,7 +98,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        if(auth()->user()->user_type == 'admin'){
+        if(auth()->user()->user_type == 'super_admin'){
             //validate user data
             $this->validate($request, $this->validationRules, array());
 
@@ -134,7 +134,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        if(auth()->user()->user_type == 'admin'){
+        if(auth()->user()->user_type == 'super_admin'){
             $user = User::findOrfail($id);
             $user_type = User::select('user_type')->distinct()->get();
             //Js validation for front-end
@@ -159,7 +159,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(auth()->user()->user_type == 'admin'){
+        if(auth()->user()->user_type == 'super_admin'){
             $user = User::findOrFail($id);
             
             $input = $request->all(); 
@@ -194,7 +194,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        if(auth()->user()->user_type == 'admin'){
+        if(auth()->user()->user_type == 'super_admin'){
             // check current login user
             $currentLoginUserId = auth()->user()->id;
             if($currentLoginUserId == $id){

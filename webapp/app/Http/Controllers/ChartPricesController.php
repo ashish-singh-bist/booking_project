@@ -172,16 +172,16 @@ class ChartPricesController extends Controller
         }
 
         // To Filter Room Type on search condition
-        // $room_array = [];
-        // $hotelprices_roomtype = clone $hotelprices;
-        // $room_type_array = $hotelprices_roomtype->select('room_type')->distinct()->get()->toarray();
-        // for($i=0; $i < count($room_type_array); $i++)
-        // {
-        //     $temp_array = [];
-        //     $temp_array['id'] = $room_type_array[$i][0];
-        //     $temp_array['text'] = $room_type_array[$i][0];
-        //     array_push($room_array,$temp_array);
-        // }
+        $room_array = [];
+        $hotelprices_roomtype = clone $hotelprices;
+        $room_type_array = $hotelprices_roomtype->select('room_type')->distinct()->get()->toarray();
+        for($i=0; $i < count($room_type_array); $i++)
+        {
+            $temp_array = [];
+            $temp_array['id'] = $room_type_array[$i][0];
+            $temp_array['text'] = $room_type_array[$i][0];
+            array_push($room_array,$temp_array);
+        }
 
         $hotelprices_data = $hotelprices->select('*')->orderBy('checkin_date','ASC')->get();
 
@@ -243,7 +243,7 @@ class ChartPricesController extends Controller
                 }
             }
         }
-        return response()->json(['status'=>'success','chart_data'=>$chart_data_array, 'dataset_property_urls' => $dataset_property_urls]);
+        return response()->json(['status'=>'success','chart_data'=>$chart_data_array, 'dataset_property_urls' => $dataset_property_urls, 'room_array'=> $room_array]);
         
         // $json_data = array(
         //             "chart_data_array"  => $chart_data_array,

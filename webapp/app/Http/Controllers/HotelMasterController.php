@@ -55,25 +55,33 @@ class HotelMasterController extends Controller
             });
         }
 
-        if(count($request->get('ratings'))>0){
-            $ratings = $request->get('ratings');
-            $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
-                foreach($ratings as $key => $rating){
-                    $start = intval($rating);
-                    $end = $rating + 1;
-                    if($key == 0){
-                        $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
-                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
-                        });
-                    }else{
-                        $query = $query->orWhere(function ($query_inner) use ($ratings,$start,$end) {
-                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
-                        });
-                    }
-                }
-                return $query;
-            });
+        if($request->get('min_rating')!= Null && $request->get('min_rating')!= ''){ 
+            $hotelmaster = $hotelmaster->where('booking_rating','>=', (double)$request->get('min_rating'));
         }
+
+        if($request->get('max_rating')!= Null && $request->get('max_rating')!= ''){
+            $hotelmaster = $hotelmaster->where('booking_rating','<=', (double)$request->get('max_rating'));
+        }
+
+        // if(count($request->get('ratings'))>0){
+        //     $ratings = $request->get('ratings');
+        //     $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
+        //         foreach($ratings as $key => $rating){
+        //             $start = intval($rating);
+        //             $end = $rating + 1;
+        //             if($key == 0){
+        //                 $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
+        //                     return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+        //                 });
+        //             }else{
+        //                 $query = $query->orWhere(function ($query_inner) use ($ratings,$start,$end) {
+        //                     return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+        //                 });
+        //             }
+        //         }
+        //         return $query;
+        //     });
+        // }
 
         if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
             $hotelmaster = $hotelmaster->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());

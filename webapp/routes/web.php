@@ -36,6 +36,9 @@ Route::get('/property_url', 'PropertyUrlController@index')->name('property_url.i
 Route::get('/property_getdata', 'PropertyUrlController@getData')->name('property_url.index.getData');
 Route::post('/property_url', 'PropertyUrlController@store');
 Route::post('/property_url/updatestatus', 'PropertyUrlController@updatePropertyUrlStatus')->name('property_url.update_status');
+Route::get('/property_url/property_url_by_city', 'PropertyUrlByCity@index')->name('property_url_by_city.index');
+Route::get('/property/search_url_City', 'PropertyUrlByCity@getPropertyUrlsByCity')->name('property_url_by_city.search_url_City');
+Route::post('/property/insertPropertyUrls', 'PropertyUrlByCity@savePropertyUrlDetails')->name('PropertyUrlByCity.insertPropertyUrls');
 
 Route::get('/hotel_master', 'HotelMasterController@index')->name('hotel_master.index');
 Route::get('/hotel_master_getdata', 'HotelMasterController@getData')->name('hotel_master.getData');

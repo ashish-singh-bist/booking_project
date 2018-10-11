@@ -72,6 +72,12 @@
                                                     <h4 class="box-title">Rating</h4>
                                                 </div>
                                                 <div class="box-body">
+                                                	<label for="min_rating">From (min)</label><br>
+                                                	<input type="number" id="min_rating" placeholder="0" min="0" max="10" step=".1"><br>
+                                                	<label for="max_rating">To (max)</label><br>
+                                                	<input type="number" id="max_rating" placeholder="10" min="0" max="10" step=".1">
+                                                </div>
+                                                {{-- <div class="box-body">
                                                     <ul>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="0"/> 0 - 1</label></li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="1"/> 1 - 2</label></li>
@@ -84,7 +90,7 @@
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="8"/> 8 - 9</label></li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="9"/> 9 - 10</label></li>
                                                     </ul>
-                                                </div>
+                                                </div> --}}
                                             </div>
                                         </div>
                                     </div>    
@@ -282,16 +288,18 @@
                         .map(function() {
                             return $(this).val();
                         }).get();
-                        var ratings = $('input[name="ratings[]"]:checked')
-                        .map(function() {
-                            return $(this).val();
-                        }).get();
+                        // var ratings = $('input[name="ratings[]"]:checked')
+                        // .map(function() {
+                        //     return $(this).val();
+                        // }).get();
                         var categories = $('input[name="category[]"]:checked')
                         .map(function() {
                             return $(this).val();
                         }).get();
                         d.stars = stars;
-                        d.ratings = ratings;
+                        // d.ratings = ratings;
+                        d.min_rating = $('#min_rating').val();
+                        d.max_rating = $('#max_rating').val();
                         d.categories = categories;
                         d.cities = $("#cities").val();
                         d.countries = $("#countries").val();
@@ -321,6 +329,8 @@
                 $("#guest_favourite").val('').trigger('change');
                 $("#created_at_to").val('');
                 $("#created_at_from").val('');
+                $('#min_rating').val('');
+                $('#max_rating').val('');
                 oTable.draw();
             });
 

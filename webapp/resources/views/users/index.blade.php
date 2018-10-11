@@ -10,7 +10,7 @@
         <section class="content-header">
             <h1>Users
                 <small>All Users</small>
-                @if(auth()->user()->user_type =='admin')
+                @if(auth()->user()->user_type =='super_admin')
                 <a class="btn btn-primary" href="{{ route('users.create') }}">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     Create User

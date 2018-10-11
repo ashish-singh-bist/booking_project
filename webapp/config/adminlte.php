@@ -137,9 +137,22 @@ return [
             'label_color' => 'success',
         ],
         [
-             'text'        => 'Property Url',
-             'url'         => '/property_url',
-             'icon'        => 'file',
+            'text'         => 'Property Url',
+            'icon'         => 'play',
+            'submenu'      => [
+                                [
+                                    'text' => 'Upload Property Url',
+                                    'url'  => '/property_url',
+                                    'icon_color' => 'yellow',
+                                ],
+                                [
+                                    'text' => 'Add Property Url By City',
+                                    'url'  => '/property_url/property_url_by_city',
+                                    'icon_color' => 'green',
+                                ],
+                            ],
+            'label_color' => 'success',
+            'icon_color'  => 'green',
         ],
         [
              'text'        => 'Hotel Details',

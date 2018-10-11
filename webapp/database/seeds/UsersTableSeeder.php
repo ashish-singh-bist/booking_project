@@ -15,7 +15,7 @@ class UsersTableSeeder extends Seeder
             'name' => 'admin',
             'email' => 'admin@limehomepricing.com',
             'password' => bcrypt('123456'),
-            'user_type'=>'admin'
+            'user_type'=>'super_admin'
         ]);
     }
 }

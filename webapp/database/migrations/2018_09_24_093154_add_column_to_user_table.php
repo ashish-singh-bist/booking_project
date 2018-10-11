@@ -14,7 +14,7 @@ class AddColumnToUserTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('user_type')->default('user')->after('password');
+            $table->string('user_type')->default('admin')->after('password');
         });
     }
 

@@ -75,25 +75,33 @@ class HotelPricesController extends Controller
             });
         }
 
-        if(count($request->get('ratings'))>0){
-            $ratings = $request->get('ratings');
-            $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
-                foreach($ratings as $key => $rating){
-                    $start = intval($rating);
-                    $end = $rating + 1;
-                    if($key == 0){
-                        $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
-                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
-                        });
-                    }else{
-                        $query = $query->orWhere(function ($query_inner) use ($ratings,$start,$end) {
-                            return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
-                        });
-                    }
-                }
-                return $query;
-            });
+        if($request->get('min_rating')!= Null && $request->get('min_rating')!= ''){
+            $hotelmaster = $hotelmaster->where('booking_rating','>=', (double)$request->get('min_rating'));
         }
+
+        if($request->get('max_rating')!= Null && $request->get('max_rating')!= ''){
+            $hotelmaster = $hotelmaster->where('booking_rating','<=', (double)$request->get('max_rating'));
+        }
+
+        // if(count($request->get('ratings'))>0){
+        //     $ratings = $request->get('ratings');
+        //     $hotelmaster = $hotelmaster->where(function ($query) use ($ratings) {
+        //         foreach($ratings as $key => $rating){
+        //             $start = intval($rating);
+        //             $end = $rating + 1;
+        //             if($key == 0){
+        //                 $query = $query->where(function ($query_inner) use ($ratings,$start,$end) {
+        //                     return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+        //                 });
+        //             }else{
+        //                 $query = $query->orWhere(function ($query_inner) use ($ratings,$start,$end) {
+        //                     return $query_inner->where('booking_rating', '>=', $start)->Where('booking_rating', '<', $end);
+        //                 });
+        //             }
+        //         }
+        //         return $query;
+        //     });
+        // }
 
         if(count($request->get('countries'))>0){
             $countries = $request->get('countries');
@@ -175,7 +183,7 @@ class HotelPricesController extends Controller
             }
         }
 
-        if(count($request->get('stars'))>0 || count($request->get('ratings'))>0 || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0 || ($request->get('self_verified')!=Null && $request->get('self_verified')!='') || ($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!='')){
+        if(count($request->get('stars'))>0 || ($request->get('min_rating')!= Null && $request->get('min_rating')!= '') || ($request->get('max_rating')!= Null && $request->get('max_rating')!= '') || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0 || ($request->get('self_verified')!=Null && $request->get('self_verified')!='') || ($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!='')){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
             foreach($hotel_id_data as $value){
@@ -239,29 +247,33 @@ class HotelPricesController extends Controller
             }
         }
         
-        if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
-            $hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
-        }
+        // if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
+        //     //$hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
+        //     $hotelprices = $hotelprices->where('cal_info.s','>',Carbon::parse($request->get('created_at_from'))->startOfDay());
+        // }
 
-        if($request->get('created_at_to') != Null && $request->get('created_at_to') != ''){
-            $hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
-        }
+        // if($request->get('created_at_to') != Null && $request->get('created_at_to') != ''){
+        //     //$hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
+        //     $hotelprices = $hotelprices->where('cal_info.s','<',Carbon::parse($request->get('created_at_to'))->endOfDay());
+        // }
 
-        if($request->get('min_price') != Null && $request->get('min_price') != ''){
-            $hotelprices = $hotelprices->where('raw_price','>=',(int)$request->get('min_price'));
-        }
+        // if($request->get('min_price') != Null && $request->get('min_price') != ''){
+        //     $hotelprices = $hotelprices->where('cal_info.p','>=',(int)$request->get('min_price'));
+        // }
 
-        if($request->get('max_price') != Null && $request->get('max_price') != '' && $request->get('max_price') <= 500){
-            $hotelprices = $hotelprices->where('raw_price','<=',(int)$request->get('max_price'));
-        }
+        // if($request->get('max_price') != Null && $request->get('max_price') != '' && $request->get('max_price') <= 500){
+        //     $hotelprices = $hotelprices->where('cal_info.p','<=',(int)$request->get('max_price'));
+        // }
 
-        if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
-            $hotelprices = $hotelprices->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
-        }
+        // if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
+        //     //$hotelprices = $hotelprices->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
+        //     $hotelprices = $hotelprices->where('cal_info.c','>=',Carbon::parse($request->get('checkin_date_from'))->startOfDay());
+        // }
 
-        if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
-            $hotelprices = $hotelprices->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
-        }
+        // if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
+        //     //$hotelprices = $hotelprices->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
+        //     $hotelprices = $hotelprices->where('cal_info.c','<=',Carbon::parse($request->get('checkin_date_to'))->endOfDay());
+        // }
        
         if($request->get('meal_plan')!=Null && $request->get('meal_plan')!=''){
             $search_meal_plan = $request->get('meal_plan');
@@ -319,6 +331,38 @@ class HotelPricesController extends Controller
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
 
+        // filter to unwind hotel_price data /////////////////////////////////////////////////
+        $cal_info_filters = [];
+        if($request->get('min_price') != Null && $request->get('min_price') != ''){
+            $cal_info_filters['cal_info.p'] = ['$gte' => intval($request->get('min_price'))];
+        }
+
+        if($request->get('max_price') != Null && $request->get('max_price') != ''){
+            if(intval($request->get('min_price'))<500){
+                $cal_info_filters['cal_info.p'] = ['$lte' => intval($request->get('max_price'))];
+            }
+        }
+
+        if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
+            $cal_info_filters['cal_info.c']['$gte'] = new \MongoDB\BSON\UTCDateTime(new \DateTime($request->get('checkin_date_from')));
+        }
+
+        if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
+            $cal_info_filters['cal_info.c']['$lte'] = new \MongoDB\BSON\UTCDateTime(new \DateTime($request->get('checkin_date_to')));
+		}
+
+        if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
+            $cal_info_filters['cal_info.s']['$gte'] = new \MongoDB\BSON\UTCDateTime(new \DateTime($request->get('created_at_from')));
+        }
+
+        if($request->get('created_at_to') != Null && $request->get('created_at_to') != ''){
+            $cal_info_filters['cal_info.s']['$lte'] = new \MongoDB\BSON\UTCDateTime(new \DateTime($request->get('created_at_to')));
+        }
+
+
+
+        /////////////////////////////////////////////////////////////////////
+
         // Code To Test The Mongodb Aggregate Query
 
         // $hotel_stars = $request->get('stars');
@@ -355,10 +399,31 @@ class HotelPricesController extends Controller
 
         #############################################################################
         if($request->get('export') != null && $request->get('export') == 'csv'){
-            $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
-                         ->limit(intval(config('app.data_export_row_limit')))
-                         ->orderBy($order,$dir)
-                         ->get();             
+            $hotelprices_data = $hotelprices->raw(function($collection) use($cal_info_filters,$start,$limit,$order,$dir) {
+                if($dir == 'asc'){
+                    $order_dir = 1;
+                }else{
+                    $order_dir = -1;
+                }
+                return $collection->aggregate([
+                    ['$unwind' => '$cal_info'],
+                    ['$match' => $cal_info_filters,
+                    ],
+                    ['$group' =>
+                        [
+                            '_id'=>['cal_info' => '$cal_info', 'hotel_id' => '$hotel_id', 'mealplan_desc'=> '$mealplan_desc', 'cancellation_type'=> '$cancellation_type', 'available_only'=>'$available_only', 'nr_stays'=>'$nr_stays', 'other_desc'=>'$other_desc', 'max_persons'=> '$max_persons', 'cancellation_desc'=>'$cancellation_desc', 'number_of_days'=>'$number_of_days','room_type'=>'$room_type','number_of_guests'=>'$number_of_guests', 'mealplan_included_name'=>'$mealplan_included_name'],
+                            'count' => [ '$sum'=> 1 ]
+                        ]
+                    ],
+                    ['$skip'  => intval($start) ],
+                    ['$limit' => intval(config('app.data_export_row_limit')) ],
+                    ['$sort'  => [$order => $order_dir]]
+                ], ['allowDiskUse' => true]);
+            });
+            // $hotelprices->select('*')->offset(intval($start))
+            //              ->limit(intval(config('app.data_export_row_limit')))
+            //              ->orderBy($order,$dir)
+            //              ->get();
             $headers = array(
                 "Content-type" => "text/csv",
                 "Content-Disposition" => "attachment; filename=file.csv",
@@ -372,22 +437,46 @@ class HotelPricesController extends Controller
                 $file = fopen('php://output', 'w');
                 fputcsv($file, $columns_header);
 
-                foreach($hotelprices_data as $row) {
-                    $row->checkin_date =  $row->checkin_date->toDateTime()->format('Y-m-d');
-                    $row->raw_price =  str_replace(".",",",$row->raw_price);
-                    $row->hotel_title = $hotel_name_array[$row->hotel_id]['hotel_name'];
-                    $row->hotel_category = $hotel_name_array[$row->hotel_id]['hotel_category'];
-                    $row->hotel_stars = $hotel_name_array[$row->hotel_id]['hotel_stars'];
-                    $row->location = $hotel_name_array[$row->hotel_id]['location'];
-                    $row->booking_rating = $hotel_name_array[$row->hotel_id]['booking_rating'];
-                    $row->guests_favorite_area = $hotel_name_array[$row->hotel_id]['guests_favorite_area'];
-                    $row->self_verified = $hotel_name_array[$row->hotel_id]['self_verified'];
-                    if(count($row->other_desc) > 0){
-                        $row->other_desc =  join("|",$row->other_desc);
+                for($i=0; $i < count($hotelprices_data); $i++){
+                    $row =new \stdClass();
+                    $data_obj = $hotelprices_data[$i]['_id'];
+                    $row->hotel_title = $hotel_name_array[$data_obj['hotel_id']]['hotel_name'];
+                    $row->hotel_category = $hotel_name_array[$data_obj['hotel_id']]['hotel_category'];
+                    $row->hotel_stars = $hotel_name_array[$data_obj['hotel_id']]['hotel_stars'];
+                    $row->location =  $hotel_name_array[$data_obj['hotel_id']]['location'];
+                    $row->booking_rating = $hotel_name_array[$data_obj['hotel_id']]['booking_rating'];
+                    $row->guests_favorite_area = $hotel_name_array[$data_obj['hotel_id']]['guests_favorite_area'];
+                    $row->self_verified = $hotel_name_array[$data_obj['hotel_id']]['self_verified'];
+                    
+                    $row->checkin_date = $data_obj['cal_info']['c']->toDateTime()->format('Y-m-d');
+                    $row->number_of_days = $data_obj['number_of_days'];
+                    $row->number_of_guests = $data_obj['number_of_guests'];
+                    $row->room_type = trim(preg_replace('/\n/', '',$data_obj['room_type']));
+                    $row->raw_price = str_replace(".",",",$data_obj['cal_info']['p']);
+                    $row->available_only = $data_obj['available_only'];
+                    $row->max_persons = $data_obj['max_persons'];
+                    $row->cancellation_type = $data_obj['cancellation_type'];
+                    if(array_key_exists('mealplan_desc', $data_obj)){
+                        $row->mealplan_desc = $data_obj['mealplan_desc'];    
+                    }else{
+                        $row->mealplan_desc = "";
                     }
-                    else{
-                        $row->other_desc =  '';
+                    if(array_key_exists('mealplan_included_name', $data_obj)){
+                        $row->mealplan_included_name = $data_obj['mealplan_included_name'];    
+                    }else{
+                        $row->mealplan_included_name = "";
                     }
+                    $row->other_desc = "";
+                    $row->s = "";
+                    // $row->other_desc = $data_obj['other_desc'];
+                    // $row->created_at = $data_obj['cal_info']['s']->toDateTime()->format('Y-m-d');
+                    // dd($data_obj['other_desc']);
+                    // if(count($data_obj['other_desc']) > 0){
+                    //     $row->other_desc =  join("|",$data_obj['other_desc']);
+                    // }
+                    // else{
+                    //     $row->other_desc =  '';
+                    // }
                     $data_row = [];
                     foreach ($columns as $key) {
                         array_push($data_row, $row->{$key});
@@ -418,46 +507,73 @@ class HotelPricesController extends Controller
             $totalData = $hotelprices->count();
             $totalFiltered = $totalData;
 
-            $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
-                         ->limit(intval($limit))
-                         ->orderBy($order,$dir)
-                         ->get();
-        }
+            // $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
+            //              ->limit(intval($limit))
+            //              ->orderBy($order,$dir)
+            //              ->get();
 
+            $hotelprices_data =  $hotelprices->raw(function($collection) use($cal_info_filters,$start,$limit,$order,$dir) {
+            	if($dir == 'asc'){
+                    $order_dir = 1;
+                }else{
+                    $order_dir = -1;
+                }
+                return $collection->aggregate([
+                    ['$unwind' => '$cal_info'],
+                    ['$match' => $cal_info_filters,
+                	],
+                    ['$group' =>
+                        [
+                            '_id'=>['cal_info' => '$cal_info', 'hotel_id' => '$hotel_id', 'mealplan_desc'=> '$mealplan_desc', 'cancellation_type'=> '$cancellation_type', 'available_only'=>'$available_only', 'nr_stays'=>'$nr_stays', 'other_desc'=>'$other_desc', 'max_persons'=> '$max_persons', 'cancellation_desc'=>'$cancellation_desc', 'number_of_days'=>'$number_of_days','room_type'=>'$room_type','number_of_guests'=>'$number_of_guests', 'mealplan_included_name'=>'$mealplan_included_name'],
+                            'count' => [ '$sum'=> 1 ]
+                        ]
+                    ],
+                    ['$skip'  => intval($start) ],
+                    ['$limit' => intval($limit) ],
+                    ['$sort'  => [$order => $order_dir]]
+                ], ['allowDiskUse' => true]);
+            });
+        }
+        
+        $hotel_data = [];
         for($i=0; $i < count($hotelprices_data); $i++)
         {
-            $hotelprices_data[$i]['hotel_title'] = '<a class="hotel_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_name'] . '">' . $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_name'] . ' <i class="fa fa-info-circle"></i></a>';
+            $data_obj = $hotelprices_data[$i]['_id'];
+            $data_obj['hotel_title'] = '<a class="hotel_equip_popup" hotel-id="'.$data_obj['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$data_obj['hotel_id']]['hotel_name'] . '">' . $hotel_name_array[$data_obj['hotel_id']]['hotel_name'] . ' <i class="fa fa-info-circle"></i></a>';
 
-            $hotelprices_data[$i]['hotel_category'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_category'];
-            $hotelprices_data[$i]['hotel_stars'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['hotel_stars'];
-            $hotelprices_data[$i]['location'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['location'];
-            $hotelprices_data[$i]['booking_rating'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['booking_rating'];
-            $hotelprices_data[$i]['guests_favorite_area'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['guests_favorite_area'];
-            $hotelprices_data[$i]['self_verified'] = $hotel_name_array[$hotelprices_data[$i]['hotel_id']]['self_verified'];
+            $data_obj['hotel_category'] = $hotel_name_array[$data_obj['hotel_id']]['hotel_category'];
+            $data_obj['hotel_stars'] = $hotel_name_array[$data_obj['hotel_id']]['hotel_stars'];
+            $data_obj['location'] = $hotel_name_array[$data_obj['hotel_id']]['location'];
+            $data_obj['booking_rating'] = $hotel_name_array[$data_obj['hotel_id']]['booking_rating'];
+            $data_obj['guests_favorite_area'] = $hotel_name_array[$data_obj['hotel_id']]['guests_favorite_area'];
+            $data_obj['self_verified'] = $hotel_name_array[$data_obj['hotel_id']]['self_verified'];
 
-            $hotelprices_data[$i]['room_type'] = '<a class="room_equip_popup" hotel-id="'.$hotelprices_data[$i]['hotel_id'].'" title="room equipment" data-title="' . $hotelprices_data[$i]['room_type'] . '">' . $hotelprices_data[$i]['room_type'] . ' <i class="fa fa-info-circle"></i></a>';
-            $hotelprices_data[$i]['raw_price'] = str_replace(".",",",$hotelprices_data[$i]['raw_price']);
+            $data_obj['room_type'] = '<a class="room_equip_popup" hotel-id="'.$data_obj['hotel_id'].'" title="room equipment" data-title="' . $data_obj['room_type'] . '">' . $data_obj['room_type'] . ' <i class="fa fa-info-circle"></i></a>';
+            $data_obj['raw_price'] = str_replace(".",",",$data_obj['cal_info']['p']);
 
 
-            $checkin_date = $hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y-m-d');
-            $checkout_date = Carbon::parse($hotelprices_data[$i]['checkin_date']->toDateTime()->format('Y-m-d'))->addDays($hotelprices_data[$i]['number_of_days'])->format('Y-m-d');
+            $checkin_date = $data_obj['cal_info']['c']->toDateTime()->format('Y-m-d');
+            $checkout_date = Carbon::parse($data_obj['cal_info']['c']->toDateTime()->format('Y-m-d'))->addDays($data_obj['number_of_days'])->format('Y-m-d');
 
-            $url = $property_url_array[$hotelprices_data[$i]['hotel_id']] . "?checkin=" . $checkin_date . "&checkout=" . $checkout_date . "&selected_currency=EUR&group_adults=" . $hotelprices_data[$i]['number_of_guests'];
-            $hotelprices_data[$i]['checkin_date'] =  '<a href="' . $url . '" target="_blank">' . $hotelprices_data[$i]['checkin_date']->toDateTime()->format('y-m-d') . "</a>";
+            $url = $property_url_array[$data_obj['hotel_id']] . "?checkin=" . $checkin_date . "&checkout=" . $checkout_date . "&selected_currency=EUR&group_adults=" . $data_obj['number_of_guests'];
+            $data_obj['checkin_date'] =  '<a href="' . $url . '" target="_blank">' . $checkin_date . "</a>";
 
-            if($hotelprices_data[$i]['cancellation_desc']!= ''){
-                $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'] ." ( ".$hotelprices_data[$i]['cancellation_desc']. " )";    
+            if(array_key_exists('cancellation_desc',$data_obj) && $data_obj['cancellation_desc']!= ''){
+                $data_obj['cancellation_type'] = $data_obj['cancellation_type'] ." ( ".$data_obj['cancellation_desc']. " )";    
             }
-            else{
-                $hotelprices_data[$i]['cancellation_type'] = $hotelprices_data[$i]['cancellation_type'];
-            }
+
+            //$utcdatetime = Carbon::parse($data_obj['cal_info']['s']);
+            //$data_obj['s'] = $utcdatetime->format('Y-m-d');
+            $data_obj['s'] = '';
+
+            array_push($hotel_data, $data_obj);
         }
 
         $json_data = array(
                     "draw"            => intval($request->input('draw')),  
                     "recordsTotal"    => intval($totalData),  
                     "recordsFiltered" => intval($totalFiltered), 
-                    "data"            => $hotelprices_data,
+                    "data"            => $hotel_data,
                     "statistics"      => $statistics,
                     "room_array"      => $room_array
                     );

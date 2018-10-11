@@ -39,7 +39,7 @@
                             </div>
                             
                             <div class="box-footer">
-                                @if(auth()->user()->user_type =='admin')
+                                @if(auth()->user()->user_type =='super_admin')
                                 <button type="submit" class="btn btn-primary">Upload</button>
                                 @endif
                             </div>

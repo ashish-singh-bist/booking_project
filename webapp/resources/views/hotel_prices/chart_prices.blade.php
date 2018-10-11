@@ -90,8 +90,12 @@
                                             </div>
                                             <div class="box-body">
                                                 <ul>
-                                                    @foreach($max_person_list as $persons_list)
-                                                        <li><label><input class="flat-icheck"  type="checkbox" name="max_persons[]" value="{{$persons_list}}"/> {{$persons_list}} person</label></li>
+                                                    @foreach($max_person_list as $person_list)
+                                                        @if($person_list == 1)
+                                                        <li><label><input class="flat-icheck" id="default_person" type="checkbox" checked="checked" name="max_persons[]" value="{{$person_list}}"/> {{$person_list}} person</label></li>
+                                                        @else
+                                                        <li><label><input class="flat-icheck" type="checkbox" name="max_persons[]" value="{{$person_list}}"/> {{$person_list}} person</label></li>
+                                                        @endif
                                                     @endforeach
                                                 </ul>
                                             </div>
@@ -249,6 +253,10 @@
                         data: JSON.stringify(data),
                         contentType: "application/json; charset=utf-8",
                         success: function (data) {
+                            var room_array = data.room_array;
+                            var room_types = $("#room_types").val();
+                            $("#room_types").empty().select2( { data : room_array, placeholder: 'Select room type' });
+                            $('#room_types').val(room_types).trigger('change');
                             bindChartData(data.chart_data, data.dataset_property_urls);
                         },
                         error: function (textStatus, errorThrown) {
@@ -267,7 +275,6 @@
             $('#clear_filter').on('click',function(){
                 $("#checkin_date_to").val('');
                 $("#checkin_date_from").val('');
-                $("#room_types").val('').trigger('change');
                 $("#calendar_date").val('');
                 $(".select2-city").val('').trigger('change');
                 $("#hotel_names").val('').trigger('change');
@@ -279,7 +286,7 @@
                 $('.calendar_date, .checkin_date_from').datepicker("setDate", current_date);
                 $('.calendar_date, .checkin_date_to').datepicker();
                 $('#default_day').iCheck('check');
-                // $('#default_person').iCheck('check');
+                $('#default_person').iCheck('check');
             });
 
             $('#cities').select2({

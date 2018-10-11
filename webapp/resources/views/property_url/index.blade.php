@@ -205,10 +205,10 @@
                 });
                 var data = {};
                 data._id = $(this).attr('prop_id');
-                var is_active = $(this).val();
-                data.is_active = is_active;
+                var parse_interval = $(this).val();
+                data.parse_interval = parse_interval;
 
-                if(data.is_active != '' || data.is_active !=null){
+                if(data.parse_interval != '' || data.parse_interval !=null){
                     $.ajax({
                         type: "POST",
                         url: "{!! URL::to('property_url/updatestatus') !!}",

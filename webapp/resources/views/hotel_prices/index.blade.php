@@ -90,6 +90,12 @@
                                                     <h4 class="box-title">Rating</h4>
                                                 </div>
                                                 <div class="box-body">
+                                                    <label for="min_rating">From (min)</label><br>
+                                                    <input type="number" id="min_rating" placeholder="0" min="0" max="10" step=".1"><br>
+                                                    <label for="max_rating">To (max)</label><br>
+                                                    <input type="number" id="max_rating" placeholder="10" min="0" max="10" step=".1">
+                                                </div>
+                                                {{-- <div class="box-body">
                                                     <ul>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="0"/> 0 - 1</li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="1"/> 1 - 2</li>
@@ -102,7 +108,7 @@
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="8"/> 8 - 9</li>
                                                         <li><label><input class="flat-icheck" type="checkbox" name="ratings[]" value="9"/> 9 - 10</li>
                                                     </ul>
-                                                </div>
+                                                </div>  --}}
                                             </div>
                                         </div>
                                     </div>
@@ -478,12 +484,12 @@
                         .map(function() {
                             return $(this).val();
                         }).get();
-                        var ratings = $('input[name="ratings[]"]:checked')
-                        .map(function() {
-                            return $(this).val();
-                        }).get();
+                        // var ratings = $('input[name="ratings[]"]:checked')
+                        // .map(function() {
+                        //     return $(this).val();
+                        // }).get();
                         d.stars = stars;
-                        d.ratings = ratings;
+                        // d.ratings = ratings;
                         var days = $('input[name="days[]"]:checked')
                         .map(function() {
                             return $(this).val();
@@ -510,6 +516,8 @@
                         d.available_only = available_only;
                         d.self_verified = $("#self_verified").val();
                         d.guest_favourite = $("#guest_favourite").val();
+                        d.min_rating = $('#min_rating').val();
+                        d.max_rating = $('#max_rating').val();
                     },
                     dataFilter: function(response) {
                         var statistics = JSON.parse(response)['statistics'];
@@ -588,6 +596,8 @@
                 $('.flat-icheck').iCheck('uncheck');
                 $('#self_verified').val('').trigger('change');
                 $('#guest_favourite').val('').trigger('change');
+                $('#min_rating').val('');
+                $('#max_rating').val('');
                 resetSlider();
                 oTable.draw();
             });

@@ -250,7 +250,7 @@ return [
         'cancellation_type' => 'Cancellation Type',
         // 'cancellation_desc' => 'Cancellation Desc',
         'other_desc' => 'Other Desc',
-        'created_at' => 'Create Time',
+        's' => 'Parse Date',
     ],
 
     'room_details_header_key' => [
