@@ -37,8 +37,8 @@ def getDateTimeObject(date_str):
   return datetime_object
 
 def checkRoomEquipmentChanged(dict_room_equip_db_json,dict_parsed_room_equip_json):
-  dict_room_equip_db = json.loads(str(dict_room_equip_db_json))
-  dict_parsed_room_equip = json.loads(str(dict_parsed_room_equip_json))
+  dict_room_equip_db = json.loads(dict_room_equip_db_json)
+  dict_parsed_room_equip = json.loads(dict_parsed_room_equip_json)
   #we check the key is equal or not. it not matched it means date is updated
   if not len(dict_room_equip_db) == len(dict_parsed_room_equip):
     return 1  
@@ -82,7 +82,7 @@ def checkHotelInfoChanged(dict_hotel_info_db,dict_parsed_hotel_info):
                 return 1   
   return 0
 
-def parseAndSaveData(temp_dict):
+def parseAndSaveData(temp_dict):  
   obj_booking = Booking() 
   url = temp_dict['url']
   prop_url = temp_dict['property_url']
@@ -92,9 +92,10 @@ def parseAndSaveData(temp_dict):
   temp_prop_id = temp_dict['temp_prop_id']
   length_stay = temp_dict['length_stay']
   number_of_guests = temp_dict['number_of_guests']  
-  print( "\nParsing start:"+str(datetime.datetime.now()) )  
+  print( "\nParsing start:"+str(datetime.datetime.now()) )
   result = obj_booking.parseProductDetails(url,checkin_date,checkout_date)  
   print( "\nParsing End:"+str(datetime.datetime.now()) )  
+  obj_booking.obj_helper.writeFile( "test.txt" , "\n"+url )
   if 'hotel_info' in result:
     print( "hotel info extracted......" )
     hotel_id = None
@@ -113,7 +114,7 @@ def parseAndSaveData(temp_dict):
           temp_dict_hotel['city'] = result['hotel_info']['city']
         if 'country' in result['hotel_info'] and result['hotel_info']['country']:
           temp_dict_hotel['country'] = result['hotel_info']['country']
-        obj_booking.obj_mongo_db.recUpdate( 'property_urls' , temp_dict_hotel , { '_id':ObjectId(temp_prop_id) }  )
+        obj_booking.obj_mongo_db.recUpdate( 'property_urls' , temp_dict_hotel , { '_id':ObjectId(temp_prop_id) } , 0  )
         #set redis cache when hotel_id and other data is inserted in property_urls
         obj_booking.obj_redis_cache.setKeyValue(temp_prop_id,hotel_id)
     else:
@@ -182,12 +183,18 @@ def parseAndSaveData(temp_dict):
                 #if room equipments are changed then we update the table
                 if room_detail_rows.count():
                   for room_detail_row in room_detail_rows:
-                    is_changed = checkRoomEquipmentChanged(room_detail_row['room_equipment'],dict_room_info['room_equipment'])
+                    is_changed = None
+                    try:
+                      is_changed = checkRoomEquipmentChanged(room_detail_row['room_equipment'],dict_room_info['room_equipment'])
+                    except Exception as e:
+                      print("\nException raised for ,Error:"+str(e))
+                      error_str = str(e)
+                      ret_id = obj_booking.obj_mongo_db.recInsert( 'logs_booking' , [ { 'status_code':2,'log':error_str } ] )
                     if is_changed:                      
                       dict_room_details = {}
                       dict_room_details['updated_at'] = datetime.datetime.now()
                       dict_room_details['room_equipment'] = dict_room_info['room_equipment']                      
-                      ret_id = obj_master.obj_mongo_db.recUpdate( 'room_details' , dict_room_details , { 'hotel_id':hotel_id,'room_type':key_room_type } )
+                      ret_id = obj_booking.obj_mongo_db.recUpdate( 'room_details' , dict_room_details , { 'hotel_id':hotel_id,'room_type':key_room_type } )
                       print( "\nUpdate room_details The return id is"+str(ret_id) )                    
                     break
                 else:
@@ -207,58 +214,65 @@ def parseAndSaveData(temp_dict):
               dict_price_info['number_of_days'] = length_stay
               dict_price_info['number_of_guests'] = number_of_guests
               dict_price_info['hotel_id'] = hotel_id
-              dict_price_info['checkin_date'] = getDateTimeObject(checkin_date)
+              checkin_date_obj = getDateTimeObject(checkin_date)
               ################
-              choices_str = "bp-"
+              choices_str = ""
               if 'mealplan_included_name' in dict_price_info and dict_price_info['mealplan_included_name']:
-                choices_str = dict_price_info['mealplan_included_name']
-              if 'mealplan_desc' in dict_price_info and dict_price_info['mealplan_desc']:
-                choices_str = choices_str + dict_price_info['mealplan_desc']
+                choices_str = choices_str + dict_price_info['mealplan_included_name']
               if 'cancellation_type' in dict_price_info and dict_price_info['cancellation_type']:
                 choices_str = choices_str + dict_price_info['cancellation_type']
-              if 'cancellation_desc' in dict_price_info and dict_price_info['cancellation_desc']:
-                choices_str = choices_str + dict_price_info['cancellation_desc']
-              if 'other_desc' in dict_price_info and dict_price_info['other_desc']:
-                for temp_other_desc in dict_price_info['other_desc']:
-                  choices_str = choices_str + temp_other_desc
+              if 'max_persons' in dict_price_info and dict_price_info['max_persons']:                
+                choices_str = choices_str + str(dict_price_info['max_persons'])
               #########################              
               #set the key in redis cache
-              str_to_md5 = str(hotel_id)+str(checkin_date)+str(key_room_type)+str(length_stay)+str(number_of_guests)+choices_str
+              str_to_md5 = str(hotel_id)+"-"+str(key_room_type)+"-"+str(length_stay)+"-"+str(number_of_guests)+"-"+choices_str
               #for now not including price we will add it later...
               if 'raw_price' in dict_price_info and dict_price_info['raw_price']:
-                raw_price = dict_price_info['raw_price']                
-                temp_key_md5 = obj_booking.obj_helper.getMd5(str_to_md5)
-                redis_value = obj_booking.obj_redis_cache.getKeyValue(temp_key_md5)
-                ####################
-                update_count = 0
-                if redis_value:
-                  arr_redis_val = redis_value.split("#")
-                  if len(arr_redis_val) == 3:
-                    update_count = int(arr_redis_val[2])
-                    #if raw_price is same which is parsed last time update the count
-                    if raw_price == float(arr_redis_val[0]):
-                      update_count = update_count + 1
-                    else:
-                      update_count = update_count + 1
-                      dict_price_info['update_count'] = update_count
-                      ###################               
-                      ret_id = obj_booking.obj_mongo_db.recInsert( 'hotel_prices' , [ dict_price_info ] )
-                      print( "\ninserted in hotel_prices The return id is"+str(ret_id) )
-                ####################
+                raw_price = dict_price_info['raw_price']                                
+                del dict_price_info['raw_price']
+                parsed_dt = getDateTimeObject( str(datetime.datetime.now().date()) )                
+                #############################
+                #first insert/update the data                
+                #################
+                temp_key_md5 = obj_booking.obj_helper.getMd5(str_to_md5) 
+                pk_redis_value = obj_booking.obj_redis_cache.getKeyValue(temp_key_md5)
+                if not pk_redis_value:
+                  #if record not isnerted
+                  #if row is not present init the cal info 
+                  ################
+                  temp_dict = {}    
+                  temp_dict['s'] = []
+                  temp_dict['s'].append(parsed_dt)
+                  temp_dict['c'] = checkin_date_obj
+                  temp_dict['p'] = raw_price
+                  dict_price_info['cal_info'] = [temp_dict]
+                  ################
+                  ret_val = obj_booking.obj_mongo_db.recInsert( 'prices' , [dict_price_info] )                  
+                  temp_redis_value = str(ret_val[0])
+                  #we have to set the primary_key redis_value. we will do it later
+                  obj_booking.obj_redis_cache.setKeyValue(temp_key_md5,temp_redis_value)
                 else:
-                  ###################
-                  #dict_price_info['prop_id'] = temp_prop_id
-                  dict_price_info['update_count'] = update_count
-                  ###################                  
-                  ret_id = obj_booking.obj_mongo_db.recInsert( 'hotel_prices' , [ dict_price_info ] )
-                  print( "\ninserted in hotel_prices The return id is"+str(ret_id) )
-                ################
-                #update the redis value for price details
-                curr_date = datetime.datetime.now().date()
-                temp_redis_value = str(raw_price)+"#"+str(curr_date)+"#"+str(update_count)
-                obj_booking.obj_redis_cache.setKeyValue(temp_key_md5,temp_redis_value)
-                ################
-              #########################               
+                  #record already inserted..
+                  print("populated the keys of cal_info")
+                  #############################
+                  where_hash = {}
+                  where_hash['_id'] = ObjectId(pk_redis_value)                  
+                  #if raw_price is same then only push the parsed_dt                  
+                  data_info = {}                  
+                  data_info['$push'] = {'cal_info.$[elem].s':parsed_dt}
+                  #data_info['$set'] = {'updated_at':datetime.datetime.now()}
+                  #only push the parsed date if checkin_date and prices are same                  
+                  array_filter = [ { "elem.p": { '$eq': raw_price }, "elem.c": { '$eq': checkin_date_obj } } ]
+                  ret_val = obj_booking.obj_mongo_db.recUpdateArrayFilters( 'prices' , data_info , where_hash,array_filter )
+                  if ret_val.modified_count:
+                    #if data successfully updated
+                    print("The data is successfully updated....")
+                  else:                    
+                    #make a new entry inside cal_info                  
+                    ret_val = obj_booking.obj_mongo_db.recUpdateCustome( 'prices' , {"$set":{'updated_at':datetime.datetime.now()},'$push': {'cal_info':{'s':[parsed_dt],'c':checkin_date_obj,'p':raw_price}}} , where_hash )                  
+                    print(ret_val)
+                    #data not updated                                     
+                  #########################               
   return {}
     
 
@@ -268,6 +282,8 @@ if __name__ == '__main__':
   number_of_guests = 2
   scraper_active = 1
   config_id = None
+  #we will set it as None later(when it will populated in db)
+  str_length_stay = ''
   config_rows = obj_master.obj_mongo_db.recSelect('config')
   #get the important data values from the config table(eg. parsing_interval,scraper_active etc.)
   for config_row in config_rows:
@@ -281,6 +297,18 @@ if __name__ == '__main__':
       scraper_active = int(config_row['scraper_active'])
     if '_id' in config_row and config_row['_id']:
       config_id = config_row['_id']
+    if 'str_length_stay' in config_row and config_row['str_length_stay']:
+      str_length_stay = config_row['str_length_stay']
+  ###################
+  arr_temp = str_length_stay.split(',')
+  arr_length_stay = []
+  for temp_stay in arr_temp:
+    if temp_stay:
+      arr_length_stay.append( int(temp_stay) )
+  if len(arr_length_stay)==0:
+    print("Length stays is not provided..exiting..")
+    exit()
+  ###################
   print( "The thread:"+str(max_process) )
   time.sleep(2)
   if not scraper_active:
@@ -291,17 +319,30 @@ if __name__ == '__main__':
   if config_id:
     ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'running','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   #set the pool max processed
-  #pool = multiprocessing.Pool(processes=max_process)
+  pool = multiprocessing.Pool(processes=max_process)
   #first calculate the date from now().get the date based on parsing_interval from current date
   date_time_interval = datetime.datetime.now() - timedelta(days=parsing_interval)
   print("Date Calculated from time interval:"+str(date_time_interval))  
   #fetch all property urls to parsed which parsed before the time intervel date
-  property_url_rows = obj_master.obj_mongo_db.recSelect('property_urls',None,{'is_active':1,'updated_at':{ '$lt': date_time_interval }},1000,'updated_at','ASC')  
-  for property_url_row in property_url_rows:    
+  #property_url_rows = obj_master.obj_mongo_db.recSelect('property_urls',None,{'is_active':1,'updated_at':{ '$lt': date_time_interval }},100,'updated_at','ASC')
+  property_url_rows = obj_master.obj_mongo_db.recSelect('property_urls',None,{'parse_interval':{'$gt':0}},1000,'updated_at','ASC')
+  for property_url_row in property_url_rows:
+    if 'parse_interval' in property_url_row:
+      parse_interval = int(property_url_row['parse_interval'])
+      date_time_interval = datetime.datetime.now() - timedelta(days=parse_interval)
+      print("Time Beforeinterval:"+str(date_time_interval)+"  Last Parsed:"+str(property_url_row['updated_at'])+" Time Interval:"+str(parse_interval))      
+      if property_url_row['updated_at'] <=  date_time_interval:
+        print("parse this property..")
+      else:
+        print("No need to parse this property")
+        continue
+    else:
+      continue    
+
     temp_prop_id = property_url_row['_id']
     property_url = property_url_row['url']
-    obj_master.obj_helper.writeFile( "LogScriptStatus-1.txt" , "\nStart:"+str(datetime.datetime.now()) )
-    obj_master.obj_helper.writeFile( "LogScriptStatus-1.txt" , "\nPropUrl:"+str(property_url) )
+    obj_master.obj_helper.writeFile( "LogScriptStatus.txt" , "\nStart:"+str(datetime.datetime.now()) )
+    obj_master.obj_helper.writeFile( "LogScriptStatus.txt" , "\nPropUrl:"+str(property_url) )
     #make the date start_date and end date
     start_date = datetime.datetime.now().date()
     end_date = datetime.datetime.now().date() + timedelta(days=365)    
@@ -309,7 +350,7 @@ if __name__ == '__main__':
     #we parse the data of one year.
     while start_date < end_date:        
       checkin_date = str(start_date)        
-      arr_length_stay = obj_master.obj_config.arr_length_stay
+      #arr_length_stay = obj_master.obj_config.arr_length_stay
       for length_stay in arr_length_stay:
         checkout_date = str( start_date + timedelta(days=length_stay) )  # increase day one by one        
         url = property_url+"?checkin="+str(checkin_date)+"&checkout="+str(checkout_date)+"&selected_currency=EUR"+"&group_adults="+str(number_of_guests)
@@ -319,12 +360,12 @@ if __name__ == '__main__':
         #temp_file = url_md5+".html"
         #'temp_file':temp_file,
         arr_args_dict.append({'url':url,'property_url':property_url,'checkin_date':checkin_date,'checkout_date':checkout_date,'temp_prop_id':temp_prop_id,'length_stay':length_stay,'number_of_guests':number_of_guests})
-      start_date = start_date + timedelta(days=1)  # increase day one by one    
+      start_date = start_date + timedelta(days=1)  # increase day one by one        
     for args_dict in arr_args_dict:
-      parseAndSaveData(args_dict)    
+      parseAndSaveData(args_dict)
     ret_id = obj_master.obj_mongo_db.recUpdate( 'property_urls' , { 'updated_at':datetime.datetime.now() } , { '_id':ObjectId(temp_prop_id) } )
     print( "\nUpdated in property_urls The return id is"+str(temp_prop_id) )    
-    obj_master.obj_helper.writeFile( "LogScriptStatus-1.txt" , "\nEnd:"+str(datetime.datetime.now()) )  
+    obj_master.obj_helper.writeFile( "LogScriptStatus.txt" , "\nEnd:"+str(datetime.datetime.now()) )  
   if config_id:
     #set the status in config file
     ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'end','ended_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )

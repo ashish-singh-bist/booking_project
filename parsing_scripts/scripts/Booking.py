@@ -54,7 +54,7 @@ class Booking(Master):
       self.params['proxy_ip'] = { 'https': proxy_ip,}
     ########################
     #for now we are using tor proxy.
-    self.params['proxy_ip'] = { 'https': 'socks5://127.0.0.1:9050',}
+    #self.params['proxy_ip'] = { 'http': 'socks5://127.0.0.1:9050',}
     ########################
     ###########################
     html = self.obj_req.getPage( "GET", url , self.params )

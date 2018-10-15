@@ -31,11 +31,23 @@ class MongoDatabase:
     result = collection.insert_many(data_array)
     return result.inserted_ids  
 
-  def recUpdate (self,table,data_dictionary,where_dictionary):
+  def recUpdate (self,table,data_dictionary,where_dictionary,update_ts_flag=True):
+    if update_ts_flag:      
+      data_dictionary['updated_at'] = datetime.datetime.now()
+    collection = self.db[table]
+    result = collection.update(where_dictionary,{ '$set': data_dictionary }, upsert=False, multi=False)
+    return result
+
+  def recUpdateCustome (self,table,data_dictionary,where_dictionary):
     #timestamp = datetime.datetime.now()
     #data_dictionary['updated_at'] = timestamp
     collection = self.db[table]
-    result = collection.update(where_dictionary,{ '$set': data_dictionary }, upsert=False, multi=False)
+    result = collection.update(where_dictionary, data_dictionary, upsert=False, multi=True)
+    return result
+        
+  def recUpdateArrayFilters (self,table,data_dictionary,where_dictionary,arr_filter=None):    
+    collection = self.db[table]    
+    result = collection.update_many(where_dictionary, data_dictionary, upsert=False, bypass_document_validation=False, collation=None, array_filters=arr_filter, session=None)
     return result
 
   def recInsertUpdate (self,table,data_dictionary,where_dictionary):
