@@ -46,6 +46,23 @@ class HotelPricesController extends Controller
             array_push($columns_header,$value);
         }
 
+        $limit = $request->input('length');
+        $start = $request->input('start');
+        $order = $columns[$request->input('order.0.column')];
+        $dir = $request->input('order.0.dir');
+        if($order == 'c'){
+            $order = 'cal_info.c';
+        }
+        if($order =='s'){
+            $order = 'cal_info.s';
+        }
+        if($order =='p'){
+            $order = 'cal_info.p';
+        }
+        // print_r(" The Sort is on column ".$order. " and direction is ".$dir);
+        // exit();
+
+        $hotel_master_search =false;
         $hotel_name_list = HotelMaster::select('hotel_id', 'hotel_name', 'hotel_category', 'hotel_stars', 'location', 'booking_rating','guests_favorite_area', 'self_verified', DB::raw('SUM(total) as total'))->groupBy('hotel_id')->get();
         $hotel_name_array= [];
         foreach ($hotel_name_list as $item){
@@ -62,6 +79,7 @@ class HotelPricesController extends Controller
         $hotelmaster = HotelMaster::select('hotel_id');
 
         if(count($request->get('stars'))>0){
+            $hotel_master_search = true;
             $stars = $request->get('stars');
             $hotelmaster = $hotelmaster->where(function ($query) use ($stars) {
                 foreach($stars as $key => $star){
@@ -76,10 +94,12 @@ class HotelPricesController extends Controller
         }
 
         if($request->get('min_rating')!= Null && $request->get('min_rating')!= ''){
+            $hotel_master_search = true;
             $hotelmaster = $hotelmaster->where('booking_rating','>=', (double)$request->get('min_rating'));
         }
 
         if($request->get('max_rating')!= Null && $request->get('max_rating')!= ''){
+            $hotel_master_search =true;
             $hotelmaster = $hotelmaster->where('booking_rating','<=', (double)$request->get('max_rating'));
         }
 
@@ -104,6 +124,7 @@ class HotelPricesController extends Controller
         // }
 
         if(count($request->get('countries'))>0){
+            $hotel_master_search =true;
             $countries = $request->get('countries');
             $hotelmaster = $hotelmaster->where(function ($query) use ($countries) {
                 foreach($countries as $key => $country){
@@ -118,6 +139,7 @@ class HotelPricesController extends Controller
         }
 
         if(count($request->get('cities'))>0){
+            $hotel_master_search =true;
             $cities = $request->get('cities');
             $hotelmaster = $hotelmaster->where(function ($query) use ($cities) {
                 foreach($cities as $key => $city){
@@ -132,6 +154,7 @@ class HotelPricesController extends Controller
         }
 
         if(count($request->get('hotel_names'))>0){
+            $hotel_master_search =true;
             $hotel_name = $request->get('hotel_names');
             $hotelmaster = $hotelmaster->where(function ($query) use ($hotel_name) {
                 foreach($hotel_name as $key => $name){
@@ -146,6 +169,7 @@ class HotelPricesController extends Controller
         }
 
         if(count($request->get('categories'))>0){
+            $hotel_master_search=true;
             $categories = $request->get('categories');
             $hotelmaster = $hotelmaster->where(function ($query) use ($categories) {
                 foreach($categories as $key => $category){
@@ -160,6 +184,7 @@ class HotelPricesController extends Controller
         }
 
         if($request->get('self_verified')!=Null && $request->get('self_verified')!=''){
+            $hotel_master_search =true;
             $is_verified = $request->get('self_verified');
             if($is_verified == '1'){
                 $hotelmaster = $hotelmaster->Where('self_verified','>',0);
@@ -172,6 +197,7 @@ class HotelPricesController extends Controller
         }
 
         if($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!=''){
+            $hotel_master_search=true;
             $is_favourite = $request->get('guest_favourite');
             if($is_favourite == '1'){
                 $hotelmaster = $hotelmaster->Where('guests_favorite_area','>',0);
@@ -182,10 +208,25 @@ class HotelPricesController extends Controller
                 });
             }
         }
+
+        if($request->get('location')!=Null && $request->get('location')!=''){
+            $hotel_master_search =true;
+            $location = $request->get('location');
+            $hotelmaster = $hotelmaster->where('location',$location);
+        }
+
         $cal_info_filters = [];
-        if(count($request->get('stars'))>0 || ($request->get('min_rating')!= Null && $request->get('min_rating')!= '') || ($request->get('max_rating')!= Null && $request->get('max_rating')!= '') || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0 || ($request->get('self_verified')!=Null && $request->get('self_verified')!='') || ($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!='')){
+        $hotel_id_data = [];
+        $hotel_id_array = [];
+        $hotel_master_sort = false;
+        if($order=='hotel_name' || $order=='hotel_category' || $order=='hotel_stars' || $order=='location' || $order=='booking_rating' || $order=='self_verified' || $order=='guests_favorite_area'){
+            $hotel_master_sort = true;
+        }
+        if($hotel_master_sort){
+                $hotelmaster = $hotelmaster->orderBy($order, $dir);
+        }
+        if($hotel_master_search || $hotel_master_sort){
             $hotel_id_data = $hotelmaster->get();
-            $hotel_id_array = [];
             foreach($hotel_id_data as $value){
                 array_push($hotel_id_array,$value->hotel_id);
             }
@@ -196,20 +237,6 @@ class HotelPricesController extends Controller
             $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
         }
 
-        $limit = $request->input('length');
-        $start = $request->input('start');
-        $order = $columns[$request->input('order.0.column')];
-        $dir = $request->input('order.0.dir');
-        if($order == 'c'){
-        	$order = 'cal_info.c';
-        }
-        if($order =='s'){
-        	$order = 'cal_info.s';
-        }
-        if($order =='p'){
-        	$order = 'cal_info.p';
-        }
-
         // filter to unwind hotel_price data /////////////////////////////////////////////////
         
         if($request->get('min_price') != Null && $request->get('min_price') != ''){
@@ -217,7 +244,7 @@ class HotelPricesController extends Controller
         }
 
         if($request->get('max_price') != Null && $request->get('max_price') != ''){
-            if(intval($request->get('min_price'))<500){
+            if(intval($request->get('max_price'))<500){
                 $cal_info_filters['cal_info.p'] = ['$lte' => intval($request->get('max_price'))];
             }
         }
@@ -324,19 +351,16 @@ class HotelPricesController extends Controller
             "Expires" => "0"
         );
 
-        #############################################################################
-        if($request->get('export') != null && $request->get('export') == 'csv'){
-            $hotelprices_data = $hotelprices->raw(function($collection) use($cal_info_filters,$start,$limit,$order,$dir) {
-                if($dir == 'asc'){
-                    $order_dir = 1;
-                }else{
-                    $order_dir = -1;
-                }
-                return $collection->aggregate([
+        if($dir == 'asc'){
+            $order_dir = 1;
+        }else{
+            $order_dir = -1;
+        }
+        $aggregate_query = [
                     ['$unwind' => '$cal_info'],
                     ['$unwind' => '$cal_info.s'],
                     ['$match' => $cal_info_filters],
-                    ['$group' =>
+                    ['$project' =>
                         [
                             '_id'=>['cal_info' => '$cal_info', 'hotel_id' => '$hotel_id', 'mealplan_desc'=> '$mealplan_desc', 'cancellation_type'=> '$cancellation_type', 'available_only'=>'$available_only', 'nr_stays'=>'$nr_stays', 'other_desc'=>'$other_desc', 'max_persons'=> '$max_persons', 'cancellation_desc'=>'$cancellation_desc', 'number_of_days'=>'$number_of_days','room_type'=>'$room_type','number_of_guests'=>'$number_of_guests', 'mealplan_included_name'=>'$mealplan_included_name'],
                             'count' => [ '$sum'=> 1 ]
@@ -344,13 +368,30 @@ class HotelPricesController extends Controller
                     ],
                     ['$sort'  => ['_id.' . $order => $order_dir]],
                     ['$skip'  => intval($start) ],
-                    ['$limit' => intval(config('app.data_export_row_limit')) ]
-                ], ['allowDiskUse' => true]);
+                    ['$limit' => intval($limit) ]
+                ];
+
+        if($hotel_master_sort &&  count($hotel_id_array)>0){
+            $aggregate_query[4]['$sort'] = ['hotel_sort_id'=>1];
+            $aggregate_query[3]['$project']['hotel_sort_id'] = [
+                                                    '$let' =>[
+                                                        'vars' =>[
+                                                            'sort_order' => $hotel_id_array,
+                                                            'hote_id'=>'$hotel_id'
+                                                        ],
+                                                        'in'=>[ '$indexOfArray' =>['$$sort_order','$$hote_id']]
+                                                    ]
+                                                ];    
+        }
+
+
+        #############################################################################
+        if($request->get('export') != null && $request->get('export') == 'csv'){
+            $hotelprices_data = $hotelprices->raw(function($collection) use($aggregate_query) {
+                $aggregate_query[6]['$limit'] = intval(config('app.data_export_row_limit'));
+                return $collection->aggregate($aggregate_query, ['allowDiskUse' => true]);
             });
-            // $hotelprices->select('*')->offset(intval($start))
-            //              ->limit(intval(config('app.data_export_row_limit')))
-            //              ->orderBy($order,$dir)
-            //              ->get();
+
             $headers = array(
                 "Content-type" => "text/csv",
                 "Content-Disposition" => "attachment; filename=file.csv",
@@ -367,7 +408,7 @@ class HotelPricesController extends Controller
                 for($i=0; $i < count($hotelprices_data); $i++){
                     $row =new \stdClass();
                     $data_obj = $hotelprices_data[$i]['_id'];
-                    $row->hotel_title = $hotel_name_array[$data_obj['hotel_id']]['hotel_name'];
+                    $row->hotel_name = $hotel_name_array[$data_obj['hotel_id']]['hotel_name'];
                     $row->hotel_category = $hotel_name_array[$data_obj['hotel_id']]['hotel_category'];
                     $row->hotel_stars = $hotel_name_array[$data_obj['hotel_id']]['hotel_stars'];
                     $row->location =  $hotel_name_array[$data_obj['hotel_id']]['location'];
@@ -469,26 +510,8 @@ class HotelPricesController extends Controller
             //              ->orderBy($order,$dir)
             //              ->get();
 
-            $hotelprices_data =  $hotelprices->raw(function($collection) use($cal_info_filters,$start,$limit,$order,$dir) {
-            	if($dir == 'asc'){
-                    $order_dir = 1;
-                }else{
-                    $order_dir = -1;
-                }
-                return $collection->aggregate([
-                    ['$unwind' => '$cal_info'],
-                    ['$unwind' => '$cal_info.s'],
-                    ['$match' => $cal_info_filters],
-                    ['$project' =>
-                        [
-                            '_id'=>['cal_info' => '$cal_info', 'hotel_id' => '$hotel_id', 'mealplan_desc'=> '$mealplan_desc', 'cancellation_type'=> '$cancellation_type', 'available_only'=>'$available_only', 'nr_stays'=>'$nr_stays', 'other_desc'=>'$other_desc', 'max_persons'=> '$max_persons', 'cancellation_desc'=>'$cancellation_desc', 'number_of_days'=>'$number_of_days','room_type'=>'$room_type','number_of_guests'=>'$number_of_guests', 'mealplan_included_name'=>'$mealplan_included_name'],
-                            'count' => [ '$sum'=> 1 ]
-                        ]
-                    ],
-                    ['$sort'  => ['_id.' . $order => $order_dir]],
-                    ['$skip'  => intval($start) ],
-                    ['$limit' => intval($limit) ]
-                ], ['allowDiskUse' => true]);
+            $hotelprices_data =  $hotelprices->raw(function($collection) use($aggregate_query) {
+                return $collection->aggregate($aggregate_query,['allowDiskUse' => true]);
             });
         }
 
@@ -496,7 +519,7 @@ class HotelPricesController extends Controller
         for($i=0; $i < count($hotelprices_data); $i++)
         {
             $data_obj = $hotelprices_data[$i]['_id'];
-            $data_obj['hotel_title'] = '<a class="hotel_equip_popup" hotel-id="'.$data_obj['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$data_obj['hotel_id']]['hotel_name'] . '">' . $hotel_name_array[$data_obj['hotel_id']]['hotel_name'] . ' <i class="fa fa-info-circle"></i></a>';
+            $data_obj['hotel_name'] = '<a class="hotel_equip_popup" hotel-id="'.$data_obj['hotel_id'].'" title="hotel equipment" data-title="' . $hotel_name_array[$data_obj['hotel_id']]['hotel_name'] . '">' . $hotel_name_array[$data_obj['hotel_id']]['hotel_name'] . ' <i class="fa fa-info-circle"></i></a>';
 
             $data_obj['hotel_category'] = $hotel_name_array[$data_obj['hotel_id']]['hotel_category'];
             $data_obj['hotel_stars'] = $hotel_name_array[$data_obj['hotel_id']]['hotel_stars'];
@@ -511,6 +534,7 @@ class HotelPricesController extends Controller
             $checkin_date = $data_obj['cal_info']['c']->toDateTime()->format('Y-m-d');
             $checkout_date = Carbon::parse($data_obj['cal_info']['c']->toDateTime()->format('Y-m-d'))->addDays($data_obj['number_of_days'])->format('Y-m-d');
             
+            $url = '';
             $url = $property_url_array[$data_obj['hotel_id']] . "?checkin=" . $checkin_date . "&checkout=" . $checkout_date . "&selected_currency=EUR&group_adults=" . $data_obj['number_of_guests'];
             $data_obj['c'] =  '<a href="' . $url . '" target="_blank">' . $checkin_date . "</a>";
 
@@ -524,8 +548,12 @@ class HotelPricesController extends Controller
             }else{
                 $data_obj['other_desc'] = '';
             }
+            if($data_obj['cal_info']['s'] != null){
+                $data_obj['s'] = $data_obj['cal_info']['s']->toDateTime()->format('Y-m-d');
+            }else{
+                $data_obj['s'] = '';
+            }
             
-            $data_obj['s'] = $data_obj['cal_info']['s']->toDateTime()->format('Y-m-d');
             
             array_push($hotel_data, $data_obj);
         }

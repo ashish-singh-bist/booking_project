@@ -231,7 +231,7 @@ return [
     ],    
 
     'hotel_prices_header_key' => [
-        'hotel_title' => 'Hotel Title',
+        'hotel_name' => 'Hotel Name',
         'hotel_category' => 'Category',
         'hotel_stars' => 'Star',
         'location' => 'Location',

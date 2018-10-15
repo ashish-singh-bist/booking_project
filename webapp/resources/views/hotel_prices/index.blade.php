@@ -535,8 +535,8 @@
                     @endforeach
                 ],
                 columnDefs: [
-                    { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6] },
-                    { "orderable": true, "targets": [ 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+                    { "orderable": false, "targets": [] },
+                    { "orderable": true, "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
                     { "width": "120px", "targets": 0 },
                     { "width": "60px", "targets": 1 },
                     { "width": "30px", "targets": 2 },
