@@ -7,7 +7,7 @@ use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 class HotelPrices extends Eloquent
 {
     protected $connection = 'mongodb';
-    protected $collection = 'hotel_prices';
+    protected $collection = 'prices';
     protected $primaryKey = '_id';
     /**
      * The attributes that are mass assignable.

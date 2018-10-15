@@ -178,6 +178,21 @@ div.dataTables_wrapper div.dataTables_processing {
     top: 140px !important;
     font-size: 16px;
 }
+#property-city-table{
+    min-height: 200px;
+}
+.prop_img{
+    width: 60px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+table.property-city-table tr th.select-checkbox.selected::after {
+    content: "✔";
+    margin-top: -11px;
+    margin-left: -4px;
+    text-align: center;
+    text-shadow: rgb(176, 190, 217) 1px 1px, rgb(176, 190, 217) -1px -1px, rgb(176, 190, 217) 1px -1px, rgb(176, 190, 217) -1px 1px;
+}
 @media (max-width: 767px) {
     .filter-box-fix-height .box-body {
         height: auto;

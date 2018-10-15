@@ -109,7 +109,7 @@
 
             <!-- Content Header (Page header) -->
             <section class="content-header">
-                <div class="col-sm-12">
+                <div class="col-sm-12 alert-msg-outer">
                     @include('flash::message')
                 </div>
                 <div class="clearfix"></div>

@@ -66,6 +66,7 @@ class HomeController extends Controller
         $custom_config->thread_count = intval($request->thread_count);
         $custom_config->number_of_guests = intval($request->number_of_guests);
         $custom_config->scraper_active = intval($scraper_active);
+        $custom_config->str_length_stay = $request->str_length_stay;
         $custom_config->save();
         return view('config', [ 'custom_config'=> $custom_config]);
     }

@@ -66,9 +66,9 @@ class HotelPricesController extends Controller
             $hotelmaster = $hotelmaster->where(function ($query) use ($stars) {
                 foreach($stars as $key => $star){
                     if($key == 0){
-                        $query = $query->where('hotel_stars', $star);
+                        $query = $query->where('hotel_stars', intval($star));
                     }else{
-                        $query = $query->orWhere('hotel_stars', $star);
+                        $query = $query->orWhere('hotel_stars', intval($star));
                     }
                 }
                 return $query;
@@ -182,157 +182,36 @@ class HotelPricesController extends Controller
                 });
             }
         }
-
+        $cal_info_filters = [];
         if(count($request->get('stars'))>0 || ($request->get('min_rating')!= Null && $request->get('min_rating')!= '') || ($request->get('max_rating')!= Null && $request->get('max_rating')!= '') || count($request->get('countries'))>0 || count($request->get('cities'))>0 || count($request->get('hotel_names'))>0 || count($request->get('categories'))>0 || ($request->get('self_verified')!=Null && $request->get('self_verified')!='') || ($request->get('guest_favourite')!=Null && $request->get('guest_favourite')!='')){
             $hotel_id_data = $hotelmaster->get();
             $hotel_id_array = [];
             foreach($hotel_id_data as $value){
                 array_push($hotel_id_array,$value->hotel_id);
             }
-            $hotelprices = $hotelprices->whereIn('hotel_id',$hotel_id_array);
+            $cal_info_filters['hotel_id'] = ['$in' => $hotel_id_array];
         }
 
         if($request->get('id') != Null && $request->get('id') != ''){
             $hotelprices = $hotelprices->where('hotel_id',$request->get('id'));
         }
 
-        if(count($request->get('room_types'))>0){
-            $room_types = $request->get('room_types');
-            $hotelprices = $hotelprices->where(function ($query) use ($room_types) {
-                foreach($room_types as $key => $room_type){
-                    if($key == 0){
-                        $query = $query->where('room_type', $room_type);
-                    }else{
-                        $query = $query->orWhere('room_type', $room_type);
-                    }
-                }
-                return $query;
-            });
-        }
-
-        if(count($request->get('max_persons'))>0){
-            $max_persons = $request->get('max_persons');
-            $hotelprices = $hotelprices->where(function ($query) use ($max_persons) {
-                foreach($max_persons as $key => $max_person){
-                    if($key == 0){
-                        $query = $query->where('max_persons', intval($max_person));
-                    }else{
-                        $query = $query->orWhere('max_persons', intval($max_person));
-                    }
-                }
-                return $query;
-            });
-        }
-
-        if(count($request->get('available_only'))>0){
-            $available_only = $request->get('available_only');
-            $hotelprices = $hotelprices->where(function ($query) use ($available_only) {
-                foreach($available_only as $key => $availableonly){
-                    if($key == 0){
-                        $query = $query->where('available_only', intval($availableonly));
-                    }else{
-                        $query = $query->orWhere('available_only', intval($availableonly));
-                    }
-                }
-                return $query;
-            });
-        }
-
-        if($request->get('guest_available')!=Null && $request->get('guest_available')!=''){
-            $is_guest_available = $request->get('guest_available');
-            if($is_guest_available == 'empty'){
-                $hotelprices = $hotelprices->whereNull('number_of_guests')->orWhere('number_of_guests','=',0);
-            } else if($is_guest_available == 'not-empty'){
-                $hotelprices = $hotelprices->whereNotNull('number_of_guests')->orWhere('number_of_guests','>',0);
-            }
-        }
-        
-        // if($request->get('created_at_from') != Null && $request->get('created_at_from') != ''){
-        //     //$hotelprices = $hotelprices->where('created_at', '>=', Carbon::parse($request->get('created_at_from'))->startOfDay());
-        //     $hotelprices = $hotelprices->where('cal_info.s','>',Carbon::parse($request->get('created_at_from'))->startOfDay());
-        // }
-
-        // if($request->get('created_at_to') != Null && $request->get('created_at_to') != ''){
-        //     //$hotelprices = $hotelprices->where('created_at', '<=', Carbon::parse($request->get('created_at_to'))->endOfDay());
-        //     $hotelprices = $hotelprices->where('cal_info.s','<',Carbon::parse($request->get('created_at_to'))->endOfDay());
-        // }
-
-        // if($request->get('min_price') != Null && $request->get('min_price') != ''){
-        //     $hotelprices = $hotelprices->where('cal_info.p','>=',(int)$request->get('min_price'));
-        // }
-
-        // if($request->get('max_price') != Null && $request->get('max_price') != '' && $request->get('max_price') <= 500){
-        //     $hotelprices = $hotelprices->where('cal_info.p','<=',(int)$request->get('max_price'));
-        // }
-
-        // if($request->get('checkin_date_from') != Null && $request->get('checkin_date_from') != ''){
-        //     //$hotelprices = $hotelprices->where('checkin_date', '>=', Carbon::parse($request->get('checkin_date_from'))->startOfDay());
-        //     $hotelprices = $hotelprices->where('cal_info.c','>=',Carbon::parse($request->get('checkin_date_from'))->startOfDay());
-        // }
-
-        // if($request->get('checkin_date_to') != Null && $request->get('checkin_date_to') != ''){
-        //     //$hotelprices = $hotelprices->where('checkin_date', '<=', Carbon::parse($request->get('checkin_date_to'))->endOfDay());
-        //     $hotelprices = $hotelprices->where('cal_info.c','<=',Carbon::parse($request->get('checkin_date_to'))->endOfDay());
-        // }
-       
-        if($request->get('meal_plan')!=Null && $request->get('meal_plan')!=''){
-            $search_meal_plan = $request->get('meal_plan');
-            if($search_meal_plan == 'empty'){
-                $hotelprices = $hotelprices->whereNull('mealplan_included_name');
-            } else if($search_meal_plan == 'not-empty'){
-                $hotelprices = $hotelprices->whereNotNull('mealplan_included_name');
-            }
-        }
-
-        if(count($request->get('cancellation_type'))>0){
-            $cancel_type = $request->get('cancellation_type');
-            $hotelprices = $hotelprices->where(function ($query) use ($cancel_type) {
-                foreach($cancel_type as $key => $cancel_type){
-                    if($key == 0){
-                        $query = $query->where('cancellation_type', $cancel_type);
-                    }else{
-                        $query = $query->orWhere('cancellation_type', $cancel_type);
-                    }
-                }
-                return $query;
-            });
-        }
-
-        if(count($request->get('others_desc'))>0){
-            $otherdesc = $request->get('others_desc');
-            $hotelprices = $hotelprices->where(function ($query) use ($otherdesc) {
-                foreach($otherdesc as $key => $otherdesc){
-                    if($key == 0){
-                        $query = $query->where('other_desc', $otherdesc);
-                    }else{
-                        $query = $query->orWhere('other_desc', $otherdesc);
-                    }
-                }
-                return $query;
-            });
-        }
-
-        if(count($request->get('days'))>0){
-            $days = $request->get('days');
-            $hotelprices = $hotelprices->where(function ($query) use ($days) {
-                foreach($days as $key => $day){
-                    if($key == 0){
-                        $query = $query->where('number_of_days', intval($day));
-                    }else{
-                        $query = $query->orWhere('number_of_days', intval($day));
-                    }
-                }
-                return $query;
-            });
-        }
-
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
+        if($order == 'c'){
+        	$order = 'cal_info.c';
+        }
+        if($order =='s'){
+        	$order = 'cal_info.s';
+        }
+        if($order =='p'){
+        	$order = 'cal_info.p';
+        }
 
         // filter to unwind hotel_price data /////////////////////////////////////////////////
-        $cal_info_filters = [];
+        
         if($request->get('min_price') != Null && $request->get('min_price') != ''){
             $cal_info_filters['cal_info.p'] = ['$gte' => intval($request->get('min_price'))];
         }
@@ -359,43 +238,91 @@ class HotelPricesController extends Controller
             $cal_info_filters['cal_info.s']['$lte'] = new \MongoDB\BSON\UTCDateTime(new \DateTime($request->get('created_at_to')));
         }
 
+        if(count($request->get('room_types'))>0){
+            $room_types = $request->get('room_types');
+            $room_array = [];
+            foreach($room_types as $key => $room_type){
+                array_push($room_array, $room_type);
+            }
+            $cal_info_filters['room_type'] = ['$in' => $room_array];
+        }
 
+        if(count($request->get('max_persons'))>0){
+            $max_persons = $request->get('max_persons');
+            $person_array = [];
+            foreach($max_persons as $key => $max_person){
+                array_push($person_array, intval($max_person));
+            }
+            $cal_info_filters['max_persons'] = ['$in' => $person_array];
+        }
 
+        if(count($request->get('available_only'))>0){
+            $available_only = $request->get('available_only');
+            $availableonly_array = [];
+            foreach($available_only as $key => $availableonly){
+                array_push($availableonly_array, intval($availableonly));
+            }
+            $cal_info_filters['available_only'] = ['$in' => $availableonly_array];
+        }
+
+        if($request->get('guest_available')!=Null && $request->get('guest_available')!=''){
+            $is_guest_available = $request->get('guest_available');
+             if($is_guest_available == 'empty'){
+                $cal_info_filters['number_of_guests'] = ['$lte' => 0];
+            } else if($is_guest_available == 'not-empty'){
+                $cal_info_filters['number_of_guests'] = ['$gt' => 0];
+            }
+        }
+
+        if($request->get('meal_plan')!=Null && $request->get('meal_plan')!=''){
+            $search_meal_plan = $request->get('meal_plan');
+            if($search_meal_plan == 'empty'){
+                $cal_info_filters['mealplan_included_name'] = ['$eq' => null];
+            } else if($search_meal_plan == 'not-empty'){
+                $cal_info_filters['mealplan_included_name'] = ['$ne' => null];
+            }
+        }
+
+        if(count($request->get('cancellation_type'))>0){
+            $cancel_type = $request->get('cancellation_type');
+            $cancellation_array = [];
+            foreach($cancel_type as $key => $value){
+                array_push($cancellation_array, $value);
+            }
+            $cal_info_filters['cancellation_type'] = ['$in' =>  $cancellation_array];
+        }
+
+        if(count($request->get('others_desc'))>0){
+            $otherdesc = $request->get('others_desc');
+            $otherdesc_array = [];
+            foreach($otherdesc as $key => $otherdesc){
+                array_push($otherdesc_array, $otherdesc);
+            }
+            $cal_info_filters['other_desc'] =  ['$in' => $otherdesc_array];
+        }
+
+        if(count($request->get('days'))>0){
+            $days = $request->get('days');
+            $days_array = [];
+            foreach($days as $key => $day){
+                array_push($days_array, intval($day));
+            }
+            $cal_info_filters['number_of_days'] = ['$in' => $days_array];
+        }
         /////////////////////////////////////////////////////////////////////
 
-        // Code To Test The Mongodb Aggregate Query
+        // $hotelprices->select('*')->offset(intval($start))
+        //              ->limit(intval(config('app.data_export_row_limit')))
+        //              ->orderBy($order,$dir)
+        //              ->get();
 
-        // $hotel_stars = $request->get('stars');
-        // $hotel_rating = $request->get('ratings');
-        // $country = $request->get('countries');
-        // $city = $request->get('cities');
-        // $self_verified = $request->get('self_verified');
-        // $guest_favourite = $request->get('guest_favourite');
-        // $hotel_category = $request->get('categories');
-        // $hotel_name = $request->get('hotel_names');
-
-        // $result = $hotelprices->raw(function($collection) use($hotel_stars, $hotel_rating, $country, $city, $self_verified, $guest_favourite, $hotel_category, $hotel_name, $start, $limit) {
-        //                     return $collection->aggregate(array(
-        //                         array( '$lookup' => array(
-        //                             'from' => 'hotel_master',
-        //                             'localField' => 'hotel_id',
-        //                             'foreignField' => 'hotel_id',
-        //                             'as' => 'hotelmaster'
-        //                         )),
-        //                         array( '$unwind' => array( 
-        //                             'path' => '$hotelmaster', 'preserveNullAndEmptyArrays' => True
-        //                         )),
-        //                         array( '$match' => array(
-        //                             '$or' => array(
-        //                                 array('hotelmaster.hotel_stars' => array('$in',$hotel_stars ))
-        //                             )
-        //                         )),
-        //                         array( '$skip' => intval($start)),
-        //                         array( '$limit' => intval($limit))
-        //                         ));
-        //                     });
-        // print_r(json_encode($result));
-        // exit();
+        $headers = array(
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=file.csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
 
         #############################################################################
         if($request->get('export') != null && $request->get('export') == 'csv'){
@@ -407,17 +334,17 @@ class HotelPricesController extends Controller
                 }
                 return $collection->aggregate([
                     ['$unwind' => '$cal_info'],
-                    ['$match' => $cal_info_filters,
-                    ],
+                    ['$unwind' => '$cal_info.s'],
+                    ['$match' => $cal_info_filters],
                     ['$group' =>
                         [
                             '_id'=>['cal_info' => '$cal_info', 'hotel_id' => '$hotel_id', 'mealplan_desc'=> '$mealplan_desc', 'cancellation_type'=> '$cancellation_type', 'available_only'=>'$available_only', 'nr_stays'=>'$nr_stays', 'other_desc'=>'$other_desc', 'max_persons'=> '$max_persons', 'cancellation_desc'=>'$cancellation_desc', 'number_of_days'=>'$number_of_days','room_type'=>'$room_type','number_of_guests'=>'$number_of_guests', 'mealplan_included_name'=>'$mealplan_included_name'],
                             'count' => [ '$sum'=> 1 ]
                         ]
                     ],
+                    ['$sort'  => ['_id.' . $order => $order_dir]],
                     ['$skip'  => intval($start) ],
-                    ['$limit' => intval(config('app.data_export_row_limit')) ],
-                    ['$sort'  => [$order => $order_dir]]
+                    ['$limit' => intval(config('app.data_export_row_limit')) ]
                 ], ['allowDiskUse' => true]);
             });
             // $hotelprices->select('*')->offset(intval($start))
@@ -448,11 +375,11 @@ class HotelPricesController extends Controller
                     $row->guests_favorite_area = $hotel_name_array[$data_obj['hotel_id']]['guests_favorite_area'];
                     $row->self_verified = $hotel_name_array[$data_obj['hotel_id']]['self_verified'];
                     
-                    $row->checkin_date = $data_obj['cal_info']['c']->toDateTime()->format('Y-m-d');
+                    $row->c = $data_obj['cal_info']['c']->toDateTime()->format('Y-m-d');
                     $row->number_of_days = $data_obj['number_of_days'];
                     $row->number_of_guests = $data_obj['number_of_guests'];
                     $row->room_type = trim(preg_replace('/\n/', '',$data_obj['room_type']));
-                    $row->raw_price = str_replace(".",",",$data_obj['cal_info']['p']);
+                    $row->p = str_replace(".",",",$data_obj['cal_info']['p']);
                     $row->available_only = $data_obj['available_only'];
                     $row->max_persons = $data_obj['max_persons'];
                     $row->cancellation_type = $data_obj['cancellation_type'];
@@ -466,17 +393,19 @@ class HotelPricesController extends Controller
                     }else{
                         $row->mealplan_included_name = "";
                     }
-                    $row->other_desc = "";
-                    $row->s = "";
-                    // $row->other_desc = $data_obj['other_desc'];
-                    // $row->created_at = $data_obj['cal_info']['s']->toDateTime()->format('Y-m-d');
-                    // dd($data_obj['other_desc']);
-                    // if(count($data_obj['other_desc']) > 0){
-                    //     $row->other_desc =  join("|",$data_obj['other_desc']);
-                    // }
-                    // else{
-                    //     $row->other_desc =  '';
-                    // }
+                    if(array_key_exists('other_desc', $data_obj)){
+                        if(count($data_obj['other_desc'])>0){
+                            $row->other_desc = join('|', (array)$data_obj['other_desc']);
+                        }
+                    }else{
+                        $row->other_desc = '';
+                    }
+                    if($data_obj['cal_info']['s'] == null){
+                        $row->s = '';
+                    }else{
+                        $row->s = $data_obj['cal_info']['s']->toDateTime()->format('Y-m-d');
+                    }
+                    
                     $data_row = [];
                     foreach ($columns as $key) {
                         array_push($data_row, $row->{$key});
@@ -490,21 +419,49 @@ class HotelPricesController extends Controller
         else{
             $room_array = [];
             $hotelprices_roomtype = clone $hotelprices;
-            $room_type_array = $hotelprices_roomtype->select('room_type')->distinct()->get()->toarray();
-            for($i=0; $i < count($room_type_array); $i++)
-            {
-                $temp_array = [];
-                $temp_array['id'] = $room_type_array[$i][0];
-                $temp_array['text'] = $room_type_array[$i][0];
-                array_push($room_array,$temp_array);
-            }
-            
-            $statistics = [];
-            $statistics['avg_price'] = $hotelprices->avg('raw_price') ?: 0;
-            $statistics['max_price'] = $hotelprices->max('raw_price') ?: 0;
-            $statistics['min_price'] = $hotelprices->min('raw_price') ?: 0;
+           
+            $distinct_rooms = $hotelprices_roomtype->raw(function($collection) use($cal_info_filters) {
+                  return $collection->aggregate([
+                    ['$unwind' => '$cal_info'],                    
+                    ['$unwind' => '$cal_info.s'],
+                    ['$match'  => $cal_info_filters],
+                    ['$group'  => ['_id' =>null, 'room_type' => ['$addToSet' => '$room_type'] ] ],
+                    ['$unwind' => '$room_type'],
+                    ['$project'=> ['_id'=>0 ]]
+                ], ['allowDiskUse' => true]);
+            });
 
-            $totalData = $hotelprices->count();
+            if(count($distinct_rooms)>0){
+                for($i=0; $i < count($distinct_rooms); $i++){
+                    $temp_array = [];
+                    $temp_array['id'] = $distinct_rooms[$i]->room_type;
+                    $temp_array['text'] = $distinct_rooms[$i]->room_type;
+                    array_push($room_array,$temp_array);
+                }
+            }
+
+            $res = $hotelprices->raw(function($collection) use($cal_info_filters) {
+                  return $collection->aggregate([
+                    ['$unwind' => '$cal_info'],
+                    ['$unwind' => '$cal_info.s'],
+                    ['$match' => $cal_info_filters],
+                    ['$group' => ["_id"=>null, 'max' => ['$max'=>'$cal_info.p'], 'min'=> ['$min'=>'$cal_info.p'], 'avg' => ['$avg' => '$cal_info.p'], 'count'=>['$sum' => 1 ] ] ],
+                ], ['allowDiskUse' => true]);
+            });
+
+            $statistics = [];
+            if(count($res)>0){
+                $totalData = $res[0]->count;
+                $statistics['avg_price'] = $res[0]->avg;
+                $statistics['max_price'] = $res[0]->max;
+                $statistics['min_price'] = $res[0]->min;
+            }
+            else{
+                $totalData = 0;
+                $statistics['avg_price']=0;
+                $statistics['max_price']=0;
+                $statistics['min_price']=0;
+            }
             $totalFiltered = $totalData;
 
             // $hotelprices_data = $hotelprices->select('*')->offset(intval($start))
@@ -520,21 +477,21 @@ class HotelPricesController extends Controller
                 }
                 return $collection->aggregate([
                     ['$unwind' => '$cal_info'],
-                    ['$match' => $cal_info_filters,
-                	],
-                    ['$group' =>
+                    ['$unwind' => '$cal_info.s'],
+                    ['$match' => $cal_info_filters],
+                    ['$project' =>
                         [
                             '_id'=>['cal_info' => '$cal_info', 'hotel_id' => '$hotel_id', 'mealplan_desc'=> '$mealplan_desc', 'cancellation_type'=> '$cancellation_type', 'available_only'=>'$available_only', 'nr_stays'=>'$nr_stays', 'other_desc'=>'$other_desc', 'max_persons'=> '$max_persons', 'cancellation_desc'=>'$cancellation_desc', 'number_of_days'=>'$number_of_days','room_type'=>'$room_type','number_of_guests'=>'$number_of_guests', 'mealplan_included_name'=>'$mealplan_included_name'],
                             'count' => [ '$sum'=> 1 ]
                         ]
                     ],
+                    ['$sort'  => ['_id.' . $order => $order_dir]],
                     ['$skip'  => intval($start) ],
-                    ['$limit' => intval($limit) ],
-                    ['$sort'  => [$order => $order_dir]]
+                    ['$limit' => intval($limit) ]
                 ], ['allowDiskUse' => true]);
             });
         }
-        
+
         $hotel_data = [];
         for($i=0; $i < count($hotelprices_data); $i++)
         {
@@ -549,23 +506,27 @@ class HotelPricesController extends Controller
             $data_obj['self_verified'] = $hotel_name_array[$data_obj['hotel_id']]['self_verified'];
 
             $data_obj['room_type'] = '<a class="room_equip_popup" hotel-id="'.$data_obj['hotel_id'].'" title="room equipment" data-title="' . $data_obj['room_type'] . '">' . $data_obj['room_type'] . ' <i class="fa fa-info-circle"></i></a>';
-            $data_obj['raw_price'] = str_replace(".",",",$data_obj['cal_info']['p']);
-
+            $data_obj['p'] = str_replace(".",",",$data_obj['cal_info']['p']);
 
             $checkin_date = $data_obj['cal_info']['c']->toDateTime()->format('Y-m-d');
             $checkout_date = Carbon::parse($data_obj['cal_info']['c']->toDateTime()->format('Y-m-d'))->addDays($data_obj['number_of_days'])->format('Y-m-d');
-
+            
             $url = $property_url_array[$data_obj['hotel_id']] . "?checkin=" . $checkin_date . "&checkout=" . $checkout_date . "&selected_currency=EUR&group_adults=" . $data_obj['number_of_guests'];
-            $data_obj['checkin_date'] =  '<a href="' . $url . '" target="_blank">' . $checkin_date . "</a>";
+            $data_obj['c'] =  '<a href="' . $url . '" target="_blank">' . $checkin_date . "</a>";
 
             if(array_key_exists('cancellation_desc',$data_obj) && $data_obj['cancellation_desc']!= ''){
                 $data_obj['cancellation_type'] = $data_obj['cancellation_type'] ." ( ".$data_obj['cancellation_desc']. " )";    
             }
-
-            //$utcdatetime = Carbon::parse($data_obj['cal_info']['s']);
-            //$data_obj['s'] = $utcdatetime->format('Y-m-d');
-            $data_obj['s'] = '';
-
+            if(array_key_exists('other_desc', $data_obj)){
+                if(count($data_obj['other_desc'])>0){
+                    $data_obj['other_desc'] = join('|', (array)$data_obj['other_desc']);
+                }
+            }else{
+                $data_obj['other_desc'] = '';
+            }
+            
+            $data_obj['s'] = $data_obj['cal_info']['s']->toDateTime()->format('Y-m-d');
+            
             array_push($hotel_data, $data_obj);
         }
 

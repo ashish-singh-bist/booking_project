@@ -91,9 +91,9 @@
                                                 </div>
                                                 <div class="box-body">
                                                     <label for="min_rating">From (min)</label><br>
-                                                    <input type="number" id="min_rating" placeholder="0" min="0" max="10" step=".1"><br>
+                                                    <input type="number" id="min_rating" placeholder="min" min="0" max="10" step=".1"><br>
                                                     <label for="max_rating">To (max)</label><br>
-                                                    <input type="number" id="max_rating" placeholder="10" min="0" max="10" step=".1">
+                                                    <input type="number" id="max_rating" placeholder="max" min="0" max="10" step=".1">
                                                 </div>
                                                 {{-- <div class="box-body">
                                                     <ul>
@@ -536,7 +536,7 @@
                 ],
                 columnDefs: [
                     { "orderable": false, "targets": [0, 1, 2, 3, 4, 5, 6] },
-                    { "orderable": true, "targets": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+                    { "orderable": true, "targets": [ 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
                     { "width": "120px", "targets": 0 },
                     { "width": "60px", "targets": 1 },
                     { "width": "30px", "targets": 2 },

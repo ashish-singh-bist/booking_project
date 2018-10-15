@@ -32,6 +32,10 @@
                                     <input class="col-sm-3" type="text" name="number_of_guests" value="{{ $custom_config->number_of_guests }}">
                                 </div>
                                 <div class="form-group row">
+                                    <label class="col-sm-3">Stay Length :</label>
+                                    <input class="col-sm-3" type="text" name="str_length_stay" value="{{ $custom_config->str_length_stay }}">
+                                </div>                                
+                                <div class="form-group row">
                                     <label class="col-sm-3">Scraper Status</label>
                                     <input name="scraper_active" type="checkbox" @if($custom_config->scraper_active =='1') checked="checked" @endif>
                                     <label>Active</label>
